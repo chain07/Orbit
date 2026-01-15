@@ -1,1 +1,72 @@
+/* =========================================================
+   ORBIT DESIGN TOKENS
+   Apple-inspired system tokens (light + dark)
+   ========================================================= */
 
+/* ---------- LIGHT MODE (DEFAULT) ---------- */
+:root {
+  /* Backgrounds */
+  --bg-page: transparent;
+  --bg-card: #ffffff;
+
+  /* Text */
+  --text-primary: #000000;
+  --text-secondary: rgba(60, 60, 67, 0.60);
+  --text-tertiary: rgba(60, 60, 67, 0.30);
+
+  /* Lines / Separators */
+  --separator: rgba(60, 60, 67, 0.36);
+  --grid-line: rgba(60, 60, 67, 0.18);
+
+  /* Accent / System Colors */
+  --accent-green: #30d158;
+  --accent-blue: #0a84ff;
+  --accent-red: #ff453a;
+  --accent-yellow: #ffd60a;
+  --accent-indigo: #5e5ce6;
+
+  /* Neutral */
+  --neutral-gray: #8e8e93;
+
+  /* Radius */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+
+  /* Spacing */
+  --space-xxs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 20px;
+  --space-xl: 24px;
+
+  /* Typography */
+  --font-system: -apple-system, BlinkMacSystemFont,
+    "SF Pro Rounded", "SF Pro", "Helvetica Neue", sans-serif;
+
+  /* Shadows */
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
+
+  /* Glass */
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-blur: saturate(180%) blur(16px);
+}
+
+/* ---------- DARK MODE ---------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-card: #1c1c1e;
+
+    --text-primary: #ffffff;
+    --text-secondary: rgba(235, 235, 245, 0.60);
+    --text-tertiary: rgba(235, 235, 245, 0.30);
+
+    --separator: rgba(84, 84, 88, 0.65);
+    --grid-line: rgba(84, 84, 88, 0.40);
+
+    --glass-bg: rgba(28, 28, 30, 0.72);
+    --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.35);
+  }
+}
