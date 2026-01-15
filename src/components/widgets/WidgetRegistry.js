@@ -1,6 +1,7 @@
 import React from 'react';
 
 // Import all specific widget components
+// Ensuring imports point to sibling files in the widgets directory
 import { ReliabilityRing } from './ReliabilityRing';
 import { TrendSparkline } from './TrendSparkline';
 import { ConsistencyHeatmap } from './ConsistencyHeatmap';
