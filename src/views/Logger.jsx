@@ -43,7 +43,7 @@ export const Logger = () => {
   });
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: 16 }}>
+    <div className="flex flex-col gap-4 p-4">
       
       {/* Segment Filter */}
       <SegmentedControl
@@ -54,13 +54,13 @@ export const Logger = () => {
 
       {/* Add New Log Entry */}
       <Glass>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ fontSize: 16, fontWeight: 600 }}>Add Log Entry</div>
-          <div style={{ display: 'flex', gap: 8 }}>
+        <div className="flex flex-col gap-3">
+          <div className="text-lg font-bold">Add Log Entry</div>
+          <div className="flex gap-2">
             <select
               value={newEntry.metricId}
               onChange={e => setNewEntry({ ...newEntry, metricId: e.target.value })}
-              style={{ flex: 1, padding: 6, borderRadius: 6, border: '1px solid #ccc' }}
+              className="flex-1 p-2 rounded border border-separator bg-transparent"
             >
               {metrics.map(m => (
                 <option key={m.id} value={m.id}>{m.name}</option>
@@ -71,9 +71,9 @@ export const Logger = () => {
               value={newEntry.value}
               onChange={e => setNewEntry({ ...newEntry, value: e.target.value })}
               placeholder="Value"
-              style={{ width: 80, padding: 6, borderRadius: 6, border: '1px solid #ccc' }}
+              className="w-20 p-2 rounded border border-separator bg-transparent"
             />
-            <button onClick={handleAdd} style={{ padding: '6px 12px', borderRadius: 6, background: '#4f46e5', color: '#fff', fontWeight: 600 }}>Add</button>
+            <button onClick={handleAdd} className="py-2 px-3 rounded bg-blue text-white font-bold">Add</button>
           </div>
         </div>
       </Glass>
@@ -81,7 +81,7 @@ export const Logger = () => {
       {/* Recent Entries Chart */}
       {metrics.length > 0 && filteredEntries.length > 0 && (
         <Glass>
-          <div style={{ fontSize: 16, fontWeight: 600 }}>Recent Entries</div>
+          <div className="text-lg font-bold mb-4">Recent Entries</div>
           <StackedBar
             data={metrics.map(m => {
               const entriesForMetric = filteredEntries.filter(e => e.metricId === m.id);
@@ -100,7 +100,6 @@ export const Logger = () => {
           />
         </Glass>
       )}
-
     </div>
   );
 };
