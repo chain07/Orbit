@@ -34,3 +34,35 @@ body {
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom);
 }
+
+/* 6. Layout Utilities (Replaces basic Tailwind) */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-2 { gap: 8px; }
+.gap-4 { gap: 16px; }
+.p-4 { padding: 16px; }
+.w-full { width: 100%; }
+
+/* 7. Typography */
+.text-sm { font-size: 13px; }
+.text-lg { font-size: 17px; }
+.font-bold { font-weight: 700; }
+.text-secondary { color: var(--text-secondary); }
+
+/* 8. Component Classes (Matches your HTML Reference) */
+.card {
+  background-color: var(--card-bg);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 16px;
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 0.5px solid rgba(0,0,0,0.05);
+}
