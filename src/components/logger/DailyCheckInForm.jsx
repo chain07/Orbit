@@ -24,7 +24,7 @@ export const DailyCheckInForm = () => {
 
   return (
     <Glass>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {metrics.map(metric => (
           <MetricInput
             key={metric.key}
@@ -33,7 +33,9 @@ export const DailyCheckInForm = () => {
             onChange={(val) => handleChange(metric.key, val)}
           />
         ))}
-        <button type="submit">Save Check-In</button>
+        <button type="submit" className="py-2 px-4 rounded bg-blue text-white font-bold">
+          Save Check-In
+        </button>
       </form>
     </Glass>
   );
