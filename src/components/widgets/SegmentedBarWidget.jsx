@@ -1,21 +1,10 @@
 import React from 'react';
-[span_1](start_span)// CRITICAL FIX: Update import to point to charts directory[span_1](end_span)
+// FIX: Correct import path relative to widgets folder
 import { StackedBar } from '../ui/charts/StackedBar';
 
-/**
- * SegmentedBarWidget
- * * Displays categorical data distribution over time.
- * * Wraps the complex StackedBar UI primitive.
- * * Expected data structure:
- * {
- * title: string,
- * entries: Array<{ label: string, values: { [category]: number } }>,
- * colors: { [category]: string }
- * }
- */
 export const SegmentedBarWidget = ({ data }) => {
   if (!data || !data.entries) return null;
-
+  
   const { title = 'Distribution', entries = [], colors = {} } = data;
 
   return (
@@ -23,13 +12,12 @@ export const SegmentedBarWidget = ({ data }) => {
       <div className="text-sm font-bold text-secondary uppercase tracking-wide mb-2">
         {title}
       </div>
-
       <div className="flex-1 w-full">
         <StackedBar
           data={entries}
           colors={colors}
-          height={180} // Fixed height for widget context
-          width={null} // Let container define width
+          height={180}
+          width={null} // Let container control width
         />
       </div>
     </div>
