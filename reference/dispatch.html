@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>DayBook Prime</title>
+    <style>
+        :root {
+            --bg-color: #F2F2F7;
+            --card-bg: #FFFFFF;
+            --text-primary: #000000;
+            --text-secondary: #8E8E93;
+            --separator: #C6C6C8;
+            --blue: #007AFF;
+            --green: #34C759;
+            --red: #FF3B30;
+            --orange: #FF9500;
+            --purple: #AF52DE;
+            --indigo: #5856D6;
+            --pink: #FF2D55;
+            --glass: rgba(255, 255, 255, 0.72);
+            --safe-bottom: env(safe-area-inset-bottom);
+            --color-flow: #34C759;
+            --color-idle: #007AFF;
+            --color-drag: #FFCC00;
+            --color-crash: #FF3B30;
+            
+            --grid-line: #E5E5EA;
+            --avg-line: #34C759;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #000000;
+                --card-bg: #1C1C1E;
+                --text-primary: #FFFFFF;
+                --text-secondary: #98989D;
+                --separator: #38383A;
+                --glass: rgba(28, 28, 30, 0.72);
+                --grid-line: #38383A;
+            }
+        }
+        * { box-sizing: border-box; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: -apple-system, "SF Pro Display", "SF Pro Text", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px 16px 160px 16px; 
+            line-height: 1.4;
+            overflow-x: hidden;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .view-content { min-height: 100vh; }
+        .hidden { display: none !important; }
+        .split-hero { display: flex; gap: 12px; margin-bottom: 24px; align-items: stretch; min-height: 110px; }
+        .hero-main { background-color: var(--card-bg); border-radius: 20px; padding: 24px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .hero-streak { background-color: var(--card-bg); border-radius: 20px; width: 110px; padding: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .hero-date { font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .hero-title { font-size: 28px; font-weight: 800; letter-spacing: -0.8px; margin: 0; line-height: 1.1; }
+        .streak-num { font-size: 34px; font-weight: 800; color: var(--orange); line-height: 1; margin-bottom: 2px; }
+        .streak-label { font-size: 10px; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        .card { background-color: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .section-label { font-size: 13px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.5px; }
+        
+        /* Reliability Redesign */
+        .rel-layout { display: flex; flex-direction: column; height: 100%; justify-content: flex-start; align-items: center; padding-top: 4px; }
+        .rel-main { display: flex; align-items: center; justify-content: center; width: 100%; position: relative; margin-bottom: 15px; } 
+        .ring-chart { width: 100px; height: 100px; position: relative; } 
+        .ring-val { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: 800; font-size: 22px; }
+        .rel-arrow { font-size: 28px; font-weight: 800; line-height: 1; margin-left: 12px; }
+        .rel-sub { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-align: center; }
+
+        /* Driver Storage Bar */
+        .driver-storage-bar { display: flex; width: 100%; height: 16px; background: var(--bg-color); border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+        .ds-seg { height: 100%; transition: width 0.6s cubic-bezier(0.25, 1, 0.5, 1); border-right: 2px solid var(--card-bg); }
+        .ds-seg:last-child { border-right: none; }
+        .ds-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .ds-item { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
+        .ds-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        /* Sparkline Widget */
+        .spark-container { height: 110px; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; position: relative; }
+        .spark-val { font-size: 42px; font-weight: 900; line-height: 1; letter-spacing: -1px; }
+        .spark-sub { font-size: 11px; color: var(--text-secondary); font-weight: 600; margin-top: 6px; text-transform: uppercase; }
+        
+        /* Updated Sparkline Graph Box */
+        .spark-graph-box { flex: 1; height: 100%; position: relative; /* Overflow hidden removed for labels */ } 
+        .spark-svg { width: 100%; height: 100%; overflow: visible; display: block; }
+        .spark-line { fill: none; stroke: var(--blue); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+        .spark-dot { fill: var(--blue); stroke: none; }
+        .spark-v-line { stroke: var(--grid-line); stroke-width: 1; vector-effect: non-scaling-stroke; stroke-dasharray: 2; }
+        .spark-h-line { stroke: var(--grid-line); stroke-width: 1; vector-effect: non-scaling-stroke; stroke-dasharray: 2; opacity: 0.5; }
+        /* .spark-label removed in favor of HTML labels */
+
+        /* Spotlight Widget */
+        .spot-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .spot-total-header { font-size: 24px; font-weight: 900; line-height: 1; }
+        .spot-row { margin-bottom: 10px; }
+        .spot-head { display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase; }
+        .spot-bar-bg { width: 100%; height: 8px; background: var(--bg-color); border-radius: 4px; overflow: hidden; }
+        .spot-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+
+        /* Telemetry Stacked Chart Styles */
+        .chart-layout { display: grid; grid-template-columns: 1fr 30px; grid-template-rows: 150px 20px; gap: 0; margin-bottom: 20px; margin-top: 20px; }
+        .graph-box { position: relative; grid-column: 1; grid-row: 1; border: 1px solid var(--separator); border-top: none; }
+        .grid-line-y { position: absolute; left: 0; right: 0; height: 1px; border-top: 1px dashed var(--grid-line); }
+        .grid-line-x { position: absolute; top: 0; bottom: 0; width: 1px; border-left: 1px dashed var(--grid-line); }
+        .avg-line { position: absolute; left: 0; right: 0; height: 0; border-top: 2px dotted var(--avg-line); z-index: 2; }
+        .bars-container { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; align-items: flex-end; padding: 0 10px; z-index: 1; }
+        
+        /* Bar aligned to touch right of grid line */
+        .bar-column { width: 10%; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; position: relative; align-items: flex-start; }
+        .bar-stack { width: 100%; border-radius: 4px; overflow: hidden; display: flex; flex-direction: column-reverse; }
+        
+        .bar-segment { width: 100%; }
+        .y-axis-column { grid-column: 2; grid-row: 1; position: relative; margin-left: 8px; }
+        .y-label { position: absolute; font-size: 10px; color: var(--text-secondary); transform: translateY(50%); width: 100%; text-align: left; }
+        
+        /* Centered X Labels */
+        .x-labels-container { grid-column: 1; grid-row: 2; display: flex; justify-content: space-between; padding: 0 10px; margin-top: 6px; width: 100%; }
+        .x-label { font-size: 10px; text-align: left; width: 10%; overflow: visible; white-space: nowrap; transform: translateX(-50%); margin-left: 5%; }
+        
+        .legend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; margin-bottom: 10px; }
+        .legend-item { display: flex; flex-direction: column; }
+        .legend-name { font-size: 11px; font-weight: 600; margin-bottom: 2px; text-transform: uppercase; color: var(--text-secondary); }
+        .legend-val { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+
+        /* Archive Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 10000; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-card { background: var(--card-bg); width: 90%; max-height: 80%; border-radius: 20px; padding: 24px; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.2); transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); display:flex; flex-direction: column; }
+        .modal-overlay.active .modal-card { transform: scale(1); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-title { font-size: 20px; font-weight: 800; }
+        .modal-close { background: rgba(118, 118, 128, 0.12); width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: 700; color: var(--text-secondary); font-size: 18px; }
+        .modal-content { font-size: 14px; line-height: 1.6; }
+        .modal-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--separator); }
+        .modal-row:last-child { border-bottom: none; }
+
+        /* Navigation */
+        .tab-bar-container { position: fixed; bottom: calc(30px + var(--safe-bottom)); left: 50%; transform: translateX(-50%); z-index: 9999; }
+        .tab-bar { background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 35px; padding: 6px; display: flex; gap: 4px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 0.5px solid rgba(255,255,255,0.1); position: relative; }
+        .tab-item { padding: 12px 20px; position: relative; z-index: 2; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .tab-item svg { width: 22px; height: 22px; fill: var(--text-secondary); transition: fill 0.3s; }
+        .tab-item.active svg { fill: var(--text-primary); }
+        .tab-indicator { position: absolute; top: 6px; left: 6px; height: calc(100% - 12px); background: rgba(0,0,0,0.08); border-radius: 30px; z-index: 1; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1.2), width 0.3s; }
+        @media (prefers-color-scheme: dark) { .tab-indicator { background: rgba(255,255,255,0.15); } }
+        
+        /* Segmented Control */
+        .segmented-wrap { position: relative; background: rgba(118, 118, 128, 0.12); border-radius: 9px; padding: 2px; display: flex; margin-bottom: 20px; z-index: 1; overflow: hidden; }
+        .seg-indicator { position: absolute; top: 2px; left: 2px; bottom: 2px; background: var(--card-bg); border-radius: 7px; box-shadow: 0 3px 8px rgba(0,0,0,0.12); 
+            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1.2); 
+            z-index: 0; width: calc((100% - 4px) / 3); }
+        .seg-btn { flex: 1; text-align: center; padding: 6px 0; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text-primary); transition: color 0.2s; position: relative; z-index: 1; }
+        
+        .ledger-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 0.5px solid var(--separator); }
+        .ledger-row:last-child { border-bottom: none; }
+        .ledger-key { font-size: 14px; font-weight: 600; color: var(--text-secondary); }
+        .ledger-val { font-size: 14px; font-weight: 700; text-align: right; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .stat-box { background: var(--bg-color); border-radius: 15px; padding: 15px; display: flex; flex-direction: column; justify-content: center; }
+        .stat-val { font-size: 18px; font-weight: 800; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .stat-lbl { font-size: 10px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; }
+        
+        .btn-ios { background: var(--blue); color: white; border: none; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 700; width: 100%; margin-top: 10px; cursor: pointer; transition: background-color 0.3s ease, transform 0.2s ease; }
+        .btn-ios:active { transform: scale(0.97); }
+        .btn-success { background-color: var(--green) !important; transform: scale(0.98); }
+        
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; margin: 0 6px 6px 0; color: white; }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        details summary { list-style: none; outline: none; }
+        details summary::-webkit-details-marker { display:none; }
+        details summary:after { content: "＋"; float: right; font-weight: 800; }
+        details[open] summary:after { content: "－"; }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+  }
+}
+</script>
+</head>
+<body>
+
+    <div id="tab-home" class="view-content fade-in"></div>
+    <div id="tab-intel" class="view-content hidden fade-in"></div>
+    <div id="tab-dispatch" class="view-content hidden fade-in"></div>
+    <div id="tab-archive" class="view-content hidden fade-in"></div>
+
+    <div id="archive-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title" id="modal-title">Report</div>
+                <div class="modal-close" onclick="closeArchive()">×</div>
+            </div>
+            <div class="modal-content" id="modal-content"></div>
+        </div>
+    </div>
+
+    <div class="tab-bar-container">
+        <div class="tab-bar">
+            <div class="tab-indicator" id="navIndicator"></div>
+            <div class="tab-item active" onclick="switchTab('home', 0)" id="t-0"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>
+            <div class="tab-item" onclick="switchTab('intel', 1)" id="t-1"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></div>
+            <div class="tab-item" onclick="switchTab('dispatch', 2)" id="t-2"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg></div>
+            <div class="tab-item" onclick="switchTab('archive', 3)" id="t-3"><svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-6 10H6v-2h8v2zm4-4H6v-2h12v2z"/></svg></div>
+        </div>
+    </div>
+
+<script>
+    const rawTimeLogs = `File`;
+    const rawYearlyLogs = `File`;
+    const memoryMapData = `File`; 
+    
+    let parsedArchive = [];
+    try {
+        if(memoryMapData && memoryMapData.length > 5 && !memoryMapData.startsWith('INSERT_')) {
+            const mem = JSON.parse(memoryMapData);
+            parsedArchive = mem.archive || [];
+        } else {
+            parsedArchive = JSON.parse(localStorage.getItem('db_prime_archive') || '[]');
+        }
+    } catch(e) { parsedArchive = []; }
+
+    const Store = {
+        view: 'home', intelSub: 'week', dispatchSub: 'weekly',
+        data: { yearly: [], time: [] },
+        archive: parsedArchive,
+        stats: JSON.parse(localStorage.getItem('db_prime_stats') || '{"maxStreak":0,"avgRel":0,"lifeHealth":0,"topTopic":"N/A"}'),
+        debug: ""
+    };
+
+    function parseLocal(dateStr) {
+        if(!dateStr) return new Date("Invalid");
+        let d = new Date("Invalid");
+        const pIso = dateStr.split('-');
+        if(pIso.length === 3) {
+            d = new Date(pIso[0], pIso[1]-1, pIso[2]);
+        } else {
+            const pUs = dateStr.split('/');
+            if(pUs.length === 3) {
+                d = new Date(pUs[2], pUs[0]-1, pUs[1]);
+            }
+        }
+        return d;
+    }
+
+    function parseCSV(csv, type) {
+        if (!csv) return [];
+        let cleanCsv = csv.trim();
+        if (cleanCsv.charCodeAt(0) === 0xFEFF) cleanCsv = cleanCsv.slice(1);
+        
+        const lines = cleanCsv.split('\n').filter(l => l.trim().length > 0);
+        if (lines.length < 2) return [];
+        
+        const headerMap = {
+            'date': 'Date', 'state': 'State', 'driver': 'Driver', 
+            'spotlight_result': 'Spotlight_Result', 'gatekeeper_status': 'Gatekeeper_Status',
+            'isolation': 'Isolation', 'activity': 'Activity', 'journal': 'Journal'
+        };
+        
+        const rawHeaders = lines[0].split(',');
+        const headers = rawHeaders.map(h => {
+            const clean = h.trim().replace(/^"|"$/g, '').trim();
+            return headerMap[clean.toLowerCase()] || clean;
+        });
+
+        const rows = lines.slice(1).map(line => {
+            const vals = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+            let obj = {};
+            headers.forEach((h, i) => {
+                if(vals[i]) obj[h] = vals[i].replace(/^"|"$/g, '').trim();
+            });
+            return obj;
+        });
+        
+        const validRows = rows.filter(r => r.Date && !isNaN(parseLocal(r.Date).getTime()));
+        return validRows.sort((a,b) => parseLocal(a.Date) - parseLocal(b.Date));
+    }
+
+    function calculateStreak(data) {
+        if (!data || !data.length) return 0;
+        let streak = 0;
+        const sorted = [...data].sort((a,b) => parseLocal(b.Date) - parseLocal(a.Date));
+        let lastDate = new Date();
+        lastDate.setHours(0,0,0,0);
+        for (let entry of sorted) {
+            let entryDate = parseLocal(entry.Date);
+            if(isNaN(entryDate)) continue; 
+            entryDate.setHours(0,0,0,0);
+            const diff = Math.round((lastDate - entryDate) / (1000 * 60 * 60 * 24));
+            if (diff <= 1) {
+                if((diff === 0 && streak === 0) || diff === 1) streak++; 
+                else if (diff === 0 && streak > 0) {} 
+                else streak++; 
+                lastDate = entryDate;
+            } else if (streak > 0) break; 
+        }
+        return streak;
+    }
+    
+    function calculateMaxStreak(data) {
+        if (!data || !data.length) return 0;
+        const sorted = [...data].sort((a,b) => parseLocal(a.Date) - parseLocal(b.Date)); 
+        let maxStreak = 0;
+        let currentStreak = 0;
+        let lastDate = null;
+        for (let entry of sorted) {
+            let d = parseLocal(entry.Date);
+            if(isNaN(d)) continue;
+            d.setHours(0,0,0,0);
+            if(!lastDate) {
+                currentStreak = 1;
+            } else {
+                const diff = Math.round((d - lastDate) / (1000 * 60 * 60 * 24));
+                if(diff === 1) {
+                    currentStreak++;
+                } else if(diff > 1) {
+                    if(currentStreak > maxStreak) maxStreak = currentStreak;
+                    currentStreak = 1;
+                }
+            }
+            lastDate = d;
+        }
+        if(currentStreak > maxStreak) maxStreak = currentStreak;
+        return maxStreak;
+    }
+
+    function getMeta(state) {
+        const s = state?.toLowerCase() || '';
+        if (s.includes('flow')) return { type: 'flow', color: 'var(--color-flow)', h: 100 };
+        if (s.includes('stable')) return { type: 'idle', color: 'var(--color-idle)', h: 70 };
+        if (s.includes('anhedonia') || s.includes('depressed')) return { type: 'drag', color: 'var(--color-drag)', h: 40 };
+        return { type: 'crash', color: 'var(--color-crash)', h: 15 };
+    }
+
+    function getDailySystemHealth(d) {
+        let score = 0;
+        if(d.Gatekeeper_Status === 'Complete') score += 30;
+        const meta = getMeta(d.State);
+        if(meta.type === 'flow' || meta.type === 'idle') score += 35;
+        else if(meta.type === 'drag') score += 15;
+        const res = d.Spotlight_Result || "";
+        if(res.includes('Gym') || res.includes('Calories')) score += 35;
+        else if(res !== "") score += 10;
+        return score;
+    }
+
+    function calculateMetrics(daysCount = 7) {
+        if(!Store.data.yearly) return {};
+        const slice = Store.data.yearly.slice(-daysCount);
+        const prev = Store.data.yearly.slice(-(daysCount * 2), -daysCount);
+        const getRel = (arr) => arr.length ? Math.round((arr.filter(d => {
+            const s = d.State?.toLowerCase() || '';
+            return s.includes('stable') || s.includes('flow');
+        }).length / arr.length) * 100) : 0;
+        
+        const score = getRel(slice);
+        const prevScore = getRel(prev);
+        const delta = score - prevScore;
+        const deltaPct = prevScore === 0 ? score : Math.round((delta / prevScore) * 100);
+
+        let spotHits = 0;
+        let gymHits = 0;
+        let calHits = 0;
+        let journalHits = 0;
+        slice.forEach(d => {
+            const res = d.Spotlight_Result || "";
+            if(res.includes('Gym')) { spotHits++; gymHits++; }
+            if(res.includes('Calories')) { spotHits++; calHits++; }
+            if(d.Journal === 'Yes') journalHits++;
+        });
+
+        const gateScore = (slice.filter(d => d.Gatekeeper_Status === 'Complete').length / slice.length) * 100 || 0;
+        const sysHealth = Math.round((gateScore * 0.3) + (score * 0.35) + (Math.min(100, (spotHits / (slice.length * 2)) * 100) * 0.35));
+        const driverCounts = slice.reduce((a, d) => { if(d.Driver) a[d.Driver] = (a[d.Driver] || 0) + 1; return a; }, {});
+        const sortedDrivers = Object.entries(driverCounts).sort((a,b) => b[1] - a[1]);
+        const isMasked = slice.some(d => /Anxiety|Impulse|Avoidance/i.test(d.Driver || ""));
+        let vibe = slice.some(d => getMeta(d.State).type === 'crash') ? '🔴 Turbulent' : slice.filter(d => getMeta(d.State).type === 'drag').length > 3 ? '🟠 Strained' : '🟡 Stable';
+        if (slice.some(d => d.Isolation === 'Fighting')) vibe += ' 🚩';
+
+        const mapping = {
+            "Recovery/Sleep": "#Topic/Health", "Gym/Movement": "#Topic/Health", "Connection (Walter)": "#Topic/Intimacy",
+            "School/Study": "#Topic/School", "Chores/Errands": "#Topic/Household", "Phone/TV": "#Topic/Leisure",
+            "Gaming": "#Topic/Leisure", "Social/Family": "#Topic/Family"
+        };
+        const topics = slice.reduce((acc, d) => { const t = mapping[d.Activity] || '#Topic/Other'; acc[t] = (acc[t] || 0) + 1; return acc; }, {});
+
+        const thrivingWeeks = Store.data.yearly.filter(d => d.Isolation === 'Connected').length;
+        const totalPossibleWeeks = Math.max(1, Math.floor(Store.data.yearly.length / 7));
+        const connectionScore = Math.round((thrivingWeeks / Store.data.yearly.length) * 100);
+        const consistencyRate = Math.round((spotHits / (daysCount * 2)) * 100);
+        const conflictRate = Store.data.yearly.filter(d => d.Isolation === 'Fighting').length;
+        
+        const sparkData = slice.map(d => getDailySystemHealth(d));
+        while(sparkData.length < 7) sparkData.unshift(0);
+
+        return { 
+            score, delta, deltaPct, sysHealth, sortedDrivers, spotHits, vibe, topics, isMasked, slice, 
+            connectionScore, consistencyRate, conflictRate, totalPossibleWeeks, sparkData, gymHits, calHits, journalHits,
+            lowReason: slice.find(d => getMeta(d.State).type === 'crash')?.State || 'N/A' 
+        };
+    }
+
+    function switchTab(view, idx) {
+        Store.view = view;
+        window.scrollTo(0,0);
+        const ind = document.getElementById('navIndicator'); 
+        const item = document.getElementById('t-' + idx);
+        ind.style.width = item.offsetWidth + 'px'; 
+        ind.style.transform = `translateX(${item.offsetLeft - 6}px)`;
+        document.querySelectorAll('.tab-item').forEach((el, i) => el.classList.toggle('active', i === idx));
+        document.querySelectorAll('.view-content').forEach(el => el.classList.add('hidden'));
+        document.getElementById('tab-' + view).classList.remove('hidden');
+        render();
+    }
+
+    function toggleSub(subKey, val) { 
+        Store[subKey] = val; 
+        
+        const isIntel = subKey === 'intelSub';
+        const index = val === 'week' || val === 'weekly' ? 0 : val === 'month' || val === 'quarterly' ? 1 : 2;
+        const offset = index * 100;
+        
+        const activeTabId = isIntel ? 'tab-intel' : 'tab-dispatch';
+        const indicator = document.querySelector(`#${activeTabId} .seg-indicator`);
+        if(indicator) indicator.style.transform = `translateX(${offset}%)`;
+
+        document.querySelectorAll(`#${activeTabId} .seg-btn`).forEach((btn, i) => {
+            btn.style.color = i === index ? 'var(--text-primary)' : 'var(--text-secondary)'; 
+        });
+
+        if (isIntel) {
+            const chartContainer = document.getElementById('intel-content');
+            if(chartContainer) chartContainer.innerHTML = renderTelemetryChart();
+        } else {
+            const dispatchContainer = document.getElementById('dispatch-content');
+            if(dispatchContainer) {
+                const mq = calculateMetrics(val === 'weekly' ? 7 : val === 'quarterly' ? 90 : 365);
+                const domTopic = Object.entries(mq.topics).sort((a,b)=>b[1]-a[1])[0]?.[0] || 'N/A';
+                let content = '';
+                if(val === 'weekly') {
+                    content = `
+                    <div class="ledger-row"><span class="ledger-key">Vibe</span><span class="ledger-val">${mq.vibe}</span></div>
+                    <div class="ledger-row"><span class="ledger-key">Spotlight (x/14)</span><span class="ledger-val">${mq.spotHits}/14</span></div>
+                    <div class="ledger-row"><span class="ledger-key">Journal</span><span class="ledger-val">${mq.journalHits}/7</span></div>
+                    <div class="ledger-row"><span class="ledger-key">System State</span><span class="ledger-val">${mq.score}%</span></div>
+                    <div class="ledger-row"><span class="ledger-key">Mask Status</span><span class="ledger-val">${mq.isMasked ? 'Masked' : 'Open'}</span></div>
+                    <div class="ledger-row"><span class="ledger-key">Dominant Topic</span><span class="ledger-val">${domTopic}</span></div>`;
+                } else if (val === 'quarterly') {
+                    content = `
+                    <div class="ledger-row"><span class="ledger-key">Consistency Rate</span><span class="ledger-val">${mq.consistencyRate}%</span></div>
+                    <div class="ledger-row"><span class="ledger-key">Connection Score</span><span class="ledger-val">${mq.connectionScore}%</span></div>
+                    <div class="ledger-row"><span class="ledger-key">Conflict Rate</span><span class="ledger-val">${mq.conflictRate}/13</span></div>
+                    <div class="ledger-row"><span class="ledger-key">System Health</span><span class="ledger-val">${mq.sysHealth}%</span></div>
+                    <div class="ledger-row"><span class="ledger-key">Dominant Topic</span><span class="ledger-val">${domTopic}</span></div>`;
+                } else {
+                    content = `
+                    <div class="ledger-row"><span class="ledger-key">Annual Connection</span><span class="ledger-val">${mq.connectionScore}%</span></div>
+                    <div class="ledger-row"><span class="ledger-key">Annual Consistency</span><span class="ledger-val">${mq.consistencyRate}%</span></div>
+                    <div class="ledger-row"><span class="ledger-key">System Health Curve</span><span class="ledger-val">${mq.delta >= 0 ? 'Trending Up' : 'Trending Down'}</span></div>
+                    <div class="ledger-row"><span class="ledger-key">Seasonal Volatility</span><span class="ledger-val">${mq.deltaPct > 20 ? 'High' : 'Low'}</span></div>
+                    <div class="ledger-row"><span class="ledger-key">Through-line</span><span class="ledger-val">${domTopic}</span></div>`;
+                }
+                dispatchContainer.innerHTML = content;
+            }
+        }
+    }
+    
+    function renderSparkline(data) {
+        if (!data || data.length === 0) return '';
+        
+        const svgHeight = 100;
+        const svgWidth = 200; 
+        const max = 100;
+
+        const points = data.map((val, i) => ({
+            x: (i / (data.length - 1)) * svgWidth,
+            y: svgHeight - ((val / max) * svgHeight)
+        }));
+
+        const tension = 0.25;
+        let d = `M ${points[0].x} ${points[0].y}`;
+        
+        for (let i = 0; i < points.length - 1; i++) {
+            const p0 = points[i];
+            const p1 = points[i + 1];
+            const prev = points[i - 1] || p0;
+            const next = points[i + 2] || p1;
+
+            const cp1x = p0.x + (p1.x - prev.x) * tension;
+            const cp1y = p0.y + (p1.y - prev.y) * tension;
+            const cp2x = p1.x - (next.x - p0.x) * tension;
+            const cp2y = p1.y - (next.y - p0.y) * tension;
+
+            d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p1.x} ${p1.y}`;
+        }
+        
+        let grid = '';
+        [0, 25, 50, 75, 100].forEach(p => {
+             const y = svgHeight - ((p / max) * svgHeight);
+             grid += `<line class="spark-h-line" x1="0" y1="${y}" x2="${svgWidth}" y2="${y}" vector-effect="non-scaling-stroke" />`;
+        });
+        
+        let vLines = '';
+        points.forEach((p, i) => {
+            vLines += `<line class="spark-v-line" x1="${p.x}" y1="0" x2="${p.x}" y2="${svgHeight}" />`;
+        });
+
+        return `
+            <div style="display:grid; grid-template-columns: 1fr 24px; grid-template-rows: 1fr 20px; height:100%; width:100%;">
+                <div style="grid-column:1; grid-row:1; position:relative;">
+                    <svg style="width:100%; height:100%; overflow:visible;" viewBox="0 0 ${svgWidth} ${svgHeight}" preserveAspectRatio="none">
+                         ${grid}
+                         ${vLines}
+                         <path class="spark-line" d="${d}" stroke-linejoin="round" stroke-linecap="round" />
+                         <circle class="spark-dot" cx="${points[points.length-1].x}" cy="${points[points.length-1].y}" r="3" />
+                    </svg>
+                </div>
+                <div style="grid-column:2; grid-row:1; position:relative;">
+                    <div class="y-label" style="top:0; transform:translateY(-50%); text-align:right;">100</div>
+                    <div class="y-label" style="bottom:0; transform:translateY(50%); text-align:right;">0</div>
+                </div>
+                <div style="grid-column:1; grid-row:2; display:flex; justify-content:space-between; align-items:center;">
+                    <div class="x-label" style="width:auto; transform:none; margin:0;">M</div>
+                    <div class="x-label" style="width:auto; transform:none; margin:0;">S</div>
+                </div>
+            </div>
+        `;
+    }
+    
+    function renderTelemetryChart() {
+        const today = new Date();
+        let bars = [];
+        let totalGate = 0, totalRel = 0, totalSpot = 0;
+
+        const getScore = (logs) => {
+            if(!logs.length) return { gate:0, rel:0, spot:0 };
+            let g=0, r=0, s=0;
+            logs.forEach(log => {
+                if(log.Gatekeeper_Status === 'Complete') g += 30;
+                const meta = getMeta(log.State);
+                if(meta.type === 'flow' || meta.type === 'idle') r += 35;
+                else if(meta.type === 'drag') r += 15;
+                const res = log.Spotlight_Result || "";
+                if(res.includes('Gym') || res.includes('Calories')) s += 35;
+                else if(res !== "") s += 10;
+            });
+            return { gate: Math.round(g/logs.length), rel: Math.round(r/logs.length), spot: Math.round(s/logs.length) };
+        };
+
+        if (Store.intelSub === 'week') {
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(today.getDate() - i);
+                const dayLabel = ['S','M','T','W','T','F','S'][d.getDay()];
+                const log = Store.data.yearly.find(l => {
+                    const ld = parseLocal(l.Date);
+                    return ld.getDate() === d.getDate() && ld.getMonth() === d.getMonth();
+                });
+                const score = getScore(log ? [log] : []);
+                bars.push({ ...score, label: dayLabel, isHighlight: i === 0 });
+                totalGate += score.gate; totalRel += score.rel; totalSpot += score.spot;
+            }
+        } else if (Store.intelSub === 'month') {
+            const currentYear = today.getFullYear();
+            const currentMonth = today.getMonth();
+            const startOfMonth = new Date(currentYear, currentMonth, 1);
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            
+            let currentDay = 1;
+            while(currentDay <= daysInMonth) {
+                const rangeStart = new Date(currentYear, currentMonth, currentDay);
+                const rangeEnd = new Date(currentYear, currentMonth, Math.min(currentDay + 6, daysInMonth));
+                const logs = Store.data.yearly.filter(l => {
+                    const ld = parseLocal(l.Date);
+                    return ld >= rangeStart && ld <= rangeEnd;
+                });
+                const score = getScore(logs);
+                const mShort = rangeStart.toLocaleString('default', { month: 'short' });
+                // Month Label: Start Day Only
+                bars.push({ ...score, label: `${mShort} ${currentDay}`, isHighlight: false });
+                totalGate += score.gate; totalRel += score.rel; totalSpot += score.spot;
+                currentDay += 7;
+            }
+            if(bars.length > 0) bars[bars.length - 1].isHighlight = true;
+
+        } else if (Store.intelSub === 'year') {
+            const curYear = today.getFullYear();
+            const months = ['J','F','M','A','M','J','J','A','S','O','N','D'];
+            for(let i=0; i<12; i++) {
+                const logs = Store.data.yearly.filter(l => {
+                    const ld = parseLocal(l.Date);
+                    return ld.getFullYear() === curYear && ld.getMonth() === i;
+                });
+                const score = getScore(logs);
+                bars.push({ ...score, label: months[i], isHighlight: i === today.getMonth() });
+                if(i <= today.getMonth()) { 
+                    totalGate += score.gate; totalRel += score.rel; totalSpot += score.spot;
+                }
+            }
+        }
+
+        let gridLinesHTML = '', yAxisHTML = '', barsHTML = '', xLabelsHTML = '';
+        const step = 25; const stepsCount = 4;
+        
+        bars.forEach((_, idx) => { if(idx < bars.length-1) gridLinesHTML += `<div class="grid-line-x" style="left:${(idx + 1) * (100 / bars.length)}%"></div>`; });
+        
+        const divisor = Store.intelSub === 'year' ? (today.getMonth()+1) : (bars.length || 1);
+        const totalAvg = Math.round((totalGate+totalRel+totalSpot)/divisor);
+
+        for(let i=0; i<=stepsCount; i++) {
+            const val = i * step;
+            if(i > 0) gridLinesHTML += `<div class="grid-line-y" style="bottom:${val}%"></div>`;
+            
+            if(val === 0) yAxisHTML += `<div class="y-label" style="bottom:0%">0</div>`;
+            else if(val === 100) yAxisHTML += `<div class="y-label" style="bottom:100%">100</div>`;
+        }
+        yAxisHTML += `<div class="y-label" style="bottom:${totalAvg}%; color:var(--avg-line); font-weight:700;">avg</div>`;
+        
+        const avgLineHTML = `<div class="avg-line" style="bottom:${totalAvg}%"></div>`;
+
+        bars.forEach(b => {
+            const total = b.gate + b.rel + b.spot;
+            const barWidth = 60; 
+            barsHTML += `
+                <div class="bar-column" style="width:${100/bars.length}%">
+                    <div class="bar-stack" style="height:${total}%; width:${barWidth}%">
+                        <div class="bar-segment" style="height:${total ? (b.spot/total)*100 : 0}%; background:var(--orange)"></div>
+                        <div class="bar-segment" style="height:${total ? (b.rel/total)*100 : 0}%; background:var(--blue)"></div>
+                        <div class="bar-segment" style="height:${total ? (b.gate/total)*100 : 0}%; background:var(--purple)"></div>
+                    </div>
+                </div>`;
+            xLabelsHTML += `<div class="x-label" style="width:${100/bars.length}%; font-weight:${b.isHighlight?'700':'400'}; color:${b.isHighlight?'var(--text-primary)':'var(--text-secondary)'}">${b.label}</div>`;
+        });
+        
+        const avgGate = Math.round(totalGate/divisor);
+        const avgRel = Math.round(totalRel/divisor);
+        const avgSpot = Math.round(totalSpot/divisor);
+
+        const legendHTML = `
+            <div class="legend-item"><div class="legend-name">Gatekeeper</div><div class="legend-val" style="color:var(--purple)">${avgGate}<span style="font-size:10px; opacity:0.6">/30</span></div></div>
+            <div class="legend-item"><div class="legend-name">Reliability</div><div class="legend-val" style="color:var(--blue)">${avgRel}<span style="font-size:10px; opacity:0.6">/35</span></div></div>
+            <div class="legend-item"><div class="legend-name">Spotlight</div><div class="legend-val" style="color:var(--orange)">${avgSpot}<span style="font-size:10px; opacity:0.6">/35</span></div></div>
+            <div class="legend-item"><div class="legend-name">Total Health</div><div class="legend-val">${totalAvg}%</div></div>
+        `;
+
+        return `
+            <div class="legend-grid">${legendHTML}</div>
+            <div class="chart-layout">
+                <div class="graph-box"><div class="grid-lines-container">${gridLinesHTML}</div>${avgLineHTML}<div class="bars-container">${barsHTML}</div></div>
+                <div class="y-axis-column">${yAxisHTML}</div>
+                <div class="x-labels-container">${xLabelsHTML}</div>
+            </div>`;
+    }
+
+    // Helper for button feedback
+    function animateButton(btn, tempText, originalText) {
+        btn.classList.add('btn-success');
+        btn.innerText = tempText;
+        setTimeout(() => {
+            btn.classList.remove('btn-success');
+            btn.innerText = originalText;
+        }, 1500);
+    }
+    
+    // Archive Viewer Functions
+    function openArchive(index) {
+        const entry = Store.archive[index];
+        if(!entry) return;
+        
+        document.getElementById('modal-title').innerText = `${entry.period} - ${entry.date}`;
+        
+        // Parse the markdown table if present
+        let html = '';
+        if(entry.data && entry.data.includes('|')) {
+            const rawParts = entry.data.split('|').map(s => s.trim()).filter(s => s);
+            // Format: Key1 | Val1 | Key2 | Val2 ...
+            if(rawParts.length >= 2) {
+                // Modified loop to treat index 0 as Key, not title
+                for(let i=0; i<rawParts.length; i+=2) {
+                    const key = rawParts[i];
+                    const val = rawParts[i+1] || '';
+                    html += `<div class="modal-row"><span>${key}</span><span style="font-weight:700">${val}</span></div>`;
+                }
+            } else {
+                html = `<div style="padding:10px;">${entry.data}</div>`;
+            }
+        } else {
+            html = `<p>${entry.data || 'No Data'}</p>`;
+        }
+        
+        document.getElementById('modal-content').innerHTML = html;
+        document.getElementById('archive-modal').classList.add('active');
+    }
+    
+    function closeArchive() {
+        document.getElementById('archive-modal').classList.remove('active');
+    }
+
+    function render() {
+        try {
+            const m = calculateMetrics(Store.intelSub === 'week' ? 7 : Store.intelSub === 'month' ? 30 : 365);
+            const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+            const currentStreak = calculateStreak(Store.data.yearly);
+            const maxStreak = calculateMaxStreak(Store.data.yearly);
+            
+            // HOME
+            const driverColors = ['var(--blue)', 'var(--purple)', 'var(--orange)', 'var(--pink)', 'var(--separator)'];
+            const totalDrivers = m.sortedDrivers.reduce((sum, d) => sum + d[1], 0) || 1;
+            const topDrivers = m.sortedDrivers.slice(0, 4); 
+            const driverSegments = topDrivers.map(([name, count], i) => {
+                return `<div class="ds-seg" style="width:${(count/totalDrivers)*100}%; background:${driverColors[i]}"></div>`;
+            }).join('');
+            const driverLegend = topDrivers.map(([name, count], i) => {
+                return `<div class="ds-item"><div class="ds-dot" style="background:${driverColors[i]}"></div>${name} <span style="color:var(--text-secondary)">${count}</span></div>`;
+            }).join('');
+
+            document.getElementById('tab-home').innerHTML = `
+                <div class="split-hero">
+                    <div class="hero-main"><div class="hero-date">${dateStr}</div><h1 class="hero-title">Hi, Johnathan.</h1></div>
+                    <div class="hero-streak"><div class="streak-num">${currentStreak}</div><div class="streak-label">Day Streak</div></div>
+                </div>
+                
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; height:130px;">
+                        <div style="display:flex; flex-direction:column; justify-content:space-between;">
+                            <div class="section-label" style="margin:0">Health</div>
+                            <div>
+                                <div class="spark-val">${m.sysHealth}%</div>
+                                <div class="spark-sub">7-Day Health</div>
+                            </div>
+                        </div>
+                        <div class="spark-graph-box" style="flex:1; margin-left:20px; position:relative;">
+                            ${renderSparkline(m.sparkData)}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="section-label">Reliability</div>
+                        <div class="rel-layout">
+                            <div class="rel-main">
+                                <div class="ring-chart">
+                                    <svg viewBox="0 0 36 36" style="width:100%; height:100%; transform:rotate(-90deg)"><circle cx="18" cy="18" r="16" fill="none" stroke="var(--separator)" stroke-width="3.5" opacity="0.1"></circle><circle cx="18" cy="18" r="16" fill="none" stroke="var(--blue)" stroke-width="3.5" stroke-dasharray="${m.score}, 100" stroke-linecap="round"></circle></svg>
+                                    <div class="ring-val">${m.score}%</div>
+                                </div>
+                                <div class="rel-arrow" style="color:${m.delta >= 0 ? 'var(--green)' : 'var(--red)'}">${m.delta >= 0 ? '↑' : '↓'}</div>
+                            </div>
+                            <div class="rel-sub">${m.delta >= 0 ? '+' : ''}${m.deltaPct}% from last week</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="spot-header-row">
+                            <div class="section-label" style="margin:0">Spotlight Integrity</div>
+                            <div class="spot-total-header">${m.spotHits}<span style="font-size:12px; color:var(--text-secondary); font-weight:600;">/14</span></div>
+                        </div>
+                        <div style="margin-top:4px;">
+                            <div class="spot-row">
+                                <div class="spot-head"><span>Gym</span><span>${m.gymHits}/7</span></div>
+                                <div class="spot-bar-bg"><div class="spot-bar-fill" style="width:${(m.gymHits/7)*100}%; background:var(--blue)"></div></div>
+                            </div>
+                            <div class="spot-row">
+                                <div class="spot-head"><span>Calories</span><span>${m.calHits}/7</span></div>
+                                <div class="spot-bar-bg"><div class="spot-bar-fill" style="width:${(m.calHits/7)*100}%; background:var(--orange)"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="section-label">Top Drivers</div>
+                    <div class="driver-storage-bar">${driverSegments}</div>
+                    <div class="ds-legend">${driverLegend}</div>
+                </div>
+            `;
+
+            // INTEL - Swapped Order of Cards
+            const intelX = Store.intelSub === 'week' ? '0%' : Store.intelSub === 'month' ? '100%' : '200%';
+            document.getElementById('tab-intel').innerHTML = `
+                <div class="card" style="padding:24px;"><h1 class="hero-title">Intelligence</h1><p class="hero-subtitle">Pattern and mental telemetry analysis.</p></div>
+                <div class="segmented-wrap"><div class="seg-indicator" style="transform:translateX(${intelX})"></div>
+                    <div class="seg-btn" onclick="toggleSub('intelSub','week')">Week</div><div class="seg-btn" onclick="toggleSub('intelSub','month')">Month</div><div class="seg-btn" onclick="toggleSub('intelSub','year')">Year</div>
+                </div>
+                
+                <div class="card">
+                    <div class="section-label">System Health</div>
+                    <div id="intel-content">${renderTelemetryChart()}</div>
+                </div>
+                
+                <div class="card"><div class="section-label">Subject Analysis</div>
+                    <p style="margin:0 0 12px 0; font-size:15px; line-height:1.5;">
+                        Reliability is currently at <b>${m.score}%</b>, heavily influenced by <b>${m.sortedDrivers[0]?.[0] || 'N/A'}</b> drivers. 
+                        Data suggests a correlation between <b>${m.lowReason}</b> states and low spotlight consistency. 
+                        The presence of <b>${m.isMasked ? 'Masked' : 'Open'}</b> behavior indicates ${m.isMasked ? 'avoidance-based friction' : 'high authenticity'} during this period.
+                    </p>
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-color); padding:12px; border-radius:12px;">
+                        <span style="font-size:11px; font-weight:800; color:var(--text-secondary)">INTENSITY INDEX</span>
+                        <span style="font-size:18px; font-weight:900;">${Math.round(m.sysHealth * 0.85)}</span>
+                    </div>
+                </div>
+                
+                <details class="card"><summary class="section-label" style="margin:0; cursor:pointer;">Metric Explanations</summary>
+                    <div style="font-size:12px; margin-top:12px; color:var(--text-secondary);">
+                        <b>System Health:</b> Stacked score of Gatekeeper (30pts), Reliability (35pts), and Spotlight (35pts).<br>
+                        <b>Reliability:</b> Percentage of days spent in Flow or Stable states.<br>
+                        <b>Intensity Index:</b> Calculation of total focus duration relative to operational baseline.
+                    </div>
+                </details>
+            `;
+
+            // DISPATCH
+            const dispX = Store.dispatchSub === 'weekly' ? '0%' : Store.dispatchSub === 'quarterly' ? '100%' : '200%';
+            const mq = calculateMetrics(Store.dispatchSub === 'weekly' ? 7 : Store.dispatchSub === 'quarterly' ? 90 : 365);
+            const domTopic = Object.entries(mq.topics).sort((a,b)=>b[1]-a[1])[0]?.[0] || 'N/A';
+            const markdown = Store.dispatchSub === 'weekly' ? `| Weekly | ${mq.vibe} | ${mq.spotHits}/14 | ${mq.journalHits}/7 | ${mq.score}% | ${mq.isMasked ? 'Masked' : 'Open'} | ${domTopic} |` : `| ${Store.dispatchSub} | ${mq.score}% Rel | ${mq.sysHealth}% Health | ${domTopic} |`;
+
+            document.getElementById('tab-dispatch').innerHTML = `
+                <div class="card" style="padding:24px;"><h1 class="hero-title">Dispatch</h1><p class="hero-subtitle">Finalize report for the permanent ledger.</p></div>
+                <div class="segmented-wrap"><div class="seg-indicator" style="transform:translateX(${dispX})"></div>
+                    <div class="seg-btn" onclick="toggleSub('dispatchSub','weekly')">Weekly</div><div class="seg-btn" onclick="toggleSub('dispatchSub','quarterly')">Quarterly</div><div class="seg-btn" onclick="toggleSub('dispatchSub','annual')">Annual</div>
+                </div>
+                <div class="card"><div class="section-label">Ledger Overview</div>
+                    <div id="dispatch-content">
+                    ${Store.dispatchSub === 'weekly' ? `
+                        <div class="ledger-row"><span class="ledger-key">Vibe</span><span class="ledger-val">${mq.vibe}</span></div>
+                        <div class="ledger-row"><span class="ledger-key">Spotlight (x/14)</span><span class="ledger-val">${mq.spotHits}/14</span></div>
+                        <div class="ledger-row"><span class="ledger-key">Journal</span><span class="ledger-val">${mq.journalHits}/7</span></div>
+                        <div class="ledger-row"><span class="ledger-key">System State</span><span class="ledger-val">${mq.score}%</span></div>
+                        <div class="ledger-row"><span class="ledger-key">Mask Status</span><span class="ledger-val">${mq.isMasked ? 'Masked' : 'Open'}</span></div>
+                        <div class="ledger-row"><span class="ledger-key">Dominant Topic</span><span class="ledger-val">${domTopic}</span></div>
+                    ` : Store.dispatchSub === 'quarterly' ? `
+                        <div class="ledger-row"><span class="ledger-key">Consistency Rate</span><span class="ledger-val">${mq.consistencyRate}%</span></div>
+                        <div class="ledger-row"><span class="ledger-key">Connection Score</span><span class="ledger-val">${mq.connectionScore}%</span></div>
+                        <div class="ledger-row"><span class="ledger-key">Conflict Rate</span><span class="ledger-val">${mq.conflictRate}/13</span></div>
+                        <div class="ledger-row"><span class="ledger-key">System Health</span><span class="ledger-val">${mq.sysHealth}%</span></div>
+                        <div class="ledger-row"><span class="ledger-key">Dominant Topic</span><span class="ledger-val">${domTopic}</span></div>
+                    ` : `
+                        <div class="ledger-row"><span class="ledger-key">Annual Connection</span><span class="ledger-val">${mq.connectionScore}%</span></div>
+                        <div class="ledger-row"><span class="ledger-key">Annual Consistency</span><span class="ledger-val">${mq.consistencyRate}%</span></div>
+                        <div class="ledger-row"><span class="ledger-key">System Health Curve</span><span class="ledger-val">${mq.delta >= 0 ? 'Trending Up' : 'Trending Down'}</span></div>
+                        <div class="ledger-row"><span class="ledger-key">Seasonal Volatility</span><span class="ledger-val">${mq.deltaPct > 20 ? 'High' : 'Low'}</span></div>
+                        <div class="ledger-row"><span class="ledger-key">Through-line</span><span class="ledger-val">${domTopic}</span></div>
+                    `}
+                    </div>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                    <button class="btn-ios" onclick="copyMarkdown(this, \`${markdown}\`)">Copy Markdown</button>
+                    <button class="btn-ios" onclick="saveToArchive(this)">Save to Archive</button>
+                </div>
+            `;
+
+            // ARCHIVE - Removed Import Button
+            let am = { score:0, sysHealth:0, topics:{} };
+            let domTopicLife = 'N/A';
+            try {
+                if(Store.data.yearly.length) {
+                    am = calculateMetrics(365);
+                    domTopicLife = Object.entries(am.topics).sort((a,b)=>b[1]-a[1])[0]?.[0] || 'N/A';
+                }
+            } catch(e) {}
+            
+            document.getElementById('tab-archive').innerHTML = `
+                <div class="card" style="padding:24px;"><h1 class="hero-title">Archive</h1><p class="hero-subtitle">History and backups.</p></div>
+                <div class="card"><div class="stat-grid">
+                    <div class="stat-box"><div class="stat-val">${maxStreak}</div><div class="stat-lbl">Max Streak</div></div>
+                    <div class="stat-box"><div class="stat-val">${am.score}%</div><div class="stat-lbl">Life Rel</div></div>
+                    <div class="stat-box"><div class="stat-val">${am.sysHealth}%</div><div class="stat-lbl">Life Health</div></div>
+                    <div class="stat-box"><div class="stat-val">${domTopicLife}</div><div class="stat-lbl">Top Topic</div></div>
+                </div></div>
+                <div class="card"><div class="section-label">Stored Reports</div>
+                    <div style="max-height: 200px; overflow-y: auto;">
+                    ${Store.archive && Store.archive.length ? Store.archive.map((a, i) => `<div class="ledger-row" onclick="openArchive(${i})"><span>${a.period} - ${a.date}</span><span style="color:var(--blue); font-weight:800;">DATA</span></div>`).join('') : '<p style="font-size:12px; color:var(--text-secondary);">No records.</p>'}
+                    </div>
+                </div>
+                <div style="display:block;">
+                    <button class="btn-ios" onclick="exportMemory(this)">Export JSON</button>
+                </div>
+            `;
+        } catch(err) {
+            console.error("Render Error:", err);
+            document.body.innerHTML += `<div style="color:red; padding:20px;">Render Error: ${err.message}</div>`;
+        }
+    }
+
+    async function copyMarkdown(btn, data) {
+        try { 
+            await navigator.clipboard.writeText(data);
+            animateButton(btn, "Copied!", "Copy Markdown");
+        } catch(e) { alert('Clipboard Fail'); }
+    }
+
+    function saveToArchive(btn) {
+        const entry = { date: new Date().toLocaleDateString(), period: Store.dispatchSub, data: document.querySelector('#dispatch-content').innerText.replace(/\n/g, ' | ') };
+        Store.archive.unshift(entry); 
+        localStorage.setItem('db_prime_archive', JSON.stringify(Store.archive));
+        animateButton(btn, "Saved!", "Save to Archive");
+        setTimeout(render, 1000);
+    }
+
+    function exportMemory(btn) { 
+        // 1. Calculate complete streak history
+        const sorted = [...Store.data.yearly].sort((a,b) => parseLocal(a.Date) - parseLocal(b.Date));
+        let streakHistory = [];
+        let currentStreak = 0;
+        let streakStart = null;
+        let lastDate = null;
+
+        for (let entry of sorted) {
+            let d = parseLocal(entry.Date);
+            d.setHours(0,0,0,0);
+            
+            if(!lastDate) {
+                currentStreak = 1;
+                streakStart = entry.Date;
+            } else {
+                const diff = Math.round((d - lastDate) / (1000 * 60 * 60 * 24));
+                if(diff === 1) {
+                    currentStreak++;
+                } else if(diff > 1) {
+                    if(currentStreak > 0) {
+                        streakHistory.push({ start: streakStart, end: lastDate.toISOString().split('T')[0], length: currentStreak });
+                    }
+                    currentStreak = 1;
+                    streakStart = entry.Date;
+                }
+            }
+            lastDate = d;
+        }
+        if(currentStreak > 0) {
+            streakHistory.push({ start: streakStart, end: lastDate.toISOString().split('T')[0], length: currentStreak });
+        }
+
+        // 2. Load and Filter Existing Config
+        let existingConfig = {};
+        try {
+            if(memoryMapData && memoryMapData.length > 5 && !memoryMapData.startsWith('INSERT_')) {
+                existingConfig = JSON.parse(memoryMapData);
+            }
+        } catch(e) {}
+
+        // Destructure to separate dynamic data from static config
+        // We ignore the old dynamic data (meta, stats, etc) to ensure we overwrite it with new calculations
+        const { meta, stats, streakHistory: oldHist, archive: oldArch, ...staticConfig } = existingConfig;
+
+        // 3. Construct Master File with Enforced Order
+        const masterFile = {
+            meta: { 
+                exportedAt: new Date().toISOString(),
+                appVersion: "DayBook Prime v1"
+            },
+            stats: {
+                maxStreak: calculateMaxStreak(Store.data.yearly),
+                currentStreak: calculateStreak(Store.data.yearly),
+                totalEntries: Store.data.yearly.length
+            },
+            streakHistory: streakHistory,
+            archive: Store.archive,
+            ...staticConfig // This puts Gatekeeper, Standards, etc. at the bottom
+        };
+        navigator.clipboard.writeText(JSON.stringify(masterFile, null, 2)).then(() => {
+            animateButton(btn, "Exported!", "Export JSON");
+        });
+    }
+
+
+    Store.data.yearly = parseCSV(rawYearlyLogs, 'Yearly'); 
+    switchTab('home', 0);
+</script>
+</body>
+</html>
