@@ -8,6 +8,70 @@ import { NormalizationEngine } from './NormalizationEngine';
  * Prepares data for widgets (rings, sparklines, heatmaps, stacked bars)
  */
 export const WidgetEngine = {
+  
+  /**
+   * MASTER AGGREGATOR: Generates full widget structures for Views
+   * Used by: Horizon.jsx, Intel.jsx
+   */
+  generateWidgets: (metrics = [], logs = [], segment = 'Weekly') => {
+    // Filter out metrics explicitly hidden from dashboard
+    const visibleMetrics = metrics.filter(m => m.dashboardVisible !== false);
+
+    return visibleMetrics.map(metric => {
+      let widgetData = null;
+      const metricLogs = logs || [];
+
+      try {
+        switch (metric.widgetType) {
+          case 'ring':
+            widgetData = WidgetEngine.ringData(metric, metricLogs);
+            break;
+            
+          case 'heatmap':
+            // Heatmaps generally show longer history; wrapping in 'values' object for View compatibility
+            widgetData = { 
+              values: WidgetEngine.heatmapData(metric, metricLogs),
+              start: new Date(new Date().setDate(new Date().getDate() - 60)).toISOString(), // Default ~2 months back
+              end: new Date().toISOString()
+            };
+            break;
+            
+          case 'sparkline':
+            // Adjust window based on segment if needed, default to 14 days for sparklines
+            const window = segment === 'Monthly' ? 30 : 14; 
+            widgetData = { 
+              values: WidgetEngine.sparklineData(metric, metricLogs, window) 
+            };
+            break;
+            
+          case 'stackedbar':
+            // Wraps single metric data to fit the stacked bar format
+            widgetData = {
+              entries: WidgetEngine.stackedBarData([metric], metricLogs),
+              colors: { [metric.label]: metric.color || '#4f46e5' }
+            };
+            break;
+            
+          default:
+            // Fallback for 'number' or undefined types
+            widgetData = WidgetEngine.summaryData(metric, metricLogs);
+            break;
+        }
+
+        return {
+          id: metric.id,
+          type: metric.widgetType || 'number', // Default to generic number widget
+          title: metric.label,
+          data: widgetData
+        };
+
+      } catch (err) {
+        console.warn(`Widget generation failed for ${metric.label}`, err);
+        return null;
+      }
+    }).filter(w => w !== null); // Filter out any failed widgets
+  },
+
   /**
    * Prepare data for a ring chart (goal completion)
    * Returns: { value: 0-100, color, label }
@@ -44,8 +108,13 @@ export const WidgetEngine = {
     logs
       .filter(l => l.metricId === metricConfig.id)
       .forEach(l => {
-        const dateKey = new Date(l.timestamp).toISOString().slice(0, 10);
-        heatmap[dateKey] = l.value ? 1 : 0;
+        // Robust date parsing
+        try {
+            const dateKey = new Date(l.timestamp).toISOString().slice(0, 10);
+            heatmap[dateKey] = l.value ? 1 : 0;
+        } catch (e) {
+            // Skip invalid dates
+        }
       });
     return heatmap;
   },
