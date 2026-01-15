@@ -9,54 +9,70 @@
 *::before,
 *::after {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  background: var(--bg);
+  width: 100%;
+  background: var(--bg-color);
   color: var(--text-primary);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+  overflow: hidden; /* Prevent body scroll, let App handle it */
 }
 
 /* 3. App layout */
 #root {
   height: 100%;
+  width: 100%;
 }
 
-/* 4. Scroll behavior */
-body {
-  overscroll-behavior: none;
-}
-
-/* 5. Safe-area support */
+/* 4. Safe-area support */
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* 6. Layout Utilities (Replaces basic Tailwind) */
+/* 5. Layout Utilities */
 .flex { display: flex; }
 .flex-col { flex-direction: column; }
 .items-center { align-items: center; }
 .justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.gap-1 { gap: 4px; }
 .gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
 .gap-4 { gap: 16px; }
 .p-4 { padding: 16px; }
 .w-full { width: 100%; }
+.h-full { height: 100%; }
+.relative { position: relative; }
 
-/* 7. Typography */
+/* 6. Typography */
+.text-xs { font-size: 11px; }
 .text-sm { font-size: 13px; }
+.text-md { font-size: 15px; }
 .text-lg { font-size: 17px; }
-.font-bold { font-weight: 700; }
-.text-secondary { color: var(--text-secondary); }
+.text-xl { font-size: 20px; }
+.text-3xl { font-size: 34px; letter-spacing: -0.5px; } /* Hero Title */
 
-/* 8. Component Classes (Matches your HTML Reference) */
+.font-bold { font-weight: 700; }
+.font-medium { font-weight: 500; }
+.text-secondary { color: var(--text-secondary); }
+.text-primary { color: var(--text-primary); }
+.text-blue { color: var(--blue); }
+.text-red { color: var(--red); }
+.text-green { color: var(--green); }
+.uppercase { text-transform: uppercase; }
+.tracking-wide { letter-spacing: 0.5px; }
+
+/* 7. Component Classes */
 .card {
   background-color: var(--card-bg);
-  border-radius: var(--radius-card);
+  border-radius: 20px;
   padding: 20px;
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
   margin-bottom: 16px;
 }
 
@@ -65,11 +81,19 @@ body {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 0.5px solid rgba(0,0,0,0.05);
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
 }
 
-/* 9. Responsive Resizing */
+.dashed-border {
+  border: 2px dashed var(--separator);
+}
+
+/* 8. Widget Grid */
 .widget-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 16px;
 }
