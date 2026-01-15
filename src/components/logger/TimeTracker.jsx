@@ -32,12 +32,22 @@ export const TimeTracker = ({ metricKey }) => {
   };
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-      <span>{formatTime(elapsed)}</span>
-      <button onClick={() => setRunning(!running)}>
+    <div className="flex items-center gap-3">
+      <span className="font-mono">{formatTime(elapsed)}</span>
+      <button 
+        onClick={() => setRunning(!running)}
+        className="py-2 px-3 rounded border border-separator font-bold"
+      >
         {running ? 'Pause' : 'Start'}
       </button>
-      {running && <button onClick={handleStop}>Stop & Log</button>}
+      {running && (
+        <button 
+          onClick={handleStop}
+          className="py-2 px-3 rounded bg-blue text-white font-bold"
+        >
+          Stop & Log
+        </button>
+      )}
     </div>
   );
 };
