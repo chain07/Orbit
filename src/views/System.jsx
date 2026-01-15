@@ -47,22 +47,22 @@ export const System = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: 16 }}>
+    <div className="flex flex-col gap-4 p-4">
       
       {/* Metrics List */}
       <Glass>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ fontSize: 16, fontWeight: 600 }}>Metrics</div>
-          <button onClick={handleAdd} style={{ padding: '6px 12px', borderRadius: 6, background: '#4f46e5', color: '#fff', fontWeight: 600 }}>Add Metric</button>
+        <div className="flex justify-between items-center">
+          <div className="text-lg font-bold">Metrics</div>
+          <button onClick={handleAdd} className="py-2 px-3 rounded bg-blue text-white font-bold">Add Metric</button>
         </div>
 
-        <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className="mt-3 flex flex-col gap-2">
           {metrics.map(m => (
-            <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 6, borderRadius: 6, background: 'rgba(0,0,0,0.03)' }}>
+            <div key={m.id} className="flex justify-between items-center p-2 rounded bg-white bg-opacity-5">
               <div>{m.name}</div>
-              <div style={{ display: 'flex', gap: 6 }}>
-                <button onClick={() => handleEdit(m)} style={{ fontWeight: 600 }}>Edit</button>
-                <button onClick={() => deleteMetric(m.id)} style={{ fontWeight: 600, color: 'red' }}>Delete</button>
+              <div className="flex gap-2">
+                <button onClick={() => handleEdit(m)} className="font-bold">Edit</button>
+                <button onClick={() => deleteMetric(m.id)} className="font-bold text-red">Delete</button>
               </div>
             </div>
           ))}
@@ -71,10 +71,10 @@ export const System = () => {
 
       {/* Export / Import */}
       <Glass>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ fontSize: 16, fontWeight: 600 }}>Data Management</div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={handleExport} style={{ padding: '6px 12px', borderRadius: 6, background: '#4f46e5', color: '#fff', fontWeight: 600 }}>Export JSON</button>
+        <div className="flex flex-col gap-3">
+          <div className="text-lg font-bold">Data Management</div>
+          <div className="flex gap-2">
+            <button onClick={handleExport} className="py-2 px-3 rounded bg-blue text-white font-bold">Export JSON</button>
             <input type="file" accept="application/json" onChange={handleImport} />
           </div>
         </div>
