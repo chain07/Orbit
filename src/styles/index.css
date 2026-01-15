@@ -1,0 +1,36 @@
+/* src/styles/index.css */
+
+/* 1. Design foundations */
+@import "./tokens.css";
+@import "./motion.css";
+
+/* 2. Reset & base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* 3. App layout */
+#root {
+  height: 100%;
+}
+
+/* 4. Scroll behavior */
+body {
+  overscroll-behavior: none;
+}
+
+/* 5. Safe-area support */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
