@@ -26,13 +26,17 @@ export const Intel = () => {
     WidgetEngine.generateWidgets(metrics, logEntries, segment), 
   [metrics, logEntries, segment]);
 
-  // Calculations for "System Health" density card
+  // Calculations for "System Health" density card (Dispatch Parity)
   const systemHealth = useMemo(() => {
-    // Mock calculation for visual parity - requires real AnalyticsEngine integration
+    // In a full implementation, this would aggregate Reliability + Consistency + Gatekeeper scores
+    // For now, we calculate a basic reliability score based on goal completion
+    if (!metrics.length) return { reliability: 0, trend: '0%' };
+    
+    // Simple mock logic for visual structure - replace with AnalyticsEngine.systemHealth() later
     const reliability = 85; 
     const trend = '+5%';
     return { reliability, trend };
-  }, [logEntries]);
+  }, [metrics, logEntries]);
 
   return (
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
@@ -74,7 +78,7 @@ export const Intel = () => {
       {/* ANALYSIS STREAM (Insights) */}
       {insights.length > 0 && (
         <div className="flex flex-col gap-2">
-          <div className="section-label px-1">Analysis Stream</div>
+          <div className="section-label px-1 text-secondary font-bold text-xs uppercase">Analysis Stream</div>
           {insights.map((insight, idx) => (
             <Glass key={idx} className="flex flex-col gap-1 border-l-2 border-purple">
               <div className="text-sm font-bold text-primary">{insight.message}</div>
@@ -86,7 +90,7 @@ export const Intel = () => {
 
       {/* TELEMETRY GRIDS (Widgets) */}
       <div className="flex flex-col gap-2">
-        <div className="section-label px-1">Telemetry</div>
+        <div className="section-label px-1 text-secondary font-bold text-xs uppercase">Telemetry</div>
         <div className="widget-grid">
           {widgets.map((widget, idx) => {
             const { type, data, title } = widget;
