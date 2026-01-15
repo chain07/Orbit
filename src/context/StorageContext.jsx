@@ -47,17 +47,132 @@ export class TimeLog {
 // ----------------------
 // Storage Context
 // ----------------------
-const StorageContext = createContext();
+export const StorageContext = createContext();
 
 export const useStorage = () => {
   return useContext(StorageContext);
 };
 
 export const StorageProvider = ({ children }) => {
-  // Metrics & Logs
+  // 1. Core State
+  // We use 'logEntries' to match the variable name expected by Horizon.jsx
   const [metrics, setMetrics] = useState([]);
-  const [logs, setLogs] = useState([]);
-  const [timeLogs, setTimeLogs] = useState([]);
+  const [logEntries, setLogEntries] = useState([]); 
+  const [widgetLayout, setWidgetLayout] = useState({});
 
-  // Dashboard layout/visibility
-  const [widgetLayout, setWidgetLayout] = useState({})
+  // 2. Load from LocalStorage on Mount
+  useEffect(() => {
+    try {
+      const storedData = localStorage.getItem('orbit_db');
+      if (storedData) {
+        const parsed = JSON.parse(storedData);
+        if (parsed.metrics) setMetrics(parsed.metrics);
+        if (parsed.logEntries) setLogEntries(parsed.logEntries);
+        if (parsed.widgetLayout) setWidgetLayout(parsed.widgetLayout);
+      }
+    } catch (e) {
+      console.error("Failed to load ORBIT data", e);
+    }
+  }, []);
+
+  // 3. Save to LocalStorage on Change
+  useEffect(() => {
+    const dataToSave = {
+      metrics,
+      logEntries,
+      widgetLayout
+    };
+    localStorage.setItem('orbit_db', JSON.stringify(dataToSave));
+  }, [metrics, logEntries, widgetLayout]);
+
+  // ----------------------
+  // Actions: Metrics
+  // ----------------------
+  const addMetric = (metricData) => {
+    const newMetric = {
+      ...metricData,
+      id: metricData.id || crypto.randomUUID(),
+      created: new Date().toISOString()
+    };
+    setMetrics(prev => [...prev, newMetric]);
+  };
+
+  const updateMetric = (updatedMetric) => {
+    setMetrics(prev => prev.map(m => m.id === updatedMetric.id ? updatedMetric : m));
+  };
+
+  const deleteMetric = (id) => {
+    // Delete the metric
+    setMetrics(prev => prev.filter(m => m.id !== id));
+    // Optional: Delete associated logs to clean up DB
+    setLogEntries(prev => prev.filter(l => l.metricId !== id));
+  };
+
+  // ----------------------
+  // Actions: Logging
+  // ----------------------
+  const addLogEntry = (entryData) => {
+    const newEntry = new LogEntry({
+      id: crypto.randomUUID(),
+      metricId: entryData.metricId || entryData.metricKey, // Handle potential inconsistent naming
+      value: entryData.value,
+      timestamp: entryData.timestamp
+    });
+    setLogEntries(prev => [...prev, newEntry]);
+  };
+
+  // ----------------------
+  // Actions: Data Management
+  // ----------------------
+  const importData = (jsonData) => {
+    if (!jsonData) return;
+    if (Array.isArray(jsonData.metrics)) setMetrics(jsonData.metrics);
+    if (Array.isArray(jsonData.logEntries)) setLogEntries(jsonData.logEntries);
+    if (jsonData.widgetLayout) setWidgetLayout(jsonData.widgetLayout);
+  };
+
+  const exportData = () => {
+    return {
+      metrics,
+      logEntries,
+      widgetLayout,
+      exportedAt: new Date().toISOString()
+    };
+  };
+
+  const clearAllData = () => {
+    setMetrics([]);
+    setLogEntries([]);
+    setWidgetLayout({});
+    localStorage.removeItem('orbit_db');
+  };
+
+  return (
+    <StorageContext.Provider value={{
+      // State
+      metrics,
+      logEntries,
+      logs: logEntries, // Alias for older components
+      widgetLayout,
+
+      // Metric Actions
+      addMetric,
+      updateMetric,
+      deleteMetric,
+
+      // Log Actions
+      addLogEntry,
+      
+      // Data Management
+      // We provide aliases because System.jsx and DataManagement.jsx 
+      // used slightly different names in your previous files.
+      importData,
+      importJSON: importData, 
+      exportData,
+      exportJSON: exportData,
+      clearAllData
+    }}>
+      {children}
+    </StorageContext.Provider>
+  );
+};
