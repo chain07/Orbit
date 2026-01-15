@@ -1,32 +1,119 @@
-// src/views/System.jsx
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { StorageContext } from '../context/StorageContext';
 import { Glass } from '../components/ui/Glass';
-import { MetricBuilder } from '../components/ui/MetricBuilder';
+import { MetricBuilder } from '../components/system/MetricBuilder';
+import { Standards } from '../lib/standards';
 
 export const System = () => {
   const { metrics, addMetric, updateMetric, deleteMetric, exportData, importData } = useContext(StorageContext);
-
+  
+  // Metric Management State
   const [showBuilder, setShowBuilder] = useState(false);
   const [editingMetric, setEditingMetric] = useState(null);
 
-  const handleEdit = (metric) => {
+  // Library Management State
+  const [libraryItems, setLibraryItems] = useState([]);
+  const [viewingItem, setViewingItem] = useState(null); // The item currently being read/edited
+  const [isEditingLibrary, setIsEditingLibrary] = useState(false);
+
+  // Load Library on Mount
+  useEffect(() => {
+    refreshLibrary();
+  }, []);
+
+  const refreshLibrary = () => {
+    const items = Standards.list();
+    if (items.length === 0) {
+      // Create Default "Welcome" Item if empty
+      const defaultItem = {
+        id: crypto.randomUUID(),
+        title: 'Library Manifest',
+        category: 'System',
+        sections: [
+          { heading: 'Purpose', content: 'The Library is your long-term storage for protocols, principles, core values, and insights.' },
+          { heading: 'Usage', content: 'Create items here to document how you want to operate. You can define custom sections for any topic.' }
+        ]
+      };
+      Standards.add(defaultItem);
+      setLibraryItems([defaultItem]);
+    } else {
+      setLibraryItems(items);
+    }
+  };
+
+  // --- Metric Handlers ---
+  const handleEditMetric = (metric) => {
     setEditingMetric(metric);
     setShowBuilder(true);
   };
 
-  const handleAdd = () => {
+  const handleAddMetric = () => {
     setEditingMetric(null);
     setShowBuilder(true);
   };
 
+  const handleSaveMetric = (metric) => {
+    // Ensure ID uniqueness for new metrics
+    if (!metric.id) {
+      metric.id = metric.label.toLowerCase().replace(/\s+/g, '_') + '_' + Math.random().toString(36).substr(2, 5);
+    }
+    
+    if (editingMetric) updateMetric(metric);
+    else addMetric(metric);
+    setShowBuilder(false);
+  };
+
+  // --- Library Handlers ---
+  const handleSaveLibraryItem = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const sections = [];
+    
+    // Parse dynamic sections
+    const headings = formData.getAll('heading');
+    const contents = formData.getAll('content');
+    headings.forEach((h, i) => {
+      if(h || contents[i]) sections.push({ heading: h, content: contents[i] });
+    });
+
+    const newItem = {
+      id: viewingItem?.id || crypto.randomUUID(),
+      title: formData.get('title'),
+      category: formData.get('category'),
+      sections: sections
+    };
+
+    if (viewingItem && viewingItem.id) Standards.update(newItem);
+    else Standards.add(newItem);
+
+    setViewingItem(null);
+    setIsEditingLibrary(false);
+    refreshLibrary();
+  };
+
+  const handleDeleteLibraryItem = (id) => {
+    if (confirm('Delete this item?')) {
+      Standards.remove(id);
+      setViewingItem(null);
+      refreshLibrary();
+    }
+  };
+
+  const openNewLibraryItem = () => {
+    setViewingItem({ title: '', category: '', sections: [{ heading: '', content: '' }] });
+    setIsEditingLibrary(true);
+  };
+
+  // --- Data Management Handlers ---
   const handleExport = () => {
     const json = exportData();
+    // Include Library in export
+    json.library = Standards.list();
     const blob = new Blob([JSON.stringify(json, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'orbit-data.json';
+    a.download = `orbit-data-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -39,58 +126,178 @@ export const System = () => {
       try {
         const data = JSON.parse(ev.target.result);
         importData(data);
+        if (data.library) {
+            // Simple overwrite/merge strategy for library
+            data.library.forEach(item => Standards.update(item)); // Update if exists, will add if implementation supports upsert or we just clear first
+            refreshLibrary();
+        }
+        alert('Import successful');
       } catch (err) {
         console.error("Invalid JSON", err);
+        alert('Failed to parse JSON');
       }
     };
     reader.readAsText(file);
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
       
-      {/* Metrics List */}
+      {/* HEADER */}
+      <div className="flex flex-col gap-1 mt-2">
+         <h1 className="text-3xl font-extrabold tracking-tight">System</h1>
+         <p className="text-secondary font-medium">Configuration & Library.</p>
+      </div>
+
+      {/* --- LIBRARY SECTION --- */}
       <Glass>
-        <div className="flex justify-between items-center">
-          <div className="text-lg font-bold">Metrics</div>
-          <button onClick={handleAdd} className="py-2 px-3 rounded bg-blue text-white font-bold">Add Metric</button>
+        <div className="flex justify-between items-center mb-4">
+          <div className="text-lg font-bold">Library</div>
+          <button onClick={openNewLibraryItem} className="text-xs font-bold bg-blue text-white px-3 py-2 rounded-lg">
+            + New Item
+          </button>
         </div>
 
-        <div className="mt-3 flex flex-col gap-2">
+        <div className="flex flex-col gap-2">
+          {libraryItems.length === 0 && <div className="text-secondary text-sm italic">Library is empty.</div>}
+          {libraryItems.map(item => (
+            <div 
+              key={item.id} 
+              onClick={() => { setViewingItem(item); setIsEditingLibrary(false); }}
+              className="p-3 rounded-lg border border-separator bg-bg-color flex justify-between items-center cursor-pointer hover:bg-opacity-50 transition-colors"
+            >
+              <div>
+                <div className="font-bold">{item.title}</div>
+                <div className="text-xs text-secondary">{item.category}</div>
+              </div>
+              <div className="text-secondary opacity-50">→</div>
+            </div>
+          ))}
+        </div>
+      </Glass>
+
+      {/* --- METRICS SECTION --- */}
+      <Glass>
+        <div className="flex justify-between items-center mb-4">
+          <div className="text-lg font-bold">Metrics</div>
+          <button onClick={handleAddMetric} className="text-xs font-bold bg-blue text-white px-3 py-2 rounded-lg">
+            + Add Metric
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-2">
           {metrics.map(m => (
-            <div key={m.id} className="flex justify-between items-center p-2 rounded bg-white bg-opacity-5">
-              <div>{m.name}</div>
-              <div className="flex gap-2">
-                <button onClick={() => handleEdit(m)} className="font-bold">Edit</button>
-                <button onClick={() => deleteMetric(m.id)} className="font-bold text-red">Delete</button>
+            <div key={m.id} className="flex justify-between items-center p-3 rounded-lg border border-separator bg-bg-color">
+              <div className="flex items-center gap-3">
+                 <div className="w-3 h-3 rounded-full" style={{ background: m.color }}></div>
+                 <span className="font-medium">{m.name}</span>
+              </div>
+              <div className="flex gap-3 text-sm font-bold">
+                <button onClick={() => handleEditMetric(m)} className="text-blue">Edit</button>
+                <button onClick={() => deleteMetric(m.id)} className="text-red">Delete</button>
               </div>
             </div>
           ))}
         </div>
       </Glass>
 
-      {/* Export / Import */}
+      {/* --- DATA MANAGEMENT --- */}
       <Glass>
         <div className="flex flex-col gap-3">
           <div className="text-lg font-bold">Data Management</div>
           <div className="flex gap-2">
-            <button onClick={handleExport} className="py-2 px-3 rounded bg-blue text-white font-bold">Export JSON</button>
-            <input type="file" accept="application/json" onChange={handleImport} />
+            <button onClick={handleExport} className="flex-1 py-3 rounded-xl bg-blue text-white font-bold">Export JSON</button>
+            <label className="flex-1 py-3 rounded-xl border border-separator text-center font-bold cursor-pointer hover:bg-bg-color transition-colors">
+              Import JSON
+              <input type="file" accept="application/json" onChange={handleImport} className="hidden" />
+            </label>
           </div>
         </div>
       </Glass>
 
-      {/* Metric Builder */}
+      {/* --- MODALS / EDITORS --- */}
+
+      {/* Metric Builder Modal */}
       {showBuilder && (
-        <MetricBuilder
-          metric={editingMetric}
-          onSave={(metric) => {
-            if (editingMetric) updateMetric(metric);
-            else addMetric(metric);
-            setShowBuilder(false);
-          }}
-          onCancel={() => setShowBuilder(false)}
-        />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4">
+          <MetricBuilder
+            metric={editingMetric}
+            onSave={handleSaveMetric}
+            onCancel={() => setShowBuilder(false)}
+          />
+        </div>
+      )}
+
+      {/* Library Viewer/Editor Modal */}
+      {viewingItem && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
+          <div className="bg-card w-full max-w-lg h-[90vh] sm:h-auto sm:max-h-[90vh] rounded-t-2xl sm:rounded-2xl flex flex-col overflow-hidden shadow-2xl animate-slide-up">
+            
+            {/* Header */}
+            <div className="p-4 border-b border-separator flex justify-between items-center bg-bg-color">
+              <button onClick={() => setViewingItem(null)} className="text-blue font-bold">Close</button>
+              <div className="font-bold">{isEditingLibrary ? (viewingItem.id ? 'Edit Item' : 'New Item') : 'Library'}</div>
+              {!isEditingLibrary ? (
+                <button onClick={() => setIsEditingLibrary(true)} className="text-blue font-bold">Edit</button>
+              ) : (
+                <button form="libraryForm" type="submit" className="text-green font-bold">Save</button>
+              )}
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-4">
+              {isEditingLibrary ? (
+                <form id="libraryForm" onSubmit={handleSaveLibraryItem} className="flex flex-col gap-4">
+                  <div>
+                    <label className="text-xs font-bold text-secondary uppercase">Title</label>
+                    <input name="title" defaultValue={viewingItem.title} required className="w-full p-3 rounded-lg bg-bg-color border border-separator font-bold text-lg outline-none" placeholder="Protocol Name" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-secondary uppercase">Category</label>
+                    <input name="category" defaultValue={viewingItem.category} className="w-full p-3 rounded-lg bg-bg-color border border-separator outline-none" placeholder="e.g. Psychology, Recovery" />
+                  </div>
+                  
+                  <div className="border-t border-separator my-2"></div>
+                  
+                  {/* Dynamic Sections Editor */}
+                  <div id="sections-container" className="flex flex-col gap-4">
+                    {viewingItem.sections && viewingItem.sections.map((sec, idx) => (
+                      <div key={idx} className="flex flex-col gap-1">
+                        <input name="heading" defaultValue={sec.heading} className="font-bold text-sm bg-transparent outline-none text-blue placeholder-blue/50" placeholder="SECTION HEADING" />
+                        <textarea name="content" defaultValue={sec.content} className="w-full p-3 rounded-lg bg-bg-color border border-separator min-h-[100px] outline-none" placeholder="Content..." />
+                      </div>
+                    ))}
+                    {/* Always show one empty slot at bottom for new sections */}
+                    <div className="flex flex-col gap-1">
+                       <input name="heading" className="font-bold text-sm bg-transparent outline-none text-blue placeholder-blue/50" placeholder="+ ADD HEADING" />
+                       <textarea name="content" className="w-full p-3 rounded-lg bg-bg-color border border-separator min-h-[80px] outline-none" placeholder="Content..." />
+                    </div>
+                  </div>
+
+                  {viewingItem.id && (
+                     <button type="button" onClick={() => handleDeleteLibraryItem(viewingItem.id)} className="mt-8 py-3 text-red font-bold bg-red bg-opacity-10 rounded-lg">Delete Item</button>
+                  )}
+                </form>
+              ) : (
+                // READ MODE
+                <div className="flex flex-col gap-6">
+                  <div>
+                    <h2 className="text-3xl font-extrabold">{viewingItem.title}</h2>
+                    <span className="inline-block mt-2 px-2 py-1 rounded bg-blue bg-opacity-10 text-blue text-xs font-bold uppercase">{viewingItem.category}</span>
+                  </div>
+                  
+                  {viewingItem.sections && viewingItem.sections.map((sec, idx) => (
+                    <div key={idx}>
+                      <div className="text-xs font-bold text-secondary uppercase mb-1 tracking-wide">{sec.heading}</div>
+                      <div className="text-primary leading-relaxed whitespace-pre-wrap">{sec.content}</div>
+                      <div className="border-b border-separator opacity-20 mt-4"></div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
