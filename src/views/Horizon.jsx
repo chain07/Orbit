@@ -20,7 +20,7 @@ export const Horizon = () => {
   const segments = ['Daily', 'Weekly', 'Monthly'];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: 16 }}>
+    <div className="flex flex-col gap-4 p-4">
       
       {/* Segmented Control for Horizon */}
       <SegmentedControl
@@ -30,19 +30,15 @@ export const Horizon = () => {
       />
 
       {/* Widgets Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-        gap: 16
-      }}>
+      <div className="widget-grid">
         {widgets.map((widget, idx) => {
           const { type, data, title } = widget;
 
           // Wrap each widget in Glass container for styling
           return (
             <Glass key={idx}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <div style={{ fontSize: 16, fontWeight: 600 }}>{title}</div>
+              <div className="flex flex-col gap-3">
+                <div className="text-lg font-bold">{title}</div>
                 {type === 'ring' && <RingChart value={data.value} label={data.label} />}
                 {type === 'heatmap' && <HeatMap data={data.values} startDate={data.start} endDate={data.end} />}
                 {type === 'sparkline' && <Sparkline data={data.values} />}
