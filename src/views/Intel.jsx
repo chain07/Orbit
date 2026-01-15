@@ -23,7 +23,7 @@ export const Intel = () => {
   const widgets = WidgetEngine.generateWidgets(metrics, logEntries, segment);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: 16 }}>
+    <div className="flex flex-col gap-4 p-4">
       
       {/* Segment Filter */}
       <SegmentedControl
@@ -35,25 +35,21 @@ export const Intel = () => {
       {/* Insights */}
       {insights.map((insight, idx) => (
         <Glass key={idx}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ fontSize: 16, fontWeight: 600 }}>{insight.title}</div>
-            <div style={{ fontSize: 14, color: 'rgba(60,60,67,0.7)' }}>{insight.summary}</div>
+          <div className="flex flex-col gap-2">
+            <div className="text-lg font-bold">{insight.title}</div>
+            <div className="text-sm text-secondary opacity-70">{insight.summary}</div>
           </div>
         </Glass>
       ))}
 
       {/* Widgets */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-        gap: 16
-      }}>
+      <div className="widget-grid">
         {widgets.map((widget, idx) => {
           const { type, data, title } = widget;
           return (
             <Glass key={idx}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <div style={{ fontSize: 16, fontWeight: 600 }}>{title}</div>
+              <div className="flex flex-col gap-3">
+                <div className="text-lg font-bold">{title}</div>
                 {type === 'ring' && <RingChart value={data.value} label={data.label} />}
                 {type === 'heatmap' && <HeatMap data={data.values} startDate={data.start} endDate={data.end} />}
                 {type === 'sparkline' && <Sparkline data={data.values} />}
@@ -63,7 +59,6 @@ export const Intel = () => {
           );
         })}
       </div>
-
     </div>
   );
 };
