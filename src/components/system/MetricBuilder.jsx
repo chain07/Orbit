@@ -1,6 +1,5 @@
-// src/components/ui/MetricBuilder.jsx
 import React, { useState } from 'react';
-import { Glass } from './Glass';
+import { Glass } from '../ui/Glass';
 
 export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
   const [form, setForm] = useState({
@@ -21,58 +20,76 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
 
   return (
     <Glass>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <div style={{ fontSize: 16, fontWeight: 600 }}>{metric ? 'Edit Metric' : 'New Metric'}</div>
+      <div className="flex flex-col gap-3">
+        <div className="text-lg font-bold">{metric ? 'Edit Metric' : 'New Metric'}</div>
         
         <input
           type="text"
           value={form.name}
           onChange={e => handleChange('name', e.target.value)}
           placeholder="Metric Name"
-          style={{ padding: 6, borderRadius: 6, border: '1px solid #ccc' }}
+          className="p-2 rounded border border-separator bg-transparent text-lg"
         />
 
-        <select
-          value={form.type}
-          onChange={e => handleChange('type', e.target.value)}
-          style={{ padding: 6, borderRadius: 6, border: '1px solid #ccc' }}
-        >
-          <option value="number">Number</option>
-          <option value="boolean">Boolean</option>
-          <option value="duration">Duration</option>
-        </select>
+        <div className="flex gap-2">
+          <select
+            value={form.type}
+            onChange={e => handleChange('type', e.target.value)}
+            className="flex-1 p-2 rounded border border-separator bg-transparent"
+          >
+            <option value="number">Number</option>
+            <option value="boolean">Boolean</option>
+            <option value="duration">Duration</option>
+          </select>
+
+          <input
+            type="color"
+            value={form.color}
+            onChange={e => handleChange('color', e.target.value)}
+            className="h-10 w-14 p-0 border-none bg-transparent"
+          />
+        </div>
 
         {form.type === 'number' && (
-          <input
-            type="number"
-            value={form.goal}
-            onChange={e => handleChange('goal', parseFloat(e.target.value))}
-            placeholder="Goal"
-            style={{ padding: 6, borderRadius: 6, border: '1px solid #ccc' }}
-          />
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-secondary uppercase font-bold">Daily Goal</label>
+            <input
+              type="number"
+              value={form.goal}
+              onChange={e => handleChange('goal', parseFloat(e.target.value))}
+              placeholder="Goal"
+              className="p-2 rounded border border-separator bg-transparent"
+            />
+          </div>
         )}
 
-        <input
-          type="color"
-          value={form.color}
-          onChange={e => handleChange('color', e.target.value)}
-          style={{ width: 60, height: 30, border: 'none', padding: 0 }}
-        />
+        <div className="flex flex-col gap-1">
+          <label className="text-xs text-secondary uppercase font-bold">Widget Style</label>
+          <select
+            value={form.widgetType}
+            onChange={e => handleChange('widgetType', e.target.value)}
+            className="p-2 rounded border border-separator bg-transparent"
+          >
+            <option value="ring">Ring Progress</option>
+            <option value="sparkline">Sparkline Trend</option>
+            <option value="heatmap">Consistency Grid</option>
+            <option value="stackedbar">Stacked Bar</option>
+          </select>
+        </div>
 
-        <select
-          value={form.widgetType}
-          onChange={e => handleChange('widgetType', e.target.value)}
-          style={{ padding: 6, borderRadius: 6, border: '1px solid #ccc' }}
-        >
-          <option value="ring">Ring</option>
-          <option value="sparkline">Sparkline</option>
-          <option value="heatmap">HeatMap</option>
-          <option value="stackedbar">StackedBar</option>
-        </select>
-
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={handleSave} style={{ padding: '6px 12px', borderRadius: 6, background: '#4f46e5', color: '#fff', fontWeight: 600 }}>Save</button>
-          <button onClick={onCancel} style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #ccc' }}>Cancel</button>
+        <div className="flex gap-2 mt-2">
+          <button 
+            onClick={handleSave} 
+            className="flex-1 py-2 rounded bg-blue text-white font-bold"
+          >
+            Save
+          </button>
+          <button 
+            onClick={onCancel} 
+            className="flex-1 py-2 rounded border border-separator font-bold text-secondary"
+          >
+            Cancel
+          </button>
         </div>
       </div>
     </Glass>
