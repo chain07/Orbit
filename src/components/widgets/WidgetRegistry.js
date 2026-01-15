@@ -1,19 +1,44 @@
+import React from 'react';
+
+// Import all specific widget components
 import { ReliabilityRing } from './ReliabilityRing';
 import { TrendSparkline } from './TrendSparkline';
 import { ConsistencyHeatmap } from './ConsistencyHeatmap';
-import { StackedBarWidget } from './StackedBarWidget'; // We'll add a placeholder for this
+import { CurrentStreak } from './CurrentStreak';
+import { NumberWidget } from './NumberWidget';
+import { RecentHistory } from './RecentHistory';
+import { SegmentedBarWidget } from './SegmentedBarWidget';
 
-// The Registry Object mapping 'type' strings to Components
+/**
+ * WidgetRegistry
+ * Maps string identifiers (stored in JSON/database) to actual React Components.
+ */
 export const WidgetRegistry = {
+  // Visual Charts
   ring: ReliabilityRing,
   sparkline: TrendSparkline,
   heatmap: ConsistencyHeatmap,
-  stackedbar: StackedBarWidget,
-  // Fallback for unknown types
-  default: ({ data }) => <div className="p-4 text-secondary">Unknown Widget Type: {data?.type}</div>
+  stackedbar: SegmentedBarWidget,
+  
+  // Data Displays
+  streak: CurrentStreak,
+  number: NumberWidget,
+  history: RecentHistory,
+  
+  // Fallback for development or broken types
+  default: ({ data }) => (
+    <div className="p-4 border border-dashed border-red rounded text-red text-sm">
+      <strong>Widget Error:</strong> Unknown type "{data?.type || 'undefined'}"
+    </div>
+  )
 };
 
-// Helper function to get the correct component
+/**
+ * getWidgetComponent
+ * Helper to safely retrieve a component.
+ * @param {string} type - The widget type string (e.g., 'ring')
+ * @returns {React.Component} - The corresponding component or the default fallback
+ */
 export const getWidgetComponent = (type) => {
   return WidgetRegistry[type] || WidgetRegistry.default;
 };
