@@ -21,8 +21,6 @@ export const Logger = () => {
   const handleAdd = () => {
     if (!newEntry.metricId || newEntry.value === '') return;
     
-    // Auto-select the next metric or stay on current? 
-    // Staying on current allows rapid entry of same metric.
     addLogEntry({
       metricId: newEntry.metricId,
       value: parseFloat(newEntry.value),
@@ -47,7 +45,7 @@ export const Logger = () => {
     });
   }, [logEntries, segment]);
 
-  // Refactored Chart Data Construction
+  // Chart Data Construction
   const chartData = useMemo(() => {
     if (!metrics.length || !filteredEntries.length) return null;
 
@@ -106,7 +104,6 @@ export const Logger = () => {
                   <option key={m.id} value={m.id}>{m.name}</option>
                 ))}
               </select>
-              {/* Custom arrow could go here */}
             </div>
             
             <input
