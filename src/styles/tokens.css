@@ -1,72 +1,74 @@
-/* =========================================================
-   ORBIT DESIGN TOKENS
-   Apple-inspired system tokens (light + dark)
-   ========================================================= */
+/* =========================
+   DayBook Prime — Design Tokens
+   Extracted from Dashboard.html
+   ========================= */
 
-/* ---------- LIGHT MODE (DEFAULT) ---------- */
 :root {
-  /* Backgrounds */
-  --bg-page: transparent;
-  --bg-card: #ffffff;
+  /* ---------- System Backgrounds ---------- */
+  --bg-color: #F2F2F7;
+  --card-bg: #FFFFFF;
+  --glass-bg: rgba(255, 255, 255, 0.72);
 
-  /* Text */
+  /* ---------- Text ---------- */
   --text-primary: #000000;
-  --text-secondary: rgba(60, 60, 67, 0.60);
-  --text-tertiary: rgba(60, 60, 67, 0.30);
+  --text-secondary: #8E8E93;
 
-  /* Lines / Separators */
-  --separator: rgba(60, 60, 67, 0.36);
-  --grid-line: rgba(60, 60, 67, 0.18);
+  /* ---------- Separators & Grid ---------- */
+  --separator: #C6C6C8;
+  --grid-line: #E5E5EA;
 
-  /* Accent / System Colors */
-  --accent-green: #30d158;
-  --accent-blue: #0a84ff;
-  --accent-red: #ff453a;
-  --accent-yellow: #ffd60a;
-  --accent-indigo: #5e5ce6;
+  /* ---------- Brand / Semantic Colors ---------- */
+  --blue: #007AFF;
+  --green: #34C759;
+  --red: #FF3B30;
+  --orange: #FF9500;
+  --purple: #AF52DE;
+  --indigo: #5856D6;
+  --pink: #FF2D55;
 
-  /* Neutral */
-  --neutral-gray: #8e8e93;
+  /* ---------- State / Telemetry Colors ---------- */
+  --color-flow: #34C759;
+  --color-idle: #007AFF;
+  --color-drag: #FFCC00;
+  --color-crash: #FF3B30;
 
-  /* Radius */
-  --radius-xs: 6px;
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 22px;
+  --avg-line: #34C759;
 
-  /* Spacing */
-  --space-xxs: 4px;
-  --space-xs: 8px;
-  --space-sm: 12px;
-  --space-md: 16px;
-  --space-lg: 20px;
-  --space-xl: 24px;
+  /* ---------- Radius ---------- */
+  --radius-sm: 7px;
+  --radius-md: 9px;
+  --radius-lg: 14px;
+  --radius-card: 20px;
+  --radius-pill: 35px;
 
-  /* Typography */
-  --font-system: -apple-system, BlinkMacSystemFont,
-    "SF Pro Rounded", "SF Pro", "Helvetica Neue", sans-serif;
+  /* ---------- Typography ---------- */
+  --font-system: -apple-system, "SF Pro Display", "SF Pro Text", sans-serif;
 
-  /* Shadows */
-  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
+  /* ---------- Shadows ---------- */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.02);
+  --shadow-glass: 0 10px 40px rgba(0, 0, 0, 0.15);
 
-  /* Glass */
-  --glass-bg: rgba(255, 255, 255, 0.75);
-  --glass-blur: saturate(180%) blur(16px);
+  /* ---------- Layout ---------- */
+  --safe-bottom: env(safe-area-inset-bottom);
 }
 
-/* ---------- DARK MODE ---------- */
+/* =========================
+   Dark Mode
+   ========================= */
+
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-card: #1c1c1e;
-
-    --text-primary: #ffffff;
-    --text-secondary: rgba(235, 235, 245, 0.60);
-    --text-tertiary: rgba(235, 235, 245, 0.30);
-
-    --separator: rgba(84, 84, 88, 0.65);
-    --grid-line: rgba(84, 84, 88, 0.40);
-
+    --bg-color: #000000;
+    --card-bg: #1C1C1E;
     --glass-bg: rgba(28, 28, 30, 0.72);
-    --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.35);
+
+    --text-primary: #FFFFFF;
+    --text-secondary: #98989D;
+
+    --separator: #38383A;
+    --grid-line: #38383A;
+
+    --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.35);
+    --shadow-glass: 0 10px 40px rgba(0, 0, 0, 0.5);
   }
 }
