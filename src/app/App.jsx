@@ -1,10 +1,8 @@
-// src/app/App.jsx
 import React, { useState } from 'react';
-
 /* 🔗 Global design system */
 import '../styles/tokens.css';
 import '../styles/motion.css';
-
+/* import '../styles/index.css'; <-- Ensure this is imported here or in main.jsx */
 import { StorageProvider } from '../context/StorageContext';
 import { Horizon } from '../views/Horizon';
 import { Logger } from '../views/Logger';
@@ -27,20 +25,10 @@ export const App = () => {
 
   return (
     <StorageProvider>
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100vh',
-          background: 'var(--bg-page)',
-          fontFamily: 'var(--font-system)',
-          color: 'var(--text-primary)'
-        }}
-      >
-        <div style={{ flex: 1, overflowY: 'auto' }}>
+      <div className="flex flex-col h-full bg-page font-system text-primary">
+        <div className="flex-1 overflow-y-auto">
           {renderTab()}
         </div>
-
         <BottomNav
           activeTab={activeTab}
           onChange={setActiveTab}
