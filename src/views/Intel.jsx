@@ -17,7 +17,7 @@ export const Intel = () => {
   const segments = ['Daily', 'Weekly', 'Monthly'];
 
   // Generate insights using Horizon Agent
-  const insights = HorizonAgent.generateInsights(metrics, logEntries, segment);
+  const insights = HorizonAgent.generateAllInsights(metrics, logEntries, segment);
 
   // Optionally generate visual widget data
   const widgets = WidgetEngine.generateWidgets(metrics, logEntries, segment);
