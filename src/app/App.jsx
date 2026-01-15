@@ -1,17 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 /* 🔗 Global design system */
 import '../styles/tokens.css';
 import '../styles/motion.css';
-/* import '../styles/index.css'; <-- Ensure this is imported here or in main.jsx */
-import { StorageProvider } from '../context/StorageContext';
+import { StorageProvider, StorageContext } from '../context/StorageContext';
 import { Horizon } from '../views/Horizon';
 import { Logger } from '../views/Logger';
 import { Intel } from '../views/Intel';
 import { System } from '../views/System';
 import { BottomNav } from '../components/ui/BottomNav';
+import { OnboardingWizard } from '../components/system/OnboardingWizard';
 
-export const App = () => {
+/* * AppContent
+ * Internal component to consume StorageContext, which is provided by the parent App component.
+ */
+const AppContent = () => {
   const [activeTab, setActiveTab] = useState('Horizon');
+  [span_0](start_span)// Access onboarding state from Context[span_0](end_span)
+  const { onboardingComplete, completeOnboarding } = useContext(StorageContext);
+  const [showWizard, setShowWizard] = useState(false);
+
+  // Check onboarding status on mount
+  useEffect(() => {
+    // If onboardingComplete is undefined (context loading) or false, show wizard
+    if (onboardingComplete === false) {
+      setShowWizard(true);
+    }
+  }, [onboardingComplete]);
+
+  const handleOnboardingFinish = () => {
+    completeOnboarding();
+    setShowWizard(false);
+  };
 
   const renderTab = () => {
     switch (activeTab) {
@@ -24,16 +43,32 @@ export const App = () => {
   };
 
   return (
-    <StorageProvider>
-      <div className="flex flex-col h-full bg-page font-system text-primary">
-        <div className="flex-1 overflow-y-auto">
-          {renderTab()}
-        </div>
-        <BottomNav
-          activeTab={activeTab}
-          onChange={setActiveTab}
-        />
+    <div className="flex flex-col h-full bg-page font-system text-primary relative">
+      {/* Main Content */}
+      <div className="flex-1 overflow-y-auto">
+        {renderTab()}
       </div>
+      
+      {/* Navigation */}
+      <BottomNav
+        activeTab={activeTab}
+        onChange={setActiveTab}
+      />
+
+      {/* Onboarding Overlay */}
+      {showWizard && (
+        <div className="absolute inset-0 z-50 bg-bg-color">
+          <OnboardingWizard onComplete={handleOnboardingFinish} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+export const App = () => {
+  return (
+    <StorageProvider>
+      <AppContent />
     </StorageProvider>
   );
 };
