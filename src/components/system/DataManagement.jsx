@@ -1,10 +1,9 @@
-// src/views/system/DataManagement.jsx
 import React, { useContext, useState } from 'react';
 import { StorageContext } from '../../context/StorageContext';
-import { Glass } from '../../components/ui/Glass';
+import { Glass } from '../ui/Glass';
 
 export const DataManagement = () => {
-  const { metrics, logs, importJSON, exportJSON, clearAllData } = useContext(StorageContext);
+  const { importJSON, exportJSON, clearAllData } = useContext(StorageContext);
   const [importText, setImportText] = useState('');
   const [message, setMessage] = useState('');
 
@@ -38,29 +37,48 @@ export const DataManagement = () => {
 
   return (
     <Glass>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <h2>Data Management</h2>
+      <div className="flex flex-col gap-4">
+        <div className="text-lg font-bold">Data Management</div>
 
         <div>
-          <button onClick={handleExport}>Export Data</button>
+          <button 
+            onClick={handleExport}
+            className="py-2 px-4 rounded bg-blue text-white font-bold"
+          >
+            Export Data
+          </button>
         </div>
 
-        <div>
+        <div className="flex flex-col gap-2">
           <textarea
             value={importText}
             onChange={(e) => setImportText(e.target.value)}
             placeholder="Paste JSON here"
             rows={6}
-            style={{ width: '100%' }}
+            className="w-full p-2 rounded border border-separator bg-transparent font-mono text-sm"
           />
-          <button onClick={handleImport}>Import Data</button>
+          <button 
+            onClick={handleImport}
+            className="py-2 px-4 rounded border border-blue text-blue font-bold"
+          >
+            Import Data
+          </button>
         </div>
 
-        <div>
-          <button onClick={handleClear} style={{ color: 'red' }}>Clear All Data</button>
+        <div className="border-t border-separator pt-4">
+          <button 
+            onClick={handleClear} 
+            className="text-red font-bold text-sm"
+          >
+            Clear All Data
+          </button>
         </div>
 
-        {message && <div>{message}</div>}
+        {message && (
+          <div className="text-sm text-secondary text-center mt-2">
+            {message}
+          </div>
+        )}
       </div>
     </Glass>
   );
