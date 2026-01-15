@@ -24,6 +24,7 @@ export class MetricConfig {
     this.goal = goal; // number
     this.color = color; // hex or string
     this.widgetType = widgetType; // WidgetType
+    this.dashboardVisible = true;
   }
 }
 
@@ -33,14 +34,6 @@ export class LogEntry {
     this.metricId = metricId; // MetricConfig id
     this.value = value; // number or boolean
     this.timestamp = timestamp || new Date().toISOString();
-  }
-}
-
-export class TimeLog {
-  constructor({ id, metricId, dailyValues }) {
-    this.id = id; // unique string
-    this.metricId = metricId; // MetricConfig id
-    this.dailyValues = dailyValues || {}; // { '2026-01-15': value }
   }
 }
 
@@ -55,10 +48,10 @@ export const useStorage = () => {
 
 export const StorageProvider = ({ children }) => {
   // 1. Core State
-  // We use 'logEntries' to match the variable name expected by Horizon.jsx
   const [metrics, setMetrics] = useState([]);
-  const [logEntries, setLogEntries] = useState([]); 
+  const [logEntries, setLogEntries] = useState([]);
   const [widgetLayout, setWidgetLayout] = useState({});
+  const [onboardingComplete, setOnboardingComplete] = useState(false);
 
   // 2. Load from LocalStorage on Mount
   useEffect(() => {
@@ -69,6 +62,9 @@ export const StorageProvider = ({ children }) => {
         if (parsed.metrics) setMetrics(parsed.metrics);
         if (parsed.logEntries) setLogEntries(parsed.logEntries);
         if (parsed.widgetLayout) setWidgetLayout(parsed.widgetLayout);
+        if (typeof parsed.onboardingComplete !== 'undefined') {
+          setOnboardingComplete(parsed.onboardingComplete);
+        }
       }
     } catch (e) {
       console.error("Failed to load ORBIT data", e);
@@ -80,10 +76,11 @@ export const StorageProvider = ({ children }) => {
     const dataToSave = {
       metrics,
       logEntries,
-      widgetLayout
+      widgetLayout,
+      onboardingComplete
     };
     localStorage.setItem('orbit_db', JSON.stringify(dataToSave));
-  }, [metrics, logEntries, widgetLayout]);
+  }, [metrics, logEntries, widgetLayout, onboardingComplete]);
 
   // ----------------------
   // Actions: Metrics
@@ -102,9 +99,8 @@ export const StorageProvider = ({ children }) => {
   };
 
   const deleteMetric = (id) => {
-    // Delete the metric
     setMetrics(prev => prev.filter(m => m.id !== id));
-    // Optional: Delete associated logs to clean up DB
+    // Also clean up logs associated with this metric
     setLogEntries(prev => prev.filter(l => l.metricId !== id));
   };
 
@@ -114,11 +110,18 @@ export const StorageProvider = ({ children }) => {
   const addLogEntry = (entryData) => {
     const newEntry = new LogEntry({
       id: crypto.randomUUID(),
-      metricId: entryData.metricId || entryData.metricKey, // Handle potential inconsistent naming
+      metricId: entryData.metricId || entryData.metricKey,
       value: entryData.value,
       timestamp: entryData.timestamp
     });
     setLogEntries(prev => [...prev, newEntry]);
+  };
+
+  // ----------------------
+  // Actions: Onboarding
+  // ----------------------
+  const completeOnboarding = () => {
+    setOnboardingComplete(true);
   };
 
   // ----------------------
@@ -129,6 +132,9 @@ export const StorageProvider = ({ children }) => {
     if (Array.isArray(jsonData.metrics)) setMetrics(jsonData.metrics);
     if (Array.isArray(jsonData.logEntries)) setLogEntries(jsonData.logEntries);
     if (jsonData.widgetLayout) setWidgetLayout(jsonData.widgetLayout);
+    if (typeof jsonData.onboardingComplete !== 'undefined') {
+        setOnboardingComplete(jsonData.onboardingComplete);
+    }
   };
 
   const exportData = () => {
@@ -136,6 +142,7 @@ export const StorageProvider = ({ children }) => {
       metrics,
       logEntries,
       widgetLayout,
+      onboardingComplete,
       exportedAt: new Date().toISOString()
     };
   };
@@ -144,6 +151,7 @@ export const StorageProvider = ({ children }) => {
     setMetrics([]);
     setLogEntries([]);
     setWidgetLayout({});
+    setOnboardingComplete(false);
     localStorage.removeItem('orbit_db');
   };
 
@@ -152,22 +160,20 @@ export const StorageProvider = ({ children }) => {
       // State
       metrics,
       logEntries,
-      logs: logEntries, // Alias for older components
+      logs: logEntries, // Alias
       widgetLayout,
+      onboardingComplete,
 
-      // Metric Actions
+      // Actions
       addMetric,
       updateMetric,
       deleteMetric,
-
-      // Log Actions
       addLogEntry,
-      
+      completeOnboarding,
+
       // Data Management
-      // We provide aliases because System.jsx and DataManagement.jsx 
-      // used slightly different names in your previous files.
       importData,
-      importJSON: importData, 
+      importJSON: importData,
       exportData,
       exportJSON: exportData,
       clearAllData
