@@ -1,156 +1,239 @@
-// src/engine/WidgetEngine.js
 import { MetricEngine } from './MetricEngine';
 import { AnalyticsEngine } from './AnalyticsEngine';
 import { NormalizationEngine } from './NormalizationEngine';
+import { dateUtils } from '../lib/dateUtils'; // Assuming this exists, or use native Date
 
 /**
  * WidgetEngine
- * Prepares data for widgets (rings, sparklines, heatmaps, stacked bars)
+ * ---------------------------------------------------------------------------
+ * The transformation layer that turns raw Metrics + Logs into View-ready data.
+ * It maps specific 'widgetType' strings to their corresponding data shapers.
+ * ---------------------------------------------------------------------------
  */
 export const WidgetEngine = {
-  
+
   /**
-   * MASTER AGGREGATOR: Generates full widget structures for Views
-   * Used by: Horizon.jsx, Intel.jsx
+   * MASTER AGGREGATOR
+   * Loops through metrics and generates the correct data object for the view.
    */
   generateWidgets: (metrics = [], logs = [], segment = 'Weekly') => {
-    // Filter out metrics explicitly hidden from dashboard
+    // 1. Filter out hidden metrics
     const visibleMetrics = metrics.filter(m => m.dashboardVisible !== false);
 
+    // 2. Map each metric to a widget configuration
     return visibleMetrics.map(metric => {
-      let widgetData = null;
-      const metricLogs = logs || [];
+      const metricLogs = logs.filter(l => l.metricId === metric.id);
+      let data = null;
 
       try {
         switch (metric.widgetType) {
+          // --- Visual Charts ---
           case 'ring':
-            widgetData = WidgetEngine.ringData(metric, metricLogs);
-            break;
-            
-          case 'heatmap':
-            // Heatmaps generally show longer history; wrapping in 'values' object for View compatibility
-            widgetData = { 
-              values: WidgetEngine.heatmapData(metric, metricLogs),
-              start: new Date(new Date().setDate(new Date().getDate() - 60)).toISOString(), // Default ~2 months back
-              end: new Date().toISOString()
-            };
+            data = WidgetEngine.ringData(metric, metricLogs);
             break;
             
           case 'sparkline':
-            // Adjust window based on segment if needed, default to 14 days for sparklines
-            const window = segment === 'Monthly' ? 30 : 14; 
-            widgetData = { 
-              values: WidgetEngine.sparklineData(metric, metricLogs, window) 
-            };
+            data = WidgetEngine.sparklineData(metric, metricLogs, segment);
+            break;
+            
+          case 'heatmap':
+            data = WidgetEngine.heatmapData(metric, metricLogs);
             break;
             
           case 'stackedbar':
-            // Wraps single metric data to fit the stacked bar format
-            widgetData = {
-              entries: WidgetEngine.stackedBarData([metric], metricLogs),
-              colors: { [metric.label]: metric.color || '#4f46e5' }
-            };
+            data = WidgetEngine.stackedBarData(metric, metricLogs);
             break;
-            
+
+          // --- Data Displays ---
+          case 'streak':
+            data = WidgetEngine.streakData(metric, metricLogs);
+            break;
+
+          case 'number':
+            data = WidgetEngine.numberData(metric, metricLogs);
+            break;
+
+          case 'history':
+            data = WidgetEngine.historyData(metric, metricLogs);
+            break;
+
+          // --- Fallback ---
           default:
-            // Fallback for 'number' or undefined types
-            widgetData = WidgetEngine.summaryData(metric, metricLogs);
+            // Default to a simple number summary if type is unknown
+            data = WidgetEngine.numberData(metric, metricLogs);
             break;
         }
-
-        return {
-          id: metric.id,
-          type: metric.widgetType || 'number', // Default to generic number widget
-          title: metric.label,
-          data: widgetData
-        };
-
       } catch (err) {
-        console.warn(`Widget generation failed for ${metric.label}`, err);
-        return null;
+        console.error(`Widget generation failed for ${metric.label}:`, err);
+        data = { error: true, message: 'Data Error' };
       }
-    }).filter(w => w !== null); // Filter out any failed widgets
-  },
 
-  /**
-   * Prepare data for a ring chart (goal completion)
-   * Returns: { value: 0-100, color, label }
-   */
-  ringData: (metricConfig, logs = []) => {
-    const completion = MetricEngine.goalCompletion(metricConfig, logs);
-    return {
-      value: completion,
-      color: metricConfig.color || '#4f46e5',
-      label: metricConfig.label,
-    };
-  },
-
-  /**
-   * Prepare data for a sparkline chart (rolling window)
-   * Returns array of normalized values 0-1
-   */
-  sparklineData: (metricConfig, logs = [], windowDays = 30) => {
-    const recentLogs = logs
-      .filter(l => l.metricId === metricConfig.id)
-      .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-    const normalized = NormalizationEngine.normalizeLogs(metricConfig, recentLogs);
-
-    // Optionally, limit to windowDays most recent
-    return normalized.slice(-windowDays);
-  },
-
-  /**
-   * Prepare heatmap data (boolean metrics over time)
-   * Returns object: { 'YYYY-MM-DD': value }
-   */
-  heatmapData: (metricConfig, logs = []) => {
-    const heatmap = {};
-    logs
-      .filter(l => l.metricId === metricConfig.id)
-      .forEach(l => {
-        // Robust date parsing
-        try {
-            const dateKey = new Date(l.timestamp).toISOString().slice(0, 10);
-            heatmap[dateKey] = l.value ? 1 : 0;
-        } catch (e) {
-            // Skip invalid dates
-        }
-      });
-    return heatmap;
-  },
-
-  /**
-   * Prepare stacked bar data for multiple metrics
-   * Returns array of { label, value, normalized }
-   */
-  stackedBarData: (metricConfigs = [], logs = []) => {
-    return metricConfigs.map(metric => {
-      const total = logs
-        .filter(l => l.metricId === metric.id)
-        .reduce((acc, l) => acc + l.value, 0);
-      const normalized = NormalizationEngine.normalizeValue(metric, total);
       return {
-        label: metric.label,
-        value: total,
-        normalized,
-        color: metric.color,
+        id: metric.id,
+        type: metric.widgetType || 'number',
+        title: metric.label || metric.name,
+        data: data
       };
     });
   },
 
-  /**
-   * Prepare summary data for widgets like Current Streak or Generic Number
-   * Returns object: { streak, total, average }
-   */
-  summaryData: (metricConfig, logs = []) => {
-    const streak = MetricEngine.currentStreak(logs, metricConfig.id);
-    const total = logs
-      .filter(l => l.metricId === metricConfig.id)
-      .reduce((acc, l) => acc + l.value, 0);
-    const avg = logs.filter(l => l.metricId === metricConfig.id).length
-      ? total / logs.filter(l => l.metricId === metricConfig.id).length
-      : 0;
+  // ---------------------------------------------------------------------------
+  // DATA SHAPERS
+  // ---------------------------------------------------------------------------
 
-    return { streak, total, average: avg };
+  /**
+   * Ring Chart Data
+   * Returns: { value: 0-100, label: string, color: string }
+   */
+  ringData: (metric, logs) => {
+    const todayVal = MetricEngine.getTodayValue(logs); // Assumes MetricEngine helper
+    const goal = metric.goal || 100;
+    
+    // Calculate percentage, capped at 100 for visual cleanliness (or let it loop)
+    const percentage = Math.min(100, Math.max(0, (todayVal / goal) * 100));
+
+    return {
+      value: percentage,
+      label: `${todayVal} / ${goal}`,
+      color: metric.color
+    };
   },
+
+  /**
+   * Sparkline Trend Data
+   * Returns: { values: number[], label: string, color: string, trendLabel: string }
+   */
+  sparklineData: (metric, logs, segment) => {
+    // Determine window size based on segment
+    const days = segment === 'Monthly' ? 30 : segment === 'Weekly' ? 7 : 14;
+    
+    // Get last N days of data (filling zeros for missing days)
+    const values = MetricEngine.getLastNDaysValues(logs, days);
+    
+    // Calculate simple trend (e.g., avg of last 3 vs avg of prev 3)
+    const trend = AnalyticsEngine.calculateTrend(values);
+
+    return {
+      values: values,
+      color: metric.color,
+      label: 'Trend',
+      trendLabel: trend > 0 ? `+${trend}%` : `${trend}%`
+    };
+  },
+
+  /**
+   * Heatmap Data
+   * Returns: { values: { 'YYYY-MM-DD': 0-1 }, start: string, end: string }
+   */
+  heatmapData: (metric, logs) => {
+    // Heatmaps need a longer history, typically 90 days
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - 90);
+
+    const values = {};
+    logs.forEach(log => {
+      const dateKey = new Date(log.timestamp).toISOString().split('T')[0];
+      // Normalize value to 0-1 range for opacity mapping
+      // If it's boolean, 1=true. If number, value/goal.
+      let normalized = 0;
+      if (metric.type === 'boolean') normalized = log.value ? 1 : 0;
+      else if (metric.goal) normalized = Math.min(1, log.value / metric.goal);
+      else normalized = log.value > 0 ? 1 : 0;
+
+      values[dateKey] = normalized;
+    });
+
+    return {
+      values,
+      start: start.toISOString(),
+      end: end.toISOString(),
+      color: metric.color
+    };
+  },
+
+  /**
+   * Stacked Bar / Segmented Data
+   * Returns: { entries: Array, colors: Object }
+   */
+  stackedBarData: (metric, logs) => {
+    // This is complex: usually used for things like "Sleep vs Awake" or Categorical logs
+    // For a single metric, this might just show daily totals
+    const days = 7;
+    const entries = [];
+    
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dayStr = d.toLocaleDateString('en-US', { weekday: 'short' });
+      
+      // Get value for this specific day
+      // Note: This logic depends on if you want to stack DIFFERENT metrics or just 1
+      // Assuming 1 metric for now:
+      const val = MetricEngine.getValueForDate(logs, d);
+      
+      entries.push({
+        label: dayStr,
+        values: { [metric.label]: val }
+      });
+    }
+
+    return {
+      entries,
+      colors: { [metric.label]: metric.color }
+    };
+  },
+
+  /**
+   * Streak Data
+   * Returns: { current: number, best: number, isActive: boolean, unit: string }
+   */
+  streakData: (metric, logs) => {
+    const current = MetricEngine.calculateCurrentStreak(logs);
+    const best = MetricEngine.calculateBestStreak(logs);
+    const todayVal = MetricEngine.getTodayValue(logs);
+
+    return {
+      current,
+      best,
+      isActive: todayVal >= (metric.goal || 1), // Active if goal met today
+      unit: 'Days'
+    };
+  },
+
+  /**
+   * Number Summary Data
+   * Returns: { value: string/number, label: string, trend: number, trendDirection: string }
+   */
+  numberData: (metric, logs) => {
+    const total = MetricEngine.getTotal(logs);
+    // OR get today's value depending on metric type preference
+    // Let's default to Total for now, or Today if it's a daily tracker
+    const val = metric.type === 'cumulative' ? total : MetricEngine.getTodayValue(logs);
+    
+    return {
+      value: val,
+      label: metric.label,
+      unit: metric.unit,
+      trend: 0, // Placeholder for AnalyticsEngine calc
+      trendDirection: 'neutral'
+    };
+  },
+
+  /**
+   * History List Data
+   * Returns: { entries: Array }
+   */
+  historyData: (metric, logs) => {
+    // Return last 10 raw logs
+    const sorted = [...logs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    return {
+      entries: sorted.slice(0, 10).map(l => ({
+        id: l.id,
+        value: l.value,
+        timestamp: l.timestamp
+      })),
+      unit: metric.unit
+    };
+  }
 };
