@@ -2,7 +2,7 @@
 import React, { useState, useContext } from 'react';
 import { StorageContext } from '../../context/StorageContext';
 import { Glass } from '../../components/ui/Glass';
-import { MetricInput } from '../components/MetricInput';
+import { MetricInput } from '../components/logger/MetricInput';
 
 export const OnboardingWizard = ({ onComplete }) => {
   const { addMetric } = useContext(StorageContext);
