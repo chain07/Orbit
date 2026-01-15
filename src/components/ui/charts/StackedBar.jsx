@@ -2,20 +2,20 @@ import React, { useState, useEffect } from 'react';
 
 /**
  * StackedBar
- * iOS-style horizontal stacked bars for multiple categories
+ * iOS-style horizontal stacked bars for multiple categories.
+ * Renders bars vertically over time (e.g., last 7 days).
  *
  * Props:
  * - data: array of { label: string, values: { [category]: number } }
  * - colors: { [category]: colorString }
  * - maxValue: optional max value for scaling (auto-calculated if omitted)
- * - width: chart width (default 400)
+ * - width: chart width (ignored in responsive layout, typically controlled by container)
  * - height: chart height (default 220)
  */
 export const StackedBar = ({
   data = [],
   colors = {},
   maxValue,
-  width = 400,
   height = 220,
 }) => {
   const [state, setState] = useState({
@@ -28,7 +28,7 @@ export const StackedBar = ({
 
   useEffect(() => {
     init();
-  }, [data]);
+  }, [data, maxValue]);
 
   const init = () => {
     let cats = {};
@@ -37,6 +37,7 @@ export const StackedBar = ({
 
     data.forEach(day => {
       let dSum = 0;
+      // day.values is { "Sleep": 7, "Work": 8 }
       for (let [k, v] of Object.entries(day.values)) {
         if (!cats[k]) cats[k] = { sum: 0, col: colors[k] || '#8E8E93' };
         cats[k].sum += v;
@@ -48,11 +49,12 @@ export const StackedBar = ({
     });
 
     const computedMax = maxValue || Math.max(4, Math.ceil(maxDaily / 2) * 2);
+
     setState({
       cats,
       max: computedMax,
       total: grandSum,
-      avg: grandSum / data.length,
+      avg: data.length ? grandSum / data.length : 0,
       sel: null,
     });
   };
@@ -64,24 +66,22 @@ export const StackedBar = ({
     }));
   };
 
-  // Main Container
+  if (!data || data.length === 0) return null;
+
   return (
-    <div 
-        className="card flex flex-col gap-3 p-3 w-full" 
-        style={{ maxWidth: '100%' }}
-    >
+    <div className="flex flex-col gap-3 w-full" style={{ height: 'auto' }}>
       
       {/* HEADER */}
       <div className="flex justify-between items-baseline">
-        <div className="text-lg font-bold">Activity</div>
-        <div className="text-sm text-secondary font-medium">Last 7 Days</div>
+        <div className="text-sm font-bold text-secondary uppercase tracking-wide">Activity</div>
+        <div className="text-xs text-secondary font-medium">Last {data.length} Days</div>
       </div>
 
       {/* CHART AREA */}
       <div className="flex relative" style={{ height }}>
         <div className="flex-1 rounded-lg overflow-hidden flex justify-between relative mr-2">
           
-          {/* Horizontal Grid */}
+          {/* Horizontal Grid Lines */}
           {[...Array(5)].map((_, i) => (
             <div 
                 key={i} 
@@ -90,45 +90,50 @@ export const StackedBar = ({
             />
           ))}
 
-          {/* Vertical Grid */}
+          {/* Vertical Separators (optional, usually subtle) */}
           {data.map((_, i) => (
             <div 
                 key={i} 
-                className="absolute top-0 bottom-0 w-px bg-separator opacity-20" 
+                className="absolute top-0 bottom-0 w-px bg-separator opacity-10" 
                 style={{ left: `${(i / data.length) * 100}%` }} 
             />
           ))}
 
           {/* AVG LINE */}
-          <div 
-            className="absolute left-0 right-0 z-10 pointer-events-none border-t-2 border-dashed border-green"
-            style={{ bottom: `${(state.avg / state.max) * 100}%` }}
-          >
-            <div className="absolute right-1 -top-4 text-xs font-bold text-green bg-card px-1 rounded">
-              AVG {state.avg.toFixed(1)}
+          {state.avg > 0 && (
+            <div 
+              className="absolute left-0 right-0 z-10 pointer-events-none border-t-2 border-dashed border-green"
+              style={{ bottom: `${Math.min(100, (state.avg / state.max) * 100)}%` }}
+            >
+              <div className="absolute right-1 -top-4 text-[10px] font-bold text-green bg-card px-1 rounded shadow-sm">
+                AVG {state.avg.toFixed(1)}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* BARS */}
           {data.map((day, idx) => {
             const isSelected = state.sel === idx;
-            const opacity = state.sel !== null && !isSelected ? 0.2 : 1;
+            const opacity = state.sel !== null && !isSelected ? 0.3 : 1;
             const transform = isSelected ? 'scaleY(1.02)' : 'scaleY(1)';
             
             return (
               <div 
                 key={idx} 
                 onClick={() => handleSelect(idx)} 
-                className="flex-1 h-full cursor-pointer flex justify-center relative transition-all duration-200"
+                className="flex-1 h-full cursor-pointer flex justify-center relative transition-all duration-300 ease-out"
                 style={{ opacity, transform }}
               >
-                <div className="w-[55%] max-w-[36px] h-full flex flex-col-reverse">
+                {/* The Stack */}
+                <div className="w-[65%] max-w-[40px] h-full flex flex-col-reverse justify-start">
                   {Object.entries(day.values).map(([cat, val], i, arr) => {
+                    if (val <= 0) return null;
                     const h = (val / state.max) * 100;
+                    
+                    // Rounding logic: Only round top corners of top segment, bottom of bottom
                     const isTop = i === arr.length - 1;
                     const isBottom = i === 0;
-                    // Note: Conditional rounding logic kept inline as it depends on loop index
-                    const borderRadius = `${isTop ? '4px' : '0'} ${isTop ? '4px' : '0'} ${isBottom ? '2px' : '0'} ${isBottom ? '2px' : '0'}`;
+                    const borderRadius = `${isTop ? '4px' : '1px'} ${isTop ? '4px' : '1px'} ${isBottom ? '2px' : '1px'} ${isBottom ? '2px' : '1px'}`;
                     
                     return (
                       <div 
@@ -136,10 +141,10 @@ export const StackedBar = ({
                         style={{ 
                             height: `${h}%`, 
                             width: '100%', 
-                            backgroundColor: state.cats[cat].col, 
+                            backgroundColor: state.cats[cat]?.col || '#ccc', 
                             borderRadius: borderRadius,
-                            marginTop: 1, 
-                            transition: 'height 0.6s cubic-bezier(0.33,1,0.68,1)'
+                            marginBottom: 1, 
+                            transition: 'height 0.6s cubic-bezier(0.2, 0.8, 0.2, 1)'
                         }} 
                       />
                     );
@@ -147,7 +152,7 @@ export const StackedBar = ({
                 </div>
                 
                 {/* X Label */}
-                <div className={`absolute -bottom-6 text-xs text-center whitespace-nowrap ${isSelected ? 'font-bold text-primary' : 'text-secondary font-medium'}`}>
+                <div className={`absolute -bottom-6 text-[10px] text-center whitespace-nowrap ${isSelected ? 'font-bold text-primary' : 'text-secondary font-medium'}`}>
                     {day.label}
                 </div>
               </div>
@@ -155,12 +160,12 @@ export const StackedBar = ({
           })}
         </div>
 
-        {/* Y Axis */}
-        <div className="w-6 flex flex-col-reverse justify-between">
+        {/* Y Axis Labels */}
+        <div className="w-6 flex flex-col-reverse justify-between py-1">
           {[0,1,2,3,4].map(i => (
-            <div key={i} className="text-xs text-secondary font-medium h-2.5 relative">
+            <div key={i} className="text-[10px] text-secondary font-medium h-2 relative">
               <span className="absolute top-0 right-0 transform -translate-y-1/2">
-                  {Math.round((state.max / 4) * i) || ''}
+                  {Math.round((state.max / 4) * i) || '0'}
               </span>
             </div>
           ))}
@@ -168,14 +173,14 @@ export const StackedBar = ({
       </div>
 
       {/* LEGEND */}
-      <div className="flex flex-wrap gap-x-4 gap-y-2 mt-3">
+      <div className="flex flex-wrap gap-x-4 gap-y-2 mt-4 pt-2 border-t border-separator border-opacity-20">
         {Object.keys(state.cats).sort((a,b) => state.cats[b].sum - state.cats[a].sum).map(cat => (
           <div key={cat} className="flex items-center gap-1.5 text-xs font-medium text-secondary">
             <div 
-                className="w-2 h-2 rounded-sm" 
+                className="w-2.5 h-2.5 rounded-full shadow-sm" 
                 style={{ backgroundColor: state.cats[cat].col }} 
             />
-            <span>{cat}</span>
+            <span className={state.sel !== null && !data[state.sel].values[cat] ? "opacity-30" : ""}>{cat}</span>
           </div>
         ))}
       </div>
