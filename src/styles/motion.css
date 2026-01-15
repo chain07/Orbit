@@ -1,1 +1,44 @@
+/* =========================================================
+   ORBIT MOTION SYSTEM
+   Apple-inspired motion & easing
+   ========================================================= */
 
+:root {
+  /* Durations */
+  --motion-fast: 120ms;
+  --motion-medium: 220ms;
+  --motion-slow: 360ms;
+
+  /* Easing (Apple-like) */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.6, 1);
+
+  /* Elevation Motion */
+  --elevate-hover: translateY(-1px);
+  --elevate-active: translateY(0);
+}
+
+/* ---------- Shared Transitions ---------- */
+.motion-fade {
+  transition: opacity var(--motion-medium) var(--ease-standard);
+}
+
+.motion-move {
+  transition: transform var(--motion-medium) var(--ease-standard);
+}
+
+.motion-all {
+  transition:
+    opacity var(--motion-medium) var(--ease-standard),
+    transform var(--motion-medium) var(--ease-standard),
+    background-color var(--motion-fast) linear;
+}
+
+/* ---------- Reduced Motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}
