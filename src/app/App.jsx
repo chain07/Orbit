@@ -1,7 +1,8 @@
-import React, { useState, useContext, useEffect } from 'react';
-/* 🔗 Global design system */
+import React, { useState, useContext, useEffect, useMemo } from 'react';
+import { LayoutDashboard, PenTool, Radio, Settings } from 'lucide-react';
 import '../styles/tokens.css';
 import '../styles/motion.css';
+
 import { StorageProvider, StorageContext } from '../context/StorageContext';
 import { Horizon } from '../views/Horizon';
 import { Logger } from '../views/Logger';
@@ -10,25 +11,33 @@ import { System } from '../views/System';
 import { BottomNav } from '../components/ui/BottomNav';
 import { OnboardingWizard } from '../components/system/OnboardingWizard';
 
-/* * AppContent
- * Internal component to consume StorageContext, which is provided by the parent App component.
- */
 const AppContent = () => {
   const [activeTab, setActiveTab] = useState('Horizon');
-  [span_0](start_span)// Access onboarding state from Context[span_0](end_span)
   const { onboardingComplete, completeOnboarding } = useContext(StorageContext);
   const [showWizard, setShowWizard] = useState(false);
 
-  // Check onboarding status on mount
+  // Define Tab Configuration for Navigation
+  const tabs = useMemo(() => [
+    { id: 'Horizon', label: 'Horizon', icon: <LayoutDashboard size={24} /> },
+    { id: 'Logger', label: 'Logger', icon: <PenTool size={24} /> },
+    { id: 'Intel', label: 'Intel', icon: <Radio size={24} /> },
+    { id: 'System', label: 'System', icon: <Settings size={24} /> }
+  ], []);
+
+  // Onboarding Logic:
+  // 1. If onboardingComplete is FALSE (new user), show wizard.
+  // 2. If it turns TRUE (loaded from storage or finished), hide wizard.
   useEffect(() => {
-    // If onboardingComplete is undefined (context loading) or false, show wizard
     if (onboardingComplete === false) {
       setShowWizard(true);
+    } else if (onboardingComplete === true) {
+      setShowWizard(false);
     }
   }, [onboardingComplete]);
 
   const handleOnboardingFinish = () => {
     completeOnboarding();
+    // Local state update provides instant feedback while Context saves async
     setShowWizard(false);
   };
 
@@ -43,21 +52,22 @@ const AppContent = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-page font-system text-primary relative">
-      {/* Main Content */}
-      <div className="flex-1 overflow-y-auto">
+    <div className="flex flex-col h-full w-full bg-bg-color font-system text-primary overflow-hidden relative">
+      {/* Main Content Area - Scrollable */}
+      <main className="flex-1 overflow-y-auto overflow-x-hidden safe-bottom pb-24">
         {renderTab()}
-      </div>
+      </main>
       
-      {/* Navigation */}
+      {/* Navigation - Fixed Bottom */}
       <BottomNav
-        activeTab={activeTab}
+        tabs={tabs}
+        activeId={activeTab}
         onChange={setActiveTab}
       />
 
       {/* Onboarding Overlay */}
       {showWizard && (
-        <div className="absolute inset-0 z-50 bg-bg-color">
+        <div className="absolute inset-0 z-50 bg-bg-color animate-fade-in">
           <OnboardingWizard onComplete={handleOnboardingFinish} />
         </div>
       )}
