@@ -1,30 +1,19 @@
-// src/components/ui/Glass.jsx
-import React from 'react';
+import React from "react";
+import "../styles/motion.css";
+import "../styles/tokens.css";
 
-/**
- * Glass
- * Reusable glassmorphic container
- *
- * Props:
- * - children: content inside the glass card
- * - className: optional additional styling
- * - style: optional inline styles
- */
-export const Glass = ({ children, className = '', style = {} }) => {
+export default function Glass({
+  children,
+  className = "",
+  as: Component = "div",
+  ...props
+}) {
   return (
-    <div
-      className={`
-        bg-white/20 dark:bg-gray-900/30
-        backdrop-blur-md
-        border border-white/30 dark:border-gray-700/30
-        rounded-2xl
-        shadow-md
-        p-4
-        ${className}
-      `}
-      style={style}
+    <Component
+      className={`glass ${className}`}
+      {...props}
     >
       {children}
-    </div>
+    </Component>
   );
-};
+}
