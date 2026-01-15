@@ -1,5 +1,6 @@
 import React from 'react';
-import { StackedBar } from '../ui/StackedBar';
+[span_1](start_span)// CRITICAL FIX: Update import to point to charts directory[span_1](end_span)
+import { StackedBar } from '../ui/charts/StackedBar';
 
 /**
  * SegmentedBarWidget
