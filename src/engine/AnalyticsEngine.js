@@ -135,31 +135,59 @@ export const AnalyticsEngine = {
         valuesCache[metric.id] = mLogs.map(l => l.value);
     });
 
-    // 2. Pairwise loop
+    // 2. Pre-calculate slices and stats for all metrics
+    // We need two versions for each metric:
+    // - "Head" (values[0...N-lag]) -> acts as idA
+    // - "Tail" (values[lag...N]) -> acts as idB
+    const precalc = {};
+
+    metrics.forEach(metric => {
+        const id = metric.id;
+        const fullValues = valuesCache[id] || [];
+
+        // Head slice
+        const headValues = fullValues.slice(0, -lagDays || undefined);
+        const headMean = headValues.length ? headValues.reduce((a, b) => a + b, 0) / headValues.length : 0;
+        // Optimization: Pre-calculate deviations for head to avoid repeated subtractions
+        const headDeviations = headValues.map(v => v - headMean);
+        const headDenom = headDeviations.reduce((acc, dev) => acc + dev * dev, 0);
+
+        // Tail slice
+        const tailValues = fullValues.slice(lagDays);
+        const tailMean = tailValues.length ? tailValues.reduce((a, b) => a + b, 0) / tailValues.length : 0;
+        // Optimization: Pre-calculate deviations for tail
+        const tailDeviations = tailValues.map(v => v - tailMean);
+        const tailDenom = tailDeviations.reduce((acc, dev) => acc + dev * dev, 0);
+
+        precalc[id] = {
+            head: { values: headValues, mean: headMean, deviations: headDeviations, denom: headDenom },
+            tail: { values: tailValues, mean: tailMean, deviations: tailDeviations, denom: tailDenom }
+        };
+    });
+
+    // 3. Pairwise loop using pre-calculated stats
     for (let i = 0; i < metrics.length; i++) {
       for (let j = i + 1; j < metrics.length; j++) {
         const idA = metrics[i].id;
         const idB = metrics[j].id;
 
-        const valuesA = valuesCache[idA] ? valuesCache[idA].slice(0, -lagDays || undefined) : [];
-        const valuesB = valuesCache[idB] ? valuesCache[idB].slice(lagDays) : [];
+        const dataA = precalc[idA].head;
+        const dataB = precalc[idB].tail;
 
-        if (valuesA.length !== valuesB.length || valuesA.length === 0) {
+        if (dataA.values.length !== dataB.values.length || dataA.values.length === 0) {
           correlations[`${idA}-${idB}`] = null;
           continue;
         }
 
-        const meanA = valuesA.reduce((a, b) => a + b, 0) / valuesA.length;
-        const meanB = valuesB.reduce((a, b) => a + b, 0) / valuesB.length;
+        const denomA = dataA.denom;
+        const denomB = dataB.denom;
+        const devA = dataA.deviations;
+        const devB = dataB.deviations;
 
-        let numerator = 0,
-          denomA = 0,
-          denomB = 0;
-
-        for (let k = 0; k < valuesA.length; k++) {
-          numerator += (valuesA[k] - meanA) * (valuesB[k] - meanB);
-          denomA += Math.pow(valuesA[k] - meanA, 2);
-          denomB += Math.pow(valuesB[k] - meanB, 2);
+        let numerator = 0;
+        const len = devA.length;
+        for (let k = 0; k < len; k++) {
+          numerator += devA[k] * devB[k];
         }
 
         correlations[`${idA}-${idB}`] = numerator / (Math.sqrt(denomA * denomB) || 1);
