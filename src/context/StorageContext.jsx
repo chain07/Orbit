@@ -33,8 +33,7 @@ export const StorageProvider = ({ children }) => {
       if (storedData) {
         let parsed = JSON.parse(storedData);
 
-        // Phase 1: Migrate Data
-        console.log("Migrating Data...", parsed);
+        // Phase 1: Migrate Data to ensure metricId consistency
         parsed = migrateData(parsed);
 
         if (parsed.metrics) {
@@ -47,15 +46,8 @@ export const StorageProvider = ({ children }) => {
 
             // Storage Reset Safeguard
             if (parsed.logEntries.length === 0 && parsed.metrics && parsed.metrics.length > 0) {
-               // If we have metrics but zero logs after migration, something might be wrong with legacy conversion
-               // Only alert if we actually expected data (heuristic: checking raw string length before parse would be better but simple check is okay)
-               alert("Warning: Migration resulted in 0 log entries. If you expected data, please check your backup or 'Clear Data'.");
+               console.warn("Log entries are empty after migration. Check schema integrity.");
             }
-        } else {
-             // Fallback for corruption
-             if (parsed.metrics && parsed.metrics.length > 0) {
-                 alert("Warning: Data corruption detected. Log entries are missing. Please 'Clear Data' in System if issues persist.");
-             }
         }
         if (parsed.widgetLayout) setWidgetLayout(parsed.widgetLayout);
         if (typeof parsed.onboardingComplete !== 'undefined') {
@@ -74,14 +66,11 @@ export const StorageProvider = ({ children }) => {
       widgetLayout,
       onboardingComplete
     };
-    
-    // Audit Fix: Add error handling for localStorage quota exceeded
     try {
       localStorage.setItem('orbit_db', JSON.stringify(dataToSave));
     } catch (e) {
       if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
-        alert("Storage Quota Exceeded! ORBIT cannot save new data. Please export your data and clear space.");
-        console.error("LocalStorage Quota Exceeded", e);
+        alert("Storage Quota Exceeded! Please export your data and clear space.");
       } else {
         console.error("Failed to save to localStorage", e);
       }
@@ -89,12 +78,8 @@ export const StorageProvider = ({ children }) => {
   }, [metrics, logEntries, widgetLayout, onboardingComplete]);
 
   const addMetric = (metricData) => {
-    try {
-      const newMetric = createMetric(metricData);
-      setMetrics(prev => [...prev, newMetric]);
-    } catch (e) {
-      console.error("Failed to add metric", e);
-    }
+    const newMetric = createMetric(metricData);
+    setMetrics(prev => [...prev, newMetric]);
   };
 
   const updateMetric = (updatedMetric) => {
@@ -107,56 +92,50 @@ export const StorageProvider = ({ children }) => {
   };
 
   const addLogEntry = (entryData) => {
-    try {
-      // Validate value against metric type
-      const metric = metrics.find(m => m.id === entryData.metricId);
-      if (metric) {
-        validateMetricValue(metric, entryData.value);
-      } else {
-        console.warn(`Adding log for unknown metricId: ${entryData.metricId}`);
-      }
-
-      const newEntry = createLog({
-        metricId: entryData.metricId, // Strict, no fallback
-        value: entryData.value,
-        timestamp: entryData.timestamp
-      });
-      setLogEntries(prev => [...prev, newEntry]);
-    } catch (e) {
-      console.error("Failed to add log entry", e);
+    // ENFORCEMENT: Strictly require metricId. metricKey is prohibited.
+    if (!entryData.metricId) {
+      throw new Error("MANDATORY_SCHEMA_VIOLATION: addLogEntry requires a valid metricId.");
     }
+
+    const newEntry = createLog({
+      metricId: entryData.metricId,
+      value: entryData.value,
+      timestamp: entryData.timestamp
+    });
+
+    setLogEntries(prev => [...prev, newEntry]);
   };
 
   const completeOnboarding = () => {
     setOnboardingComplete(true);
   };
 
-  // Audit Fix: Add Data validation on import to prevent corrupted state
   const importData = (jsonData) => {
     if (!jsonData) return;
+    
+    // Apply migration to imported data
+    const migrated = migrateData(jsonData);
 
-    // Validate Metrics: Must be array and have IDs
-    if (Array.isArray(jsonData.metrics)) {
-      const validMetrics = jsonData.metrics.filter(m => 
+    if (Array.isArray(migrated.metrics)) {
+      const validMetrics = migrated.metrics.filter(m => 
         m && typeof m === 'object' && m.id && m.name
       );
       setMetrics(validMetrics);
     }
 
-    // Validate Logs: Must be array and have metricId + value
-    if (Array.isArray(jsonData.logEntries)) {
-      const validLogs = jsonData.logEntries.filter(l => 
+    if (Array.isArray(migrated.logEntries)) {
+      const validLogs = migrated.logEntries.filter(l => 
         l && typeof l === 'object' && l.metricId && (l.value !== undefined)
       );
       setLogEntries(validLogs);
     }
 
-    if (jsonData.widgetLayout && typeof jsonData.widgetLayout === 'object') {
-      setWidgetLayout(jsonData.widgetLayout);
+    if (migrated.widgetLayout && typeof migrated.widgetLayout === 'object') {
+      setWidgetLayout(migrated.widgetLayout);
     }
 
-    if (typeof jsonData.onboardingComplete !== 'undefined') {
-        setOnboardingComplete(jsonData.onboardingComplete);
+    if (typeof migrated.onboardingComplete !== 'undefined') {
+        setOnboardingComplete(migrated.onboardingComplete);
     }
   };
 
@@ -182,7 +161,6 @@ export const StorageProvider = ({ children }) => {
     <StorageContext.Provider value={{
       metrics,
       logEntries,
-      // Audit Fix: Removed duplicate 'logs: logEntries' export
       widgetLayout,
       onboardingComplete,
       addMetric,
