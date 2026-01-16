@@ -9,43 +9,12 @@ export const Recipes = {
   // ----------------------
   // Default Metrics (Bootstrap)
   // ----------------------
-  defaultMetrics: [
-    new MetricConfig({
-      id: 'habit_morning_routine',
-      label: 'Morning Routine',
-      type: MetricType.BOOLEAN,
-      goal: 1,
-      color: '#4f46e5',
-      widgetType: WidgetType.RING,
-    }),
-    new MetricConfig({
-      id: 'exercise_minutes',
-      label: 'Exercise Minutes',
-      type: MetricType.NUMBER,
-      goal: 60,
-      color: '#10b981',
-      widgetType: WidgetType.SPARKLINE,
-    }),
-    new MetricConfig({
-      id: 'deep_work_hours',
-      label: 'Deep Work',
-      type: MetricType.NUMBER,
-      goal: 4,
-      color: '#f59e0b',
-      widgetType: WidgetType.BAR,
-    }),
-    new MetricConfig({
-      id: 'hydration',
-      label: 'Water Intake',
-      type: MetricType.NUMBER,
-      goal: 2000,
-      color: '#3b82f6',
-      widgetType: WidgetType.BAR,
-    }),
-  ],
+  // FIX: Emptied defaults to satisfy "No Assumptions" rule. 
+  // The system must start blank and rely on user creation or onboarding wizards.
+  defaultMetrics: [],
 
   defaultWidgetLayout: {
-    Horizon: ['habit_morning_routine', 'exercise_minutes', 'deep_work_hours', 'hydration'],
+    Horizon: [],
   },
 
   // ----------------------
@@ -105,7 +74,7 @@ export const Recipes = {
       id: 'comeback_kid',
       type: 'motivation',
       description: 'Encouragement after breaking a 0 streak',
-      condition: ({ streak, logs }) => streak === 1 && logs.length > 10, // Rudimentary check for past history
+      condition: ({ streak, logs }) => streak === 1 && logs && logs.length > 10, 
       message: (metric) => `🌱 You're back on track with ${metric.label}. Let's build a new streak.`,
     },
 
@@ -131,8 +100,8 @@ export const Recipes = {
     {
       id: 'consistency_check',
       type: 'analysis',
-      condition: ({ rollingAvg, metricType, goal }) => metricType === 'number' && rollingAvg > (goal * 0.9),
-      message: (metric) => `⚖️ Your consistency on ${metric.label} is rock solid (Avg: ${rollingAvg.toFixed(1)}).`,
+      condition: ({ rollingAvg, metricType, goal }) => metricType === 'number' && goal > 0 && rollingAvg > (goal * 0.9),
+      message: (metric, { rollingAvg }) => `⚖️ Your consistency on ${metric.label} is rock solid (Avg: ${rollingAvg.toFixed(1)}).`,
     },
 
     // --- CATEGORY: SMART ADJUSTMENTS (System Maintenance) ---
@@ -140,21 +109,21 @@ export const Recipes = {
       id: 'raise_the_bar',
       type: 'adjustment',
       description: 'Suggests increasing goal if consistently overachieving',
-      condition: ({ rollingAvg, goal }) => rollingAvg > (goal * 1.3),
-      message: (metric) => `💪 You're consistently crushing ${metric.label}. Consider raising the goal to ${Math.round(goal * 1.2)} to keep challenging yourself.`,
+      condition: ({ rollingAvg, goal }) => goal > 0 && rollingAvg > (goal * 1.3),
+      message: (metric, { goal }) => `💪 You're consistently crushing ${metric.label}. Consider raising the goal to ${Math.round(goal * 1.2)} to keep challenging yourself.`,
     },
     {
       id: 'lower_the_bar',
       type: 'adjustment',
       description: 'Suggests lowering goal if consistently failing (to prevent demoralization)',
-      condition: ({ rollingAvg, goal, streak }) => streak === 0 && rollingAvg < (goal * 0.4) && rollingAvg > 0,
-      message: (metric) => `📉 Struggling with ${metric.label}? Try lowering the goal to ${Math.round(goal * 0.5)} to build momentum back up.`,
+      condition: ({ rollingAvg, goal, streak }) => streak === 0 && goal > 0 && rollingAvg < (goal * 0.4) && rollingAvg > 0,
+      message: (metric, { goal }) => `📉 Struggling with ${metric.label}? Try lowering the goal to ${Math.round(goal * 0.5)} to build momentum back up.`,
     },
     {
       id: 'forgotten_metric',
       type: 'adjustment',
       description: 'Identifies stale metrics',
-      condition: ({ daysSinceLastLog }) => daysSinceLastLog > 14,
+      condition: ({ daysSinceLastLog }) => daysSinceLastLog > 14 && daysSinceLastLog < 900,
       message: (metric) => `🕸️ You haven't logged ${metric.label} in 2 weeks. Is this still important to you?`,
     },
 
@@ -162,14 +131,14 @@ export const Recipes = {
     {
       id: 'positive_synergy',
       type: 'insight',
-      condition: ({ correlation, corrPartner }) => correlation > 0.75,
+      condition: ({ correlation, corrPartner }) => correlation > 0.75 && corrPartner,
       message: (metric, stats) => `🔗 Synergy found: When you do ${metric.label}, you also tend to do ${stats.corrPartner}.`,
     },
     {
       id: 'negative_friction',
       type: 'insight',
-      condition: ({ correlation, corrPartner }) => correlation < -0.75,
+      condition: ({ correlation, corrPartner }) => correlation < -0.75 && corrPartner,
       message: (metric, stats) => `⚠️ Friction: ${metric.label} seems to negatively impact ${stats.corrPartner}.`,
     },
   ],
-}
+};
