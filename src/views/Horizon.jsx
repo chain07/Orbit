@@ -1,5 +1,6 @@
 import React, { useContext, useState, useMemo } from 'react';
 import { StorageContext } from '../context/StorageContext';
+import { NavigationContext } from '../context/NavigationContext';
 import { WidgetDataEngine } from '../engine/WidgetDataEngine';
 import { HorizonAgent } from '../lib/horizonAgent';
 import SegmentedControl from '../components/ui/SegmentedControl';
@@ -35,8 +36,9 @@ class WidgetErrorBoundary extends React.Component {
   }
 }
 
-export const Horizon = ({ onGoToSystem }) => {
+export const Horizon = () => {
   const { metrics, logEntries, onboardingComplete } = useContext(StorageContext);
+  const { setActiveTab } = useContext(NavigationContext);
   const [segment, setSegment] = useState('Weekly');
   const [isEditing, setIsEditing] = useState(false);
   const [isNudgeDismissed, setIsNudgeDismissed] = useState(false);
@@ -119,7 +121,7 @@ export const Horizon = ({ onGoToSystem }) => {
           title="Welcome to ORBIT"
           message="Your dashboard is empty. Configure your first metric to start tracking."
           actionLabel="Launch Setup"
-          onAction={onGoToSystem}
+          onAction={() => setActiveTab('System')}
         />
       )}
 
@@ -139,7 +141,7 @@ export const Horizon = ({ onGoToSystem }) => {
                   </div>
                   <motion.button
                     whileTap={{ scale: 0.95 }}
-                    onClick={onGoToSystem}
+                    onClick={() => setActiveTab('System')}
                     className="px-3 py-2 bg-blue text-white text-xs font-bold rounded-lg shadow-sm"
                   >
                       Setup
