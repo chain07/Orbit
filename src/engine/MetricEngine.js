@@ -127,9 +127,20 @@ export const MetricEngine = {
   getLastNDaysValues: (logs = [], days = 7) => {
     // 1. Bucket values by date string key (YYYY-M-D)
     const buckets = {};
+    const now = new Date();
+    // Pre-calculate cutoff time to filter old logs early
+    // We go back 'days' days, set to start of day
+    const cutoffDate = new Date(now);
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+    cutoffDate.setHours(0, 0, 0, 0);
+    const cutoffTime = cutoffDate.getTime();
 
     logs.forEach(l => {
       const d = new Date(l.timestamp);
+
+      // Optimization: Skip logs older than the window
+      if (d.getTime() < cutoffTime) return;
+
       // Construct key manually to avoid slow string formatting
       const key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
       buckets[key] = (buckets[key] || 0) + (parseFloat(l.value) || 0);
