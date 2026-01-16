@@ -152,4 +152,66 @@ export const AnalyticsEngine = {
     });
     return comparisons;
   },
+
+  // ----------------------
+  // System Health / Intel Stats
+  // ----------------------
+  calculateSystemHealth: (metrics = [], logs = [], segment = 'Weekly') => {
+    if (!metrics.length) return { reliability: 0, trend: '0%', intensity: 'None', status: 'Offline' };
+
+    // Determine window size in days
+    let days = 7;
+    if (segment === 'Daily') days = 1;
+    if (segment === 'Monthly') days = 30;
+
+    const now = new Date();
+
+    // Filter logs for current window
+    const currentLogs = logs.filter(l => {
+      const d = new Date(l.timestamp);
+      const diff = (now - d) / (1000 * 60 * 60 * 24);
+      return diff <= days;
+    });
+
+    // Filter logs for previous window (for trend comparison)
+    const prevLogs = logs.filter(l => {
+      const d = new Date(l.timestamp);
+      const diff = (now - d) / (1000 * 60 * 60 * 24);
+      return diff > days && diff <= (days * 2);
+    });
+
+    // 1. Reliability (Average Goal Completion)
+    let totalCompletion = 0;
+    metrics.forEach(m => {
+       // MetricEngine.goalCompletion handles 0-100 logic
+       const comp = MetricEngine.goalCompletion ? MetricEngine.goalCompletion(m, currentLogs) : 0;
+       totalCompletion += Math.min(comp, 100); // Cap individual impact at 100%
+    });
+    const reliability = Math.round(totalCompletion / (metrics.length || 1));
+
+    // 2. Trend Calculation
+    let prevTotal = 0;
+    metrics.forEach(m => {
+       const comp = MetricEngine.goalCompletion ? MetricEngine.goalCompletion(m, prevLogs) : 0;
+       prevTotal += Math.min(comp, 100);
+    });
+    const prevReliability = Math.round(prevTotal / (metrics.length || 1));
+    const trendVal = reliability - prevReliability;
+    const trend = trendVal >= 0 ? `+${trendVal}%` : `${trendVal}%`;
+
+    // 3. Intensity (Log Volume Heuristic)
+    // Baseline: We expect roughly 1 log per metric per day (very rough heuristic)
+    const expectedVolume = metrics.length * (days > 1 ? days : 1);
+    const ratio = currentLogs.length / (expectedVolume || 1);
+
+    let intensity = 'Low';
+    if (ratio > 0.4) intensity = 'Moderate';
+    if (ratio > 0.8) intensity = 'High';
+    if (ratio > 1.2) intensity = 'Peak';
+
+    // 4. Operational Baseline Status
+    const status = reliability > 80 ? 'Optimal' : reliability > 50 ? 'Functional' : 'Degraded';
+
+    return { reliability, trend, intensity, status };
+  }
 };
