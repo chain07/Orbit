@@ -36,7 +36,7 @@ export const Intel = () => {
     WidgetDataEngine.generateWidgets(metrics, logEntries, segment),
   [metrics, logEntries, segment]);
 
-  // Calculate Real System Health & Stats
+  // Calculate Real System Health & Stats using AnalyticsEngine
   const stats = useMemo(() => {
     return AnalyticsEngine.calculateSystemHealth(metrics, logEntries, segment);
   }, [metrics, logEntries, segment]);

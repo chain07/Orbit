@@ -6,12 +6,12 @@ import { StackedBar } from '../ui/charts/StackedBar';
  * Wrapper around StackedBar for displaying categorical distributions.
  * * Expected Data Prop Structure:
  * {
- * title: "Sleep Quality",
+ * title: "Metric Distribution",
  * entries: [
- * { label: "Mon", values: { Deep: 2, Light: 5 } },
- * { label: "Tue", values: { Deep: 3, Light: 4 } }
+ * { label: "Mon", values: { CategoryA: 2, CategoryB: 5 } },
+ * { label: "Tue", values: { CategoryA: 3, CategoryB: 4 } }
  * ],
- * colors: { Deep: "#...", Light: "#..." }
+ * colors: { CategoryA: "#...", CategoryB: "#..." }
  * }
  */
 export const SegmentedBarWidget = ({ data }) => {
