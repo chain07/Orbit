@@ -26,10 +26,14 @@ export const MetricEngine = {
   calculateCurrentStreak: (logs = []) => {
     if (!logs || logs.length === 0) return 0;
 
-    // Get unique dates sorted descending
-    const uniqueDates = Array.from(new Set(
-      logs.map(l => new Date(l.timestamp).toLocaleDateString())
-    )).map(d => new Date(d)).sort((a, b) => b - a);
+    // Perf optimization: Use start-of-day timestamp for uniqueness
+    const uniqueTimestamps = [...new Set(logs.map(l => {
+      const d = new Date(l.timestamp);
+      d.setHours(0, 0, 0, 0);
+      return d.getTime();
+    }))];
+
+    const uniqueDates = uniqueTimestamps.sort((a, b) => b - a).map(t => new Date(t));
 
     if (uniqueDates.length === 0) return 0;
 
@@ -62,9 +66,13 @@ export const MetricEngine = {
   calculateBestStreak: (logs = []) => {
     if (!logs || logs.length === 0) return 0;
 
-    const uniqueDates = Array.from(new Set(
-      logs.map(l => new Date(l.timestamp).toLocaleDateString())
-    )).map(d => new Date(d)).sort((a, b) => b - a);
+    const uniqueTimestamps = [...new Set(logs.map(l => {
+      const d = new Date(l.timestamp);
+      d.setHours(0, 0, 0, 0);
+      return d.getTime();
+    }))];
+
+    const uniqueDates = uniqueTimestamps.sort((a, b) => b - a).map(t => new Date(t));
 
     if (uniqueDates.length === 0) return 0;
 
@@ -90,9 +98,18 @@ export const MetricEngine = {
   // NEW: Get Today's Value (Sum)
   // ----------------------
   getTodayValue: (logs = []) => {
-    const today = new Date().toLocaleDateString();
+    const today = new Date();
+    const todayYear = today.getFullYear();
+    const todayMonth = today.getMonth();
+    const todayDate = today.getDate();
+
     return logs
-      .filter(l => new Date(l.timestamp).toLocaleDateString() === today)
+      .filter(l => {
+        const d = new Date(l.timestamp);
+        return d.getFullYear() === todayYear &&
+               d.getMonth() === todayMonth &&
+               d.getDate() === todayDate;
+      })
       .reduce((acc, l) => acc + (parseFloat(l.value) || 0), 0);
   },
 
@@ -107,9 +124,18 @@ export const MetricEngine = {
   // NEW: Get Value for Specific Date
   // ----------------------
   getValueForDate: (logs = [], date) => {
-    const target = new Date(date).toLocaleDateString();
+    const target = new Date(date);
+    const targetYear = target.getFullYear();
+    const targetMonth = target.getMonth();
+    const targetDate = target.getDate();
+
     return logs
-      .filter(l => new Date(l.timestamp).toLocaleDateString() === target)
+      .filter(l => {
+        const d = new Date(l.timestamp);
+        return d.getFullYear() === targetYear &&
+               d.getMonth() === targetMonth &&
+               d.getDate() === targetDate;
+      })
       .reduce((acc, l) => acc + (parseFloat(l.value) || 0), 0);
   },
 
