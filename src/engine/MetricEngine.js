@@ -7,7 +7,7 @@ import { MetricType } from '../context/StorageContext';
  */
 export const MetricEngine = {
   // ----------------------
-  // Current streak calculation
+  // Current streak calculation (Legacy support)
   // ----------------------
   currentStreak: (logs = [], metricId) => {
     const metricLogs = logs
@@ -15,26 +15,115 @@ export const MetricEngine = {
       .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
     if (metricLogs.length === 0) return 0;
+    
+    // Delegate to the robust calculator
+    return MetricEngine.calculateCurrentStreak(metricLogs);
+  },
 
-    let streak = 0;
-    let lastDate = null;
+  // ----------------------
+  // NEW: Calculate Current Streak (Expects pre-filtered logs)
+  // ----------------------
+  calculateCurrentStreak: (logs = []) => {
+    if (!logs || logs.length === 0) return 0;
 
-    for (const log of metricLogs) {
-      const logDate = new Date(log.timestamp).toDateString();
-      if (!lastDate) {
-        // first entry in loop
-        streak = 1;
-      } else {
-        const prev = new Date(lastDate);
-        const curr = new Date(logDate);
-        const diff = (prev - curr) / (1000 * 60 * 60 * 24);
-        if (diff === 1) streak += 1; // consecutive day
-        else break;
-      }
-      lastDate = logDate;
+    // Get unique dates sorted descending
+    const uniqueDates = Array.from(new Set(
+      logs.map(l => new Date(l.timestamp).toLocaleDateString())
+    )).map(d => new Date(d)).sort((a, b) => b - a);
+
+    if (uniqueDates.length === 0) return 0;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Check if the most recent entry is today or yesterday
+    const mostRecent = uniqueDates[0];
+    const diffHours = (today - mostRecent) / (1000 * 60 * 60);
+
+    // If last entry is older than yesterday (>48h roughly), streak is 0
+    // We use 36h to be safe for "yesterday" logic without strict midnight adherence
+    if (diffHours > 36) return 0;
+
+    let streak = 1;
+    for (let i = 0; i < uniqueDates.length - 1; i++) {
+      const curr = uniqueDates[i];
+      const next = uniqueDates[i+1];
+      const diffDays = Math.round((curr - next) / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 1) streak++;
+      else break;
     }
-
     return streak;
+  },
+
+  // ----------------------
+  // NEW: Calculate Best Streak
+  // ----------------------
+  calculateBestStreak: (logs = []) => {
+    if (!logs || logs.length === 0) return 0;
+
+    const uniqueDates = Array.from(new Set(
+      logs.map(l => new Date(l.timestamp).toLocaleDateString())
+    )).map(d => new Date(d)).sort((a, b) => b - a);
+
+    if (uniqueDates.length === 0) return 0;
+
+    let maxStreak = 1;
+    let currentStreak = 1;
+
+    for (let i = 0; i < uniqueDates.length - 1; i++) {
+      const curr = uniqueDates[i];
+      const next = uniqueDates[i+1];
+      const diffDays = Math.round((curr - next) / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 1) {
+        currentStreak++;
+      } else {
+        maxStreak = Math.max(maxStreak, currentStreak);
+        currentStreak = 1;
+      }
+    }
+    return Math.max(maxStreak, currentStreak);
+  },
+
+  // ----------------------
+  // NEW: Get Today's Value (Sum)
+  // ----------------------
+  getTodayValue: (logs = []) => {
+    const today = new Date().toLocaleDateString();
+    return logs
+      .filter(l => new Date(l.timestamp).toLocaleDateString() === today)
+      .reduce((acc, l) => acc + (parseFloat(l.value) || 0), 0);
+  },
+
+  // ----------------------
+  // NEW: Get Total Value (Sum of all logs)
+  // ----------------------
+  getTotal: (logs = []) => {
+    return logs.reduce((acc, l) => acc + (parseFloat(l.value) || 0), 0);
+  },
+
+  // ----------------------
+  // NEW: Get Value for Specific Date
+  // ----------------------
+  getValueForDate: (logs = [], date) => {
+    const target = new Date(date).toLocaleDateString();
+    return logs
+      .filter(l => new Date(l.timestamp).toLocaleDateString() === target)
+      .reduce((acc, l) => acc + (parseFloat(l.value) || 0), 0);
+  },
+
+  // ----------------------
+  // NEW: Get Last N Days Values (Array for Charts)
+  // ----------------------
+  getLastNDaysValues: (logs = [], days = 7) => {
+    const values = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      values.push(MetricEngine.getValueForDate(logs, d));
+    }
+    return values;
   },
 
   // ----------------------
@@ -93,7 +182,7 @@ export const MetricEngine = {
   },
 
   // ----------------------
-  // Example aggregated stats
+  // Aggregated stats
   // ----------------------
   stats: (metricConfig, logs = []) => {
     const values = logs
