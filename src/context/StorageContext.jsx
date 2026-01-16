@@ -7,6 +7,7 @@ import {
   createLog,
   createMetric,
   validateMetrics,
+  validateMetricValue,
   validateLogEntries,
   migrateData
 } from '../types/schemas';
@@ -94,6 +95,14 @@ export const StorageProvider = ({ children }) => {
 
   const addLogEntry = (entryData) => {
     try {
+      // Validate value against metric type
+      const metric = metrics.find(m => m.id === entryData.metricId);
+      if (metric) {
+        validateMetricValue(metric, entryData.value);
+      } else {
+        console.warn(`Adding log for unknown metricId: ${entryData.metricId}`);
+      }
+
       const newEntry = createLog({
         metricId: entryData.metricId, // Strict, no fallback
         value: entryData.value,
