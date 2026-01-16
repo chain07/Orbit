@@ -2,7 +2,7 @@ import React, { useState, useContext, useMemo, useEffect } from 'react';
 import { StorageContext } from '../../context/StorageContext';
 import { ReportEngine } from '../../engine/ReportEngine';
 import { Glass } from '../ui/Glass';
-import { Copy, Download, Check, Save, Archive } from 'lucide-react';
+import { Copy, Download, Check, Save, Archive, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const ReportGenerator = ({ segment = 'Weekly' }) => {
@@ -20,6 +20,7 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
   const [saved, setSaved] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
   const [archivedReports, setArchivedReports] = useState([]);
+  const [selectedReport, setSelectedReport] = useState(null);
 
   // Delegate logic to ReportEngine
   const reportData = useMemo(() => {
@@ -159,29 +160,60 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
             <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto">
                 {archivedReports.length === 0 && <div className="text-center text-sm text-secondary italic py-4">No saved reports found.</div>}
                 {archivedReports.map(report => (
-                    <div key={report.id} className="p-3 border border-separator rounded-lg bg-bg-color hover:bg-opacity-50 transition-colors">
+                    <div
+                        key={report.id}
+                        className="p-3 border border-separator rounded-lg bg-bg-color hover:bg-separator/10 transition-colors cursor-pointer"
+                        onClick={() => setSelectedReport(report)}
+                    >
                         <div className="flex justify-between items-center mb-2">
                             <span className="text-xs font-bold text-blue uppercase">{report.segment}</span>
                             <span className="text-[10px] text-secondary">{new Date(report.timestamp).toLocaleString()}</span>
                         </div>
-                        <div className="text-xs text-primary line-clamp-3 font-mono opacity-80 whitespace-pre-wrap">
-                            {report.content.substring(0, 150)}...
-                        </div>
-                        <div className="mt-2 flex justify-end">
-                             <button
-                                onClick={() => {
-                                    navigator.clipboard.writeText(report.content);
-                                    alert("Report copied to clipboard!");
-                                }}
-                                className="text-xs font-bold text-blue hover:underline"
-                             >
-                                 Copy Content
-                             </button>
+                        <div className="text-xs text-primary line-clamp-2 font-mono opacity-80 whitespace-pre-wrap pointer-events-none">
+                            {report.content.substring(0, 100)}...
                         </div>
                     </div>
                 ))}
             </div>
         </Glass>
+    )}
+
+    {/* Report Viewer Modal */}
+    {selectedReport && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+            <Glass className="w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden shadow-2xl">
+                <div className="flex justify-between items-center p-4 border-b border-separator bg-bg-color">
+                    <div>
+                        <div className="text-sm font-bold text-blue uppercase">{selectedReport.segment} Report</div>
+                        <div className="text-xs text-secondary">{new Date(selectedReport.timestamp).toLocaleString()}</div>
+                    </div>
+                    <button
+                        onClick={() => setSelectedReport(null)}
+                        className="p-2 hover:bg-separator/20 rounded-full transition-colors"
+                    >
+                        <X size={20} />
+                    </button>
+                </div>
+                <div className="flex-1 overflow-y-auto p-4 bg-bg-color">
+                    <pre className="text-xs sm:text-sm font-mono whitespace-pre-wrap text-primary leading-relaxed">
+                        {selectedReport.content}
+                    </pre>
+                </div>
+                <div className="p-4 border-t border-separator bg-bg-color flex justify-end">
+                    <button
+                        onClick={() => {
+                            navigator.clipboard.writeText(selectedReport.content);
+                            setCopied(true);
+                            setTimeout(() => setCopied(false), 2000);
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue text-white rounded-lg font-bold text-sm"
+                    >
+                        {copied ? <Check size={16} /> : <Copy size={16} />}
+                        Copy to Clipboard
+                    </button>
+                </div>
+            </Glass>
+        </div>
     )}
     </div>
   );
