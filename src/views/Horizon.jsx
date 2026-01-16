@@ -33,7 +33,7 @@ class WidgetErrorBoundary extends React.Component {
   }
 }
 
-export const Horizon = () => {
+export const Horizon = ({ onGoToSystem }) => {
   const { metrics, logEntries } = useContext(StorageContext);
   const [segment, setSegment] = useState('Weekly');
   const [isEditing, setIsEditing] = useState(false);
@@ -103,7 +103,7 @@ export const Horizon = () => {
           title="Welcome to ORBIT"
           message="Your dashboard is empty. Configure your first metric to start tracking."
           actionLabel="Launch Setup"
-          onAction={() => document.getElementById('tab-System')?.click()} // Simple hack to switch tabs, ideally use Context
+          onAction={onGoToSystem}
         />
       )}
 

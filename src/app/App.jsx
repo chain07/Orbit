@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useMemo } from 'react';
+import React, { useState, useContext, useEffect, useMemo, useCallback } from 'react';
 import { LayoutDashboard, PenTool, Radio, Settings } from 'lucide-react';
 import '../styles/tokens.css';
 import '../styles/motion.css';
@@ -41,13 +41,17 @@ const AppContent = () => {
     setShowWizard(false);
   };
 
+  const handleGoToSystem = useCallback(() => {
+    setActiveTab('System');
+  }, []);
+
   const renderTab = () => {
     switch (activeTab) {
-      case 'Horizon': return <Horizon />;
+      case 'Horizon': return <Horizon onGoToSystem={handleGoToSystem} />;
       case 'Logger': return <Logger />;
       case 'Intel': return <Intel />;
       case 'System': return <System />;
-      default: return <Horizon />;
+      default: return <Horizon onGoToSystem={handleGoToSystem} />;
     }
   };
 
