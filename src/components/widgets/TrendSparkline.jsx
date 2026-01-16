@@ -13,9 +13,9 @@ import { Sparkline } from '../ui/charts/Sparkline';
  * }
  */
 export const TrendSparkline = ({ data }) => {
-  if (!data || !data.values) return null;
+  if (!data || !data.data) return null;
 
-  const { values = [], color = '#4f46e5', label = '', trendLabel = '' } = data;
+  const { data: values = [], color = '#4f46e5', label = '', trendLabel = '' } = data;
 
   return (
     <div className="flex flex-col h-full w-full justify-between">

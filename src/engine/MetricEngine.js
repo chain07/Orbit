@@ -138,11 +138,11 @@ export const MetricEngine = {
     switch (type) {
       case MetricType.BOOLEAN:
         const trueCount = metricLogs.filter(l => l.value).length;
-        return Math.min(100, (trueCount / metricLogs.length) * 100);
+        return Math.min(100, Math.max(0, (trueCount / metricLogs.length) * 100));
       case MetricType.NUMBER:
       case MetricType.PERCENTAGE:
         const sum = metricLogs.reduce((acc, l) => acc + l.value, 0);
-        return Math.min(100, (sum / (metricLogs.length * metricConfig.goal)) * 100);
+        return Math.min(100, Math.max(0, (sum / (metricLogs.length * (metricConfig.goal || 1))) * 100));
       default:
         return 0;
     }
@@ -175,7 +175,7 @@ export const MetricEngine = {
         return value ? 1 : 0;
       case MetricType.NUMBER:
       case MetricType.PERCENTAGE:
-        return value / metricConfig.goal;
+        return Math.min(1, Math.max(0, value / (metricConfig.goal || 1)));
       default:
         return 0;
     }

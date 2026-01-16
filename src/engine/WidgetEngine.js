@@ -125,7 +125,7 @@ export const WidgetEngine = {
       : 0;
 
     return {
-      values: values,
+      data: values,
       color: metric.color,
       label: 'Trend',
       trendLabel: trend > 0 ? `+${trend}%` : `${trend}%`
