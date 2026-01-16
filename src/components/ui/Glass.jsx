@@ -11,6 +11,11 @@ export default function Glass({
   return (
     <Component
       className={`glass ${className}`}
+      style={{
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        border: '0.5px solid var(--separator)'
+      }}
       {...props}
     >
       {children}

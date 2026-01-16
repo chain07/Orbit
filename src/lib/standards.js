@@ -1,11 +1,12 @@
 // src/lib/standards.js
 
 // Example schema for a standard reference item
-export const createStandard = ({ id, title, description = '', category = '', metadata = {} }) => ({
+export const createStandard = ({ id, title, description = '', category = '', sections = [], metadata = {} }) => ({
   id,
   title,
   description,
   category,
+  sections,
   metadata
 });
 
