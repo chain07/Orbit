@@ -3,7 +3,7 @@ import { StorageContext } from '../../context/StorageContext';
 import { RotateCcw } from 'lucide-react';
 
 export const TimeTracker = ({ metricId }) => {
-  const { metrics, addLogEntry } = useContext(StorageContext);
+  const { metrics, addTimeLog } = useContext(StorageContext);
   
   // State
   const [mode, setMode] = useState('timer'); // 'timer' | 'manual'
@@ -12,10 +12,14 @@ export const TimeTracker = ({ metricId }) => {
   // Timer State
   const [running, setRunning] = useState(false);
   const [elapsed, setElapsed] = useState(0); // in seconds
+  const [startTime, setStartTime] = useState(null); // Capture precise start time
   
   // Manual Entry State
   const [manualHours, setManualHours] = useState('');
   const [manualMinutes, setManualMinutes] = useState('');
+
+  // Notes State (New for Phase 4.2)
+  const [notes, setNotes] = useState('');
 
   // Sync prop if provided
   useEffect(() => {
@@ -26,6 +30,7 @@ export const TimeTracker = ({ metricId }) => {
   useEffect(() => {
     let timer;
     if (running) {
+      if (!startTime) setStartTime(new Date().toISOString()); // Set start time on first tick
       timer = setInterval(() => setElapsed(prev => prev + 1), 1000);
     }
     return () => clearInterval(timer);
@@ -44,34 +49,61 @@ export const TimeTracker = ({ metricId }) => {
     metrics.filter(m => m.type === 'duration' || m.type === 'number'), 
   [metrics]);
 
+  const getSelectedMetricLabel = () => {
+      const m = metrics.find(metric => metric.id === selectedMetricId);
+      return m ? (m.label || m.name) : 'Unknown Activity';
+  };
+
   const handleSave = () => {
     if (!selectedMetricId) {
       alert("Please select an activity first.");
       return;
     }
 
-    let valueToLog = 0;
+    let calculatedDuration = 0;
+    let finalStartTime = new Date().toISOString();
+    let finalEndTime = new Date().toISOString();
 
     if (mode === 'timer') {
       if (elapsed === 0) return;
-      valueToLog = elapsed / 3600; // Save as hours
+      calculatedDuration = elapsed / 3600; // Hours
+
+      // If timer was running, use the captured start time.
+      // If paused/stopped, logic might vary, but simplified here:
+      finalStartTime = startTime || new Date(Date.now() - elapsed * 1000).toISOString();
+      finalEndTime = new Date().toISOString();
+
       setElapsed(0);
       setRunning(false);
+      setStartTime(null);
     } else {
       const h = parseFloat(manualHours) || 0;
       const m = parseFloat(manualMinutes) || 0;
       if (h === 0 && m === 0) return;
-      valueToLog = h + (m / 60);
+
+      calculatedDuration = h + (m / 60);
+
+      // For manual entry, we approximate the timeframe to "now"
+      const now = new Date();
+      finalEndTime = now.toISOString();
+      finalStartTime = new Date(now.getTime() - (calculatedDuration * 3600 * 1000)).toISOString();
+
       setManualHours('');
       setManualMinutes('');
     }
 
-    // Save to TimeLog via StorageContext
-    addLogEntry({
-      metricId: selectedMetricId,
-      value: parseFloat(valueToLog.toFixed(2)),
-      timestamp: new Date().toISOString()
+    // Phase 4.2 Update: Call addTimeLog instead of addLogEntry
+    addTimeLog({
+      activityId: selectedMetricId, // Using correct activityId (metricId)
+      activityLabel: getSelectedMetricLabel(),
+      startTime: finalStartTime,
+      endTime: finalEndTime,
+      duration: parseFloat(calculatedDuration.toFixed(2)),
+      notes: notes
     });
+
+    // Clear notes after save
+    setNotes('');
   };
 
   return (
@@ -158,7 +190,7 @@ export const TimeTracker = ({ metricId }) => {
                   
                   {!running && (
                     <button 
-                      onClick={() => setElapsed(0)}
+                      onClick={() => { setElapsed(0); setStartTime(null); }}
                       className="px-4 py-4 border border-separator text-secondary rounded-xl font-bold btn-ios bg-white"
                     >
                       <RotateCcw size={20} />
@@ -203,6 +235,17 @@ export const TimeTracker = ({ metricId }) => {
             </button>
           </div>
         )}
+      </div>
+
+      {/* 4. Notes Field (New) */}
+      <div>
+          <label className="text-xs font-bold text-secondary uppercase ml-1">Notes</label>
+          <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Session notes..."
+              className="w-full p-3 mt-1 bg-bg-color border border-separator rounded-xl outline-none focus:border-blue min-h-[80px]"
+          />
       </div>
     </div>
   );

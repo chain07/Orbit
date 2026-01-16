@@ -1,7 +1,7 @@
 # ORBIT Naming Conventions
 
-**Version:** 1.0.0  
-**Last Updated:** 2026-01-16  
+**Version:** 1.1.0
+**Last Updated:** 2026-01-20
 **Status:** 🔒 LOCKED - Changes require architecture review
 
 ---
@@ -35,13 +35,15 @@ This document is the **single source of truth** for naming across the ORBIT code
 | `id` | string (UUID) | Unique identifier | `metric.id` |
 | `name` | string | Internal machine-readable key | `metric.name` (used in code logic) |
 | `label` | string | Human-readable display name | `metric.label` (shown in UI) |
-| `type` | string | Data type: `'boolean'` \| `'number'` \| `'duration'` | `metric.type` |
+| `type` | string | Data type: `'boolean'` \| `'number'` \| `'duration'` \| `'range'` \| `'select'` \| `'text'` | `metric.type` |
 | `goal` | number \| null | Target value for this metric | `metric.goal` |
 | `color` | string | Hex color code | `metric.color` (e.g., `'#007AFF'`) |
 | `widgetType` | string | Widget rendering type | `metric.widgetType` (e.g., `'ring'`, `'sparkline'`) |
 | `dashboardVisible` | boolean | Show on Horizon dashboard | `metric.dashboardVisible` |
 | `unit` | string (optional) | Display unit | `metric.unit` (e.g., `'hrs'`, `'reps'`) |
 | `displayOrder` | number (optional) | Sort order in UI | `metric.displayOrder` |
+| `range` | object | Range config ({min, max, step}) | `metric.range.min` |
+| `options` | string[] | Options for select type | `metric.options` |
 
 **CRITICAL RULES:**
 - ✅ Always use `metric.id` when filtering logs
@@ -69,6 +71,9 @@ This document is the **single source of truth** for naming across the ORBIT code
   - `type: 'boolean'` → `value: true/false`
   - `type: 'number'` → `value: number`
   - `type: 'duration'` → `value: number` (hours as decimal)
+  - `type: 'range'` → `value: number`
+  - `type: 'select'` → `value: string`
+  - `type: 'text'` → `value: string`
 
 ---
 
@@ -555,6 +560,7 @@ When reviewing PRs:
 
 | Date | Version | Change | Author |
 |------|---------|--------|--------|
+| 2026-01-20 | 1.1.0 | Added RANGE, SELECT, TEXT metric types. Expanded TimeLog schema. | Jules |
 | 2026-01-16 | 1.0.0 | Initial creation from stabilization audit | System Architect |
 
 ---
@@ -563,6 +569,3 @@ When reviewing PRs:
 
 When in doubt, ask: "Is this name consistent with existing usage in this document?"
 If no, update your code. If the pattern doesn't exist here, update this document first.
-```
-
----
