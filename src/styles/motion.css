@@ -30,6 +30,21 @@
   }
 }
 
+.slide-in {
+  animation: slideIn var(--dur-med) ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* -----------------------------
    Cards
 -------------------------------- */
@@ -37,6 +52,10 @@
   transition:
     transform var(--dur-fast) var(--ease-standard),
     box-shadow var(--dur-fast) var(--ease-standard);
+}
+
+.card:active {
+  transform: scale(0.98);
 }
 
 /* Optional hover (desktop only, safe to keep) */
