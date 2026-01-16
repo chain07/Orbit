@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import Glass from "./Glass";
-import "../styles/motion.css";
+import "../../styles/motion.css";
 
 export default function BottomNav({ tabs, activeIndex, onChange }) {
   const indicatorRef = useRef(null);
