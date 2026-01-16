@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { StorageContext } from '../../context/StorageContext';
+import SegmentedControl from '../../components/ui/SegmentedControl';
 import { RotateCcw } from 'lucide-react';
 
 export const TimeTracker = ({ metricId }) => {
@@ -110,24 +111,11 @@ export const TimeTracker = ({ metricId }) => {
     <div className="flex flex-col w-full gap-4">
       
       {/* 1. Mode Toggle */}
-      <div className="flex p-1 bg-separator bg-opacity-20 rounded-lg">
-        <button
-          onClick={() => setMode('timer')}
-          className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${
-            mode === 'timer' ? 'bg-card text-primary shadow-sm' : 'text-secondary'
-          }`}
-        >
-          Timer
-        </button>
-        <button
-          onClick={() => setMode('manual')}
-          className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${
-            mode === 'manual' ? 'bg-card text-primary shadow-sm' : 'text-secondary'
-          }`}
-        >
-          Manual Entry
-        </button>
-      </div>
+      <SegmentedControl
+        options={[{ label: 'Stopwatch', value: 'timer' }, { label: 'Manual Entry', value: 'manual' }]}
+        value={mode}
+        onChange={setMode}
+      />
 
       {/* 2. Activity Selector */}
       <div className="flex flex-col gap-1">
