@@ -1,5 +1,5 @@
 // src/engine/MetricEngine.js
-import { MetricType } from '../context/StorageContext';
+import { MetricType } from '../types/schemas';
 
 /**
  * MetricEngine

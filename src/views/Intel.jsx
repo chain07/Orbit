@@ -1,6 +1,6 @@
 import React, { useContext, useState, useMemo } from 'react';
 import { StorageContext } from '../context/StorageContext';
-import { WidgetEngine } from '../engine/WidgetEngine';
+import { WidgetDataEngine } from '../engine/WidgetDataEngine';
 import { HorizonAgent } from '../lib/horizonAgent';
 import { MetricEngine } from '../engine/MetricEngine';
 import { AnalyticsEngine } from '../engine/AnalyticsEngine';
@@ -33,7 +33,7 @@ export const Intel = () => {
 
   // Generate widgets
   const widgets = useMemo(() => 
-    WidgetEngine.generateWidgets(metrics, logEntries, segment), 
+    WidgetDataEngine.generateWidgets(metrics, logEntries, segment),
   [metrics, logEntries, segment]);
 
   // Calculate Real System Health & Stats
