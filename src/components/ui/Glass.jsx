@@ -14,7 +14,7 @@ export default function Glass({
       style={{
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
-        border: '0.5px solid var(--separator)'
+        border: '0.5px solid rgba(255,255,255,0.1)'
       }}
       {...props}
     >

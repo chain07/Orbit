@@ -10,17 +10,19 @@ export default function BottomNav({ tabs, activeIndex, onChange }) {
         {tabs.map((tab, i) => {
           const isActive = i === activeIndex;
           return (
-            <div
+            <motion.div
               key={tab.id}
               className={`tab-item ${isActive ? "active" : ""}`}
               onClick={() => onChange(i)}
               style={{ position: 'relative' }}
+              initial="idle"
+              whileTap="active"
             >
               {isActive && (
                 <motion.div
                   layoutId="activeTab"
                   className="tab-indicator-fluid"
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 35, mass: 1 }}
                   style={{
                     position: 'absolute',
                     inset: 0,
@@ -30,8 +32,17 @@ export default function BottomNav({ tabs, activeIndex, onChange }) {
                   }}
                 />
               )}
-              {tab.icon}
-            </div>
+              <motion.div
+                className="relative z-10"
+                variants={{
+                  idle: { scale: 1 },
+                  active: { scale: 0.97 }
+                }}
+                transition={{ type: "spring", stiffness: 500, damping: 35, mass: 1 }}
+              >
+                {tab.icon}
+              </motion.div>
+            </motion.div>
           );
         })}
       </Glass>
