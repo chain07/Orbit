@@ -1,10 +1,7 @@
 /* src/styles/index.css */
-
-/* 1. Design foundations */
 @import "./tokens.css";
 @import "./motion.css";
 
-/* 2. Reset & base */
 *,
 *::before,
 *::after {
@@ -19,22 +16,20 @@ html, body {
   width: 100%;
   background: var(--bg-color);
   color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
-  overflow: hidden; /* Prevent body scroll, let App handle it */
+  font-family: var(--font-system);
+  overflow: hidden;
 }
 
-/* 3. App layout */
 #root {
   height: 100%;
   width: 100%;
 }
 
-/* 4. Safe-area support */
 .safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: var(--safe-bottom);
 }
 
-/* 5. Layout Utilities */
+/* --- Layout Utils --- */
 .flex { display: flex; }
 .flex-col { flex-direction: column; }
 .items-center { align-items: center; }
@@ -49,30 +44,48 @@ html, body {
 .h-full { height: 100%; }
 .relative { position: relative; }
 
-/* 6. Typography */
+/* --- Typography Utils --- */
 .text-xs { font-size: 11px; }
 .text-sm { font-size: 13px; }
 .text-md { font-size: 15px; }
 .text-lg { font-size: 17px; }
 .text-xl { font-size: 20px; }
-.text-3xl { font-size: 34px; letter-spacing: -0.5px; } /* Hero Title */
-
+.text-3xl { font-size: 34px; letter-spacing: -0.5px; }
 .font-bold { font-weight: 700; }
 .font-medium { font-weight: 500; }
-.text-secondary { color: var(--text-secondary); }
-.text-primary { color: var(--text-primary); }
-.text-blue { color: var(--blue); }
-.text-red { color: var(--red); }
-.text-green { color: var(--green); }
 .uppercase { text-transform: uppercase; }
 .tracking-wide { letter-spacing: 0.5px; }
 
-/* 7. Component Classes */
+/* --- Color Utilities (Expanded) --- */
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+
+.text-blue { color: var(--blue); }
+.text-green { color: var(--green); }
+.text-red { color: var(--red); }
+.text-orange { color: var(--orange); }
+.text-yellow { color: var(--yellow); }
+.text-purple { color: var(--purple); }
+.text-pink { color: var(--pink); }
+.text-cyan { color: var(--cyan); }
+.text-indigo { color: var(--indigo); }
+
+.bg-blue { background-color: var(--blue); }
+.bg-green { background-color: var(--green); }
+.bg-red { background-color: var(--red); }
+.bg-orange { background-color: var(--orange); }
+.bg-yellow { background-color: var(--yellow); }
+.bg-purple { background-color: var(--purple); }
+.bg-pink { background-color: var(--pink); }
+.bg-cyan { background-color: var(--cyan); }
+.bg-indigo { background-color: var(--indigo); }
+
+/* --- Component Classes --- */
 .card {
   background-color: var(--card-bg);
-  border-radius: 20px;
+  border-radius: var(--radius-card);
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  box-shadow: var(--shadow-card);
   margin-bottom: 16px;
 }
 
@@ -81,17 +94,16 @@ html, body {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 0.5px solid rgba(0,0,0,0.05);
-  border-radius: 20px;
+  border-radius: var(--radius-card);
   padding: 20px;
   margin-bottom: 16px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-glass);
 }
 
 .dashed-border {
   border: 2px dashed var(--separator);
 }
 
-/* 8. Widget Grid */
 .widget-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
