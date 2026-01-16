@@ -34,6 +34,7 @@ export const StorageProvider = ({ children }) => {
         let parsed = JSON.parse(storedData);
 
         // Phase 1: Migrate Data
+        console.log("Migrating Data...", parsed);
         parsed = migrateData(parsed);
 
         if (parsed.metrics) {
@@ -43,6 +44,18 @@ export const StorageProvider = ({ children }) => {
         if (parsed.logEntries) {
             validateLogEntries(parsed.logEntries, parsed.metrics || []);
             setLogEntries(parsed.logEntries);
+
+            // Storage Reset Safeguard
+            if (parsed.logEntries.length === 0 && parsed.metrics && parsed.metrics.length > 0) {
+               // If we have metrics but zero logs after migration, something might be wrong with legacy conversion
+               // Only alert if we actually expected data (heuristic: checking raw string length before parse would be better but simple check is okay)
+               alert("Warning: Migration resulted in 0 log entries. If you expected data, please check your backup or 'Clear Data'.");
+            }
+        } else {
+             // Fallback for corruption
+             if (parsed.metrics && parsed.metrics.length > 0) {
+                 alert("Warning: Data corruption detected. Log entries are missing. Please 'Clear Data' in System if issues persist.");
+             }
         }
         if (parsed.widgetLayout) setWidgetLayout(parsed.widgetLayout);
         if (typeof parsed.onboardingComplete !== 'undefined') {

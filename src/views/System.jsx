@@ -113,6 +113,33 @@ export const System = () => {
   };
 
   // --- Data Management Handlers ---
+  const handleArchive = () => {
+    try {
+      // 1. Snapshot current state
+      const snapshot = {
+        metrics,
+        logEntries: exportData().logEntries, // using export helper to get consistent state
+        archivedAt: new Date().toISOString()
+      };
+
+      // 2. Load existing archive
+      const existingArchiveJson = localStorage.getItem('orbit_archive');
+      let archive = [];
+      if (existingArchiveJson) {
+        archive = JSON.parse(existingArchiveJson);
+      }
+
+      // 3. Append and Save
+      archive.push(snapshot);
+      localStorage.setItem('orbit_archive', JSON.stringify(archive));
+
+      alert(`Archive saved. Total snapshots: ${archive.length}`);
+    } catch (e) {
+      console.error("Archive failed", e);
+      alert("Failed to save archive (Quota exceeded?)");
+    }
+  };
+
   const handleExport = () => {
     const json = exportData();
     // Include Library in export
@@ -237,13 +264,18 @@ export const System = () => {
         <div className="flex flex-col gap-3">
           <div className="text-lg font-bold">Data Management</div>
           
-          {/* Import/Export */}
-          <div className="flex gap-2">
-            <button onClick={handleExport} className="flex-1 py-3 rounded-xl bg-blue text-white font-bold active:scale-95 transition-transform">Export JSON</button>
-            <label className="flex-1 py-3 rounded-xl border border-separator text-center font-bold cursor-pointer hover:bg-bg-color transition-colors active:scale-95">
-              Import JSON
-              <input type="file" accept="application/json" onChange={handleImport} className="hidden" />
-            </label>
+          {/* Import/Export/Archive */}
+          <div className="flex flex-col gap-2">
+             <div className="flex gap-2">
+                <button onClick={handleArchive} className="flex-1 py-3 rounded-xl bg-purple text-white font-bold active:scale-95 transition-transform">Save to Archive</button>
+             </div>
+             <div className="flex gap-2">
+                <button onClick={handleExport} className="flex-1 py-3 rounded-xl bg-blue text-white font-bold active:scale-95 transition-transform">Export JSON</button>
+                <label className="flex-1 py-3 rounded-xl border border-separator text-center font-bold cursor-pointer hover:bg-bg-color transition-colors active:scale-95">
+                Import JSON
+                <input type="file" accept="application/json" onChange={handleImport} className="hidden" />
+                </label>
+             </div>
           </div>
 
           {/* Danger Zone */}
