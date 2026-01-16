@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useMemo } from 'react';
+import React, { useState, useContext, useEffect, useMemo, useCallback } from 'react';
 import { LayoutDashboard, PenTool, Radio, Settings } from 'lucide-react';
 import '../styles/tokens.css';
 import '../styles/motion.css';
@@ -13,6 +13,7 @@ import { OnboardingWizard } from '../components/system/OnboardingWizard';
 
 const AppContent = () => {
   const [activeTab, setActiveTab] = useState('Horizon');
+  const [navigationParams, setNavigationParams] = useState(null);
   const { onboardingComplete, completeOnboarding } = useContext(StorageContext);
   const [showWizard, setShowWizard] = useState(false);
 
@@ -23,6 +24,22 @@ const AppContent = () => {
     { id: 'Intel', label: 'Intel', icon: <Radio size={24} /> },
     { id: 'System', label: 'System', icon: <Settings size={24} /> }
   ], []);
+
+  // Global Navigation Event Listener
+  useEffect(() => {
+    const handleNavigation = (event) => {
+      const { tab, metricId } = event.detail;
+      if (tab) {
+        setActiveTab(tab);
+        if (metricId) {
+          setNavigationParams({ metricId });
+        }
+      }
+    };
+
+    window.addEventListener('orbit-navigate', handleNavigation);
+    return () => window.removeEventListener('orbit-navigate', handleNavigation);
+  }, []);
 
   // Onboarding Logic:
   // 1. If onboardingComplete is FALSE (new user), show wizard.
@@ -41,13 +58,20 @@ const AppContent = () => {
     setShowWizard(false);
   };
 
+  const handleGoToSystem = useCallback(() => {
+    setActiveTab('System');
+  }, []);
+
   const renderTab = () => {
     switch (activeTab) {
-      case 'Horizon': return <Horizon />;
-      case 'Logger': return <Logger />;
+      case 'Horizon': return <Horizon onGoToSystem={handleGoToSystem} />;
+      case 'Logger':
+        // Pass params if active tab matches logic, otherwise null
+        // (Though technically we just want to pass it once or check if tab is logger)
+        return <Logger initialMetricId={navigationParams?.metricId} />;
       case 'Intel': return <Intel />;
       case 'System': return <System />;
-      default: return <Horizon />;
+      default: return <Horizon onGoToSystem={handleGoToSystem} />;
     }
   };
 
@@ -59,6 +83,8 @@ const AppContent = () => {
     const selectedTab = tabs[index];
     if (selectedTab) {
       setActiveTab(selectedTab.id);
+      // Clear navigation params on manual tab switch to prevent stuck state
+      setNavigationParams(null);
     }
   };
 

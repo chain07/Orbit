@@ -48,17 +48,23 @@ export const AnalyticsEngine = {
   },
 
   // ----------------------
-  // Trend delta calculation
-  // Compares average of current window vs previous window
-  // OPTIMIZED: Uses Map for O(1) metric log lookup
+  // Momentum Calculation (formerly Trend Deltas)
+  // Compares current 7-day window vs previous 7-day window
+  // Input: metrics, logs
+  // Output: Object { metricId: number (delta) }
   // ----------------------
-  trendDeltas: (metrics = [], logs = [], windowDays = 7) => {
+  calculateMomentum: (metrics = [], logs = []) => {
     const results = {};
+    const windowDays = 7;
     const today = new Date();
+
+    // Normalize dates to start of day for cleaner comparison?
+    // Or just use timestamps. Timestamps are fine for rolling windows.
+
     const currentWindowStart = new Date(today.getTime() - windowDays * 24 * 60 * 60 * 1000);
     const previousWindowStart = new Date(today.getTime() - 2 * windowDays * 24 * 60 * 60 * 1000);
 
-    // Pre-group logs by metricId
+    // Pre-group logs by metricId for O(1) lookup
     const logsByMetric = new Map();
     logs.forEach(l => {
       if (!logsByMetric.has(l.metricId)) logsByMetric.set(l.metricId, []);
@@ -68,6 +74,7 @@ export const AnalyticsEngine = {
     metrics.forEach(metric => {
       const metricLogs = logsByMetric.get(metric.id) || [];
 
+      // Sort logs by timestamp ascending
       metricLogs.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
       const currentWindowLogs = metricLogs.filter(l => new Date(l.timestamp) >= currentWindowStart);
@@ -81,10 +88,16 @@ export const AnalyticsEngine = {
       const previousAvg =
         previousWindowLogs.reduce((acc, l) => acc + l.value, 0) / (previousWindowLogs.length || 1);
 
-      results[metric.id] = currentAvg - previousAvg; // positive = upward trend
+      results[metric.id] = currentAvg - previousAvg; // positive = upward momentum
     });
 
     return results;
+  },
+
+  // Alias for backward compatibility if needed, but we should remove "trendDeltas" calls
+  trendDeltas: (metrics = [], logs = [], windowDays = 7) => {
+      // Mapping old call to new Momentum logic, ignoring windowDays argument for strict 7-day momentum
+      return AnalyticsEngine.calculateMomentum(metrics, logs);
   },
 
   // ----------------------

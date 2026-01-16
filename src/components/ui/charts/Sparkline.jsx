@@ -1,19 +1,22 @@
 import React, { useMemo } from 'react';
-import { motion } from 'framer-motion';
 
 /**
  * Sparkline
  * Smooth line chart with grid, axis labels, and gradient fill.
+ * Replaced Framer Motion with CSS transitions for interaction.
  *
  * Props:
  * - data: array of numbers (raw values)
+ * - comparisonData: array of numbers (optional, dashed line)
  * - labels: array of strings for X-axis (optional, defaults to index)
  * - height: chart height in px (default 120)
  * - lineColor: color of the line
  * - fillColor: color for gradient fill under line
+ * - showDots: boolean
  */
 export const Sparkline = ({
   data = [],
+  comparisonData = [],
   labels = [],
   height = 120,
   lineColor = '#4f46e5',
@@ -21,17 +24,18 @@ export const Sparkline = ({
   showDots = true,
 }) => {
   // 1. Calculations & Normalization
-  const { points, max, min, normalizedData, stepX } = useMemo(() => {
-    if (!data.length) return { points: '', max: 0, min: 0, normalizedData: [], stepX: 0 };
+  const { points, comparisonPoints, max, min, normalizedData, stepX } = useMemo(() => {
+    if (!data.length) return { points: '', comparisonPoints: '', max: 0, min: 0, normalizedData: [], stepX: 0 };
 
-    const maxVal = Math.max(...data);
-    const minVal = Math.min(...data);
+    const allValues = [...data, ...comparisonData];
+    const maxVal = Math.max(...allValues);
+    const minVal = Math.min(...allValues);
     // Add 10% padding to top, ensure baseline is at least 0 if data is positive
     const ceiling = maxVal === minVal ? maxVal + 10 : maxVal + (maxVal - minVal) * 0.1;
     const floor = minVal > 0 ? 0 : minVal; 
     const range = ceiling - floor;
 
-    const normalized = data.map(v => (v - floor) / (range || 1));
+    const normalize = (val) => (val - floor) / (range || 1);
     
     // SVG Coordinate mapping
     // We use a viewBox of 0 0 100 100 for easy scaling, preserving aspect ratio via CSS
@@ -39,33 +43,43 @@ export const Sparkline = ({
     const svgHeight = 100;
     const step = svgWidth / (data.length - 1 || 1);
 
-    const pts = normalized.map((n, i) => {
+    const pts = data.map((v, i) => {
       const x = i * step;
-      const y = svgHeight - (n * svgHeight); // Invert Y for SVG
+      const y = svgHeight - (normalize(v) * svgHeight); // Invert Y for SVG
       return `${x},${y}`;
     }).join(' ');
 
+    let compPts = '';
+    if (comparisonData.length > 0) {
+        compPts = comparisonData.map((v, i) => {
+            const x = i * step; // Assuming comparison data aligns with data length/step
+            const y = svgHeight - (normalize(v) * svgHeight);
+            return `${x},${y}`;
+        }).join(' ');
+    }
+
     return { 
       points: pts, 
+      comparisonPoints: compPts,
       max: ceiling, 
       min: floor, 
-      normalizedData: normalized,
+      normalizedData: data.map(normalize),
       stepX: step
     };
-  }, [data]);
+  }, [data, comparisonData]);
 
   if (!data.length) return null;
 
   const uniqueId = React.useId(); // Unique ID for gradient definition
 
   return (
-    <div className="w-full flex flex-col select-none" style={{ height: 'auto' }}>
+    <div className="w-full flex flex-col select-none group" style={{ height: 'auto' }}>
       
       {/* Chart Container */}
       <div className="relative w-full flex" style={{ height }}>
         
         {/* Y-Axis Labels (Left side overlay or separate column) */}
-        <div className="absolute left-0 top-0 bottom-6 flex flex-col justify-between text-[9px] font-mono text-secondary pointer-events-none z-10">
+        <div className="absolute left-0 top-0 bottom-6 flex flex-col justify-between text-[9px] font-mono text-secondary pointer-events-none z-10 transition-opacity duration-300 opacity-50 group-hover:opacity-100">
           <span>{Math.round(max)}</span>
           <span className="opacity-50">{Math.round((max + min) / 2)}</span>
           <span>{Math.round(min)}</span>
@@ -102,3 +116,60 @@ export const Sparkline = ({
                   vectorEffect="non-scaling-stroke" 
                 />
               ))}
+
+              {/* COMPARISON LINE (Dashed) */}
+              {comparisonPoints && (
+                  <polyline
+                    fill="none"
+                    stroke={lineColor}
+                    strokeOpacity="0.3"
+                    strokeWidth="1.5"
+                    strokeDasharray="4,4"
+                    points={comparisonPoints}
+                    vectorEffect="non-scaling-stroke"
+                  />
+              )}
+
+              {/* MAIN DATA AREA */}
+              <polyline
+                fill={`url(#gradient-${uniqueId})`}
+                stroke="none"
+                points={`0,100 ${points} 100,100`}
+              />
+
+              {/* MAIN LINE */}
+              <polyline
+                fill="none"
+                stroke={lineColor}
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                points={points}
+                vectorEffect="non-scaling-stroke"
+                className="transition-all duration-300 ease-out"
+              />
+
+              {/* DOTS */}
+              {showDots && normalizedData.map((n, i) => {
+                  const x = i * stepX;
+                  const y = 100 - (n * 100);
+                  return (
+                    <circle
+                      key={i}
+                      cx={x}
+                      cy={y}
+                      r="3" // Default radius (scaled by CSS if needed, but here it's SVG unit, using vector-effect to keep size constant?)
+                      fill={lineColor}
+                      stroke="white"
+                      strokeWidth="1.5"
+                      className="transition-all duration-300 ease-out opacity-0 group-hover:opacity-100 scale-0 group-hover:scale-100 origin-center"
+                      style={{ transformBox: 'fill-box' }}
+                    />
+                  );
+              })}
+            </svg>
+        </div>
+      </div>
+    </div>
+  );
+};

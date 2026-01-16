@@ -9,8 +9,8 @@
  * 3. Use Object.freeze() to prevent accidental mutations
  * 4. Export factory functions, not just classes (for validation)
  * 
- * @version 1.0.0
- * @last-updated 2026-01-16
+ * @version 1.1.0
+ * @last-updated 2026-01-20
  */
 
 // ============================================================================
@@ -25,7 +25,10 @@
 export const MetricType = Object.freeze({
   BOOLEAN: 'boolean',
   NUMBER: 'number',
-  DURATION: 'duration'
+  DURATION: 'duration',
+  RANGE: 'range',
+  SELECT: 'select',
+  TEXT: 'text'
 });
 
 /**
@@ -161,6 +164,8 @@ export class MetricConfig {
    * @param {string} [data.unit=''] - Display unit (e.g., 'hrs', 'reps')
    * @param {number} [data.displayOrder=0] - Sort order in UI
    * @param {string} [data.created] - ISO timestamp of creation
+   * @param {Object|null} [data.range] - Range config for RANGE type {min, max, step}
+   * @param {string[]} [data.options] - Options for SELECT type
    */
   constructor({
     id,
@@ -173,7 +178,9 @@ export class MetricConfig {
     dashboardVisible = true,
     unit = '',
     displayOrder = 0,
-    created = new Date().toISOString()
+    created = new Date().toISOString(),
+    range = null,
+    options = []
   }) {
     // Validate required fields
     validateUUID(id, 'id');
@@ -189,6 +196,24 @@ export class MetricConfig {
         throw new Error('goal must be a number or null for NUMBER/DURATION metrics');
       }
     }
+
+    // Validate range
+    if (type === MetricType.RANGE) {
+        if (!range || typeof range !== 'object') {
+            // Provide default if missing
+            range = { min: 1, max: 10, step: 1 };
+        }
+        if (typeof range.min !== 'number' || typeof range.max !== 'number') {
+            throw new Error('Range metrics must have min and max values');
+        }
+    }
+
+    // Validate options
+    if (type === MetricType.SELECT) {
+        if (!Array.isArray(options)) {
+            options = [];
+        }
+    }
     
     this.id = id;
     this.name = name;
@@ -201,6 +226,8 @@ export class MetricConfig {
     this.unit = unit;
     this.displayOrder = Number(displayOrder);
     this.created = created;
+    this.range = range;
+    this.options = options;
     
     // Freeze to prevent accidental mutation
     Object.freeze(this);
@@ -235,7 +262,9 @@ export class MetricConfig {
       dashboardVisible: this.dashboardVisible,
       unit: this.unit,
       displayOrder: this.displayOrder,
-      created: this.created
+      created: this.created,
+      range: this.range,
+      options: this.options
     };
   }
   
@@ -309,9 +338,7 @@ export class LogEntry {
    * @returns {LogEntry} LogEntry instance
    */
   static fromJSON(obj) {
-    return new LogEntry( 
-	
-	obj);
+    return new LogEntry(obj);
   }
   
   /**
@@ -541,7 +568,9 @@ export const createMetric = (data) => {
     dashboardVisible: true,
     unit: '',
     displayOrder: 0,
-    created: new Date().toISOString()
+    created: new Date().toISOString(),
+    range: null,
+    options: []
   };
   
   return new MetricConfig({ ...defaults, ...data });
@@ -601,14 +630,19 @@ export const validateMetricValue = (metric, value) => {
       
     case MetricType.NUMBER:
     case MetricType.DURATION:
+    case MetricType.RANGE:
       if (typeof value !== 'number') {
         throw new Error(`Value for ${metric.label} must be number, got ${typeof value}`);
       }
       if (isNaN(value)) {
         throw new Error(`Value for ${metric.label} cannot be NaN`);
       }
-      if (value < 0) {
-        throw new Error(`Value for ${metric.label} cannot be negative`);
+      break;
+
+    case MetricType.SELECT:
+    case MetricType.TEXT:
+      if (typeof value !== 'string') {
+          throw new Error(`Value for ${metric.label} must be string, got ${typeof value}`);
       }
       break;
       

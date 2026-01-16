@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { StorageContext } from '../../context/StorageContext';
 import { Glass } from '../../components/ui/Glass';
+import { motion } from 'framer-motion';
 
 export const OnboardingWizard = ({ onComplete }) => {
   const { addMetric } = useContext(StorageContext);
@@ -15,14 +16,14 @@ export const OnboardingWizard = ({ onComplete }) => {
   const [currentStep, setCurrentStep] = useState(0);
   
   // Initialize state for the three metrics we will build
-  [span_0](start_span)// Defaulting to diverse colors and widget types for a better starting dashboard[span_0](end_span)
+  // Defaulting to diverse colors and widget types for a better starting dashboard
   const [formData, setFormData] = useState({
     metric1: { name: '', type: 'boolean', goal: 1, color: '#007AFF', widgetType: 'ring' },
     metric2: { name: '', type: 'number', goal: 10, color: '#34C759', widgetType: 'sparkline' },
     metric3: { name: '', type: 'number', goal: 5, color: '#FF9500', widgetType: 'bar' }
   });
 
-  [span_1](start_span)// Implemented properly to handle updates (replacing unused placeholder)[span_1](end_span)
+  // Implemented properly to handle updates (replacing unused placeholder)
   const updateField = (metricSlot, field, value) => {
     setFormData(prev => ({
       ...prev,
@@ -73,7 +74,13 @@ export const OnboardingWizard = ({ onComplete }) => {
     if (onComplete) onComplete();
   };
 
-  [span_2](start_span)// Implements actual metric creation form for each step[span_2](end_span)
+  const handleSkip = () => {
+      if (confirm("Are you sure you want to skip setup? You can configure metrics later in System > Metrics.")) {
+          if (onComplete) onComplete();
+      }
+  };
+
+  // Implements actual metric creation form for each step
   const renderMetricForm = (metricSlot) => {
     const data = formData[metricSlot];
     return (
@@ -84,7 +91,7 @@ export const OnboardingWizard = ({ onComplete }) => {
             type="text" 
             value={data.name}
             onChange={(e) => updateField(metricSlot, 'name', e.target.value)}
-            placeholder="e.g. Morning Jog"
+            placeholder="e.g. Focus Time"
             className="w-full p-3 rounded-xl bg-bg-color border border-separator text-lg font-bold outline-none focus:border-blue"
           />
         </div>
@@ -125,7 +132,7 @@ export const OnboardingWizard = ({ onComplete }) => {
     );
   };
 
-  [span_3](start_span)// Implements goal setting form for step 4[span_3](end_span)
+  // Implements goal setting form for step 4
   const renderGoalForm = () => {
     // Only show goal inputs for metrics that are numeric
     const numericMetrics = ['metric1', 'metric2', 'metric3'].filter(k => formData[k].type === 'number' && formData[k].name);
@@ -179,25 +186,33 @@ export const OnboardingWizard = ({ onComplete }) => {
                 </div>
             </div>
 
-            [span_4](start_span){/* Replaced placeholder div with actual form inputs[span_4](end_span) */}
+            {/* Replaced placeholder div with actual form inputs */}
             <div className="min-h-[250px]">
               {currentStep < 3 ? renderMetricForm(steps[currentStep].key) : renderGoalForm()}
             </div>
 
-            <div className="flex justify-between pt-4 border-t border-separator">
-              <button
-                onClick={prevStep}
-                disabled={currentStep === 0}
-                className={`px-6 py-3 font-bold rounded-xl transition-colors ${currentStep === 0 ? 'text-secondary opacity-50 cursor-not-allowed' : 'text-primary hover:bg-bg-color'}`}
-              >
-                Back
-              </button>
-              <button
-                onClick={nextStep}
-                className="px-8 py-3 bg-blue text-white font-bold rounded-xl active:scale-95 transition-transform shadow-lg shadow-blue/20"
-              >
-                {currentStep === steps.length - 1 ? 'Launch ORBIT 🚀' : 'Next'}
-              </button>
+            <div className="flex flex-col gap-3 pt-4 border-t border-separator">
+                <div className="flex justify-between gap-3">
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={prevStep}
+                    disabled={currentStep === 0}
+                    className={`px-6 py-3 font-bold rounded-xl transition-colors ${currentStep === 0 ? 'text-secondary opacity-50 cursor-not-allowed' : 'text-primary hover:bg-bg-color'}`}
+                  >
+                    Back
+                  </motion.button>
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={nextStep}
+                    className="px-8 py-3 bg-blue text-white font-bold rounded-xl shadow-lg shadow-blue/20"
+                  >
+                    {currentStep === steps.length - 1 ? 'Launch ORBIT 🚀' : 'Next'}
+                  </motion.button>
+                </div>
+
+                <button onClick={handleSkip} className="text-xs text-secondary font-bold hover:text-primary transition-colors py-2">
+                    Skip Setup
+                </button>
             </div>
           </div>
         </Glass>

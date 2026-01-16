@@ -1,6 +1,8 @@
 import { MetricEngine } from './MetricEngine';
 import { AnalyticsEngine } from './AnalyticsEngine';
 
+const ARCHIVE_KEY = 'orbit_reports_archive';
+
 /**
  * ReportEngine
  * Logic for generating insights reports (text/markdown generation).
@@ -120,5 +122,49 @@ export const ReportEngine = {
     report += `End of Report\n`;
 
     return report;
+  },
+
+  /**
+   * Save Report Snapshot
+   * Persists the generated report text to localStorage.
+   */
+  saveReportSnapshot: (reportText, segment) => {
+    try {
+      const raw = localStorage.getItem(ARCHIVE_KEY);
+      const archive = raw ? JSON.parse(raw) : [];
+
+      const snapshot = {
+        id: crypto.randomUUID(),
+        timestamp: new Date().toISOString(),
+        segment,
+        content: reportText
+      };
+
+      archive.unshift(snapshot); // Add to top
+
+      // Limit archive size to last 50 reports to prevent storage issues
+      if (archive.length > 50) {
+          archive.length = 50;
+      }
+
+      localStorage.setItem(ARCHIVE_KEY, JSON.stringify(archive));
+      return true;
+    } catch (e) {
+      console.error("Failed to save report snapshot", e);
+      return false;
+    }
+  },
+
+  /**
+   * Get Archived Reports
+   * Retrieves snapshots from localStorage.
+   */
+  getArchivedReports: () => {
+    try {
+      const raw = localStorage.getItem(ARCHIVE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
   }
 };

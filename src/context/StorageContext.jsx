@@ -1,11 +1,13 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import {
   MetricConfig,
   LogEntry,
+  TimeLog,
   MetricType,
   WidgetType,
   createLog,
   createMetric,
+  createTimeLog,
   validateMetrics,
   validateMetricValue,
   validateLogEntries,
@@ -24,6 +26,7 @@ export const useStorage = () => {
 export const StorageProvider = ({ children }) => {
   const [metrics, setMetrics] = useState([]);
   const [logEntries, setLogEntries] = useState([]);
+  const [timeLogs, setTimeLogs] = useState([]);
   const [widgetLayout, setWidgetLayout] = useState({});
   const [onboardingComplete, setOnboardingComplete] = useState(false);
 
@@ -49,6 +52,13 @@ export const StorageProvider = ({ children }) => {
                console.warn("Log entries are empty after migration. Check schema integrity.");
             }
         }
+        if (parsed.timeLogs) {
+            // No strict validation for timeLogs in migration yet, but good to have
+            // Assuming array
+            if (Array.isArray(parsed.timeLogs)) {
+                setTimeLogs(parsed.timeLogs);
+            }
+        }
         if (parsed.widgetLayout) setWidgetLayout(parsed.widgetLayout);
         if (typeof parsed.onboardingComplete !== 'undefined') {
           setOnboardingComplete(parsed.onboardingComplete);
@@ -63,6 +73,7 @@ export const StorageProvider = ({ children }) => {
     const dataToSave = {
       metrics,
       logEntries,
+      timeLogs,
       widgetLayout,
       onboardingComplete
     };
@@ -75,23 +86,24 @@ export const StorageProvider = ({ children }) => {
         console.error("Failed to save to localStorage", e);
       }
     }
-  }, [metrics, logEntries, widgetLayout, onboardingComplete]);
+  }, [metrics, logEntries, timeLogs, widgetLayout, onboardingComplete]);
 
-  const addMetric = (metricData) => {
+  const addMetric = useCallback((metricData) => {
     const newMetric = createMetric(metricData);
     setMetrics(prev => [...prev, newMetric]);
-  };
+  }, []);
 
-  const updateMetric = (updatedMetric) => {
+  const updateMetric = useCallback((updatedMetric) => {
     setMetrics(prev => prev.map(m => m.id === updatedMetric.id ? updatedMetric : m));
-  };
+  }, []);
 
-  const deleteMetric = (id) => {
+  const deleteMetric = useCallback((id) => {
     setMetrics(prev => prev.filter(m => m.id !== id));
     setLogEntries(prev => prev.filter(l => l.metricId !== id));
-  };
+    setTimeLogs(prev => prev.filter(l => l.activityId !== id));
+  }, []);
 
-  const addLogEntry = (entryData) => {
+  const addLogEntry = useCallback((entryData) => {
     // ENFORCEMENT: Strictly require metricId. metricKey is prohibited.
     if (!entryData.metricId) {
       throw new Error("MANDATORY_SCHEMA_VIOLATION: addLogEntry requires a valid metricId.");
@@ -104,13 +116,35 @@ export const StorageProvider = ({ children }) => {
     });
 
     setLogEntries(prev => [...prev, newEntry]);
-  };
+  }, []);
 
-  const completeOnboarding = () => {
+  const addTimeLog = useCallback((timeLogData) => {
+      const newTimeLog = createTimeLog({
+          activityId: timeLogData.activityId || timeLogData.metricId, // Support both for flexibility
+          activityLabel: timeLogData.activityLabel,
+          startTime: timeLogData.startTime,
+          endTime: timeLogData.endTime,
+          duration: timeLogData.duration,
+          notes: timeLogData.notes
+      });
+
+      setTimeLogs(prev => [...prev, newTimeLog]);
+
+      // OPTIONAL: Also add a simplified LogEntry for duration analytics if needed
+      // But adhering to strict separation, analytics engines should look at timeLogs for duration metrics if needed.
+      // However, current analytics engine looks at logEntries.
+      // For Phase 4.2 compliance, we persist to timeLogs.
+      // If we want this to show up in charts immediately without updating AnalyticsEngine, we might need to dual-log.
+      // But the instruction says "persist it to the timeLogs array, not just a generic numeric LogEntry".
+      // This implies we SHOULD NOT add a generic LogEntry, or at least that's the primary goal.
+      // I will implement strictly as requested: persist to timeLogs.
+  }, []);
+
+  const completeOnboarding = useCallback(() => {
     setOnboardingComplete(true);
-  };
+  }, []);
 
-  const importData = (jsonData) => {
+  const importData = useCallback((jsonData) => {
     if (!jsonData) return;
     
     // Apply migration to imported data
@@ -130,6 +164,10 @@ export const StorageProvider = ({ children }) => {
       setLogEntries(validLogs);
     }
 
+    if (Array.isArray(migrated.timeLogs)) {
+        setTimeLogs(migrated.timeLogs);
+    }
+
     if (migrated.widgetLayout && typeof migrated.widgetLayout === 'object') {
       setWidgetLayout(migrated.widgetLayout);
     }
@@ -137,43 +175,64 @@ export const StorageProvider = ({ children }) => {
     if (typeof migrated.onboardingComplete !== 'undefined') {
         setOnboardingComplete(migrated.onboardingComplete);
     }
-  };
+  }, []);
 
-  const exportData = () => {
+  const exportData = useCallback(() => {
     return {
       metrics,
       logEntries,
+      timeLogs,
       widgetLayout,
       onboardingComplete,
       exportedAt: new Date().toISOString()
     };
-  };
+  }, [metrics, logEntries, timeLogs, widgetLayout, onboardingComplete]);
 
-  const clearAllData = () => {
+  const clearAllData = useCallback(() => {
     setMetrics([]);
     setLogEntries([]);
+    setTimeLogs([]);
     setWidgetLayout({});
     setOnboardingComplete(false);
     localStorage.removeItem('orbit_db');
-  };
+  }, []);
+
+  const value = useMemo(() => ({
+    metrics,
+    logEntries,
+    timeLogs,
+    widgetLayout,
+    onboardingComplete,
+    addMetric,
+    updateMetric,
+    deleteMetric,
+    addLogEntry,
+    addTimeLog,
+    completeOnboarding,
+    importData,
+    importJSON: importData,
+    exportData,
+    exportJSON: exportData,
+    clearAllData
+  }), [
+    metrics,
+    logEntries,
+    timeLogs,
+    widgetLayout,
+    onboardingComplete,
+    addMetric,
+    updateMetric,
+    deleteMetric,
+    addLogEntry,
+    addTimeLog,
+    completeOnboarding,
+    importData,
+    exportData,
+    clearAllData
+  ]);
 
   return (
-    <StorageContext.Provider value={{
-      metrics,
-      logEntries,
-      widgetLayout,
-      onboardingComplete,
-      addMetric,
-      updateMetric,
-      deleteMetric,
-      addLogEntry,
-      completeOnboarding,
-      importData,
-      importJSON: importData,
-      exportData,
-      exportJSON: exportData,
-      clearAllData
-    }}>
+    <StorageContext.Provider value={value}>
       {children}
     </StorageContext.Provider>
   );
