@@ -1,6 +1,6 @@
 // src/engine/AnalyticsEngine.js
 import { MetricEngine } from './MetricEngine';
-import { MetricType } from '../context/StorageContext';
+import { MetricType } from '../types/schemas';
 
 /**
  * AnalyticsEngine
