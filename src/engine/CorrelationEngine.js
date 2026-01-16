@@ -8,28 +8,35 @@ export const CorrelationEngine = {
   /**
    * Compute Pearson correlation coefficient between two arrays
    * Returns null if arrays are empty or unequal length
+   * OPTIMIZED: Single-pass calculation (O(N) instead of 3N)
    */
   pearson: (arrX, arrY) => {
-    if (!arrX.length || !arrY.length || arrX.length !== arrY.length) return null;
-
     const n = arrX.length;
-    const meanX = arrX.reduce((a, b) => a + b, 0) / n;
-    const meanY = arrY.reduce((a, b) => a + b, 0) / n;
+    if (!n || arrY.length !== n || n === 0) return null;
 
-    let numerator = 0;
-    let denomX = 0;
-    let denomY = 0;
+    let sumX = 0;
+    let sumY = 0;
+    let sumXY = 0;
+    let sumX2 = 0;
+    let sumY2 = 0;
 
     for (let i = 0; i < n; i++) {
-      const dx = arrX[i] - meanX;
-      const dy = arrY[i] - meanY;
-      numerator += dx * dy;
-      denomX += dx * dx;
-      denomY += dy * dy;
+      const x = arrX[i];
+      const y = arrY[i];
+      sumX += x;
+      sumY += y;
+      sumXY += x * y;
+      sumX2 += x * x;
+      sumY2 += y * y;
     }
 
-    const denominator = Math.sqrt(denomX * denomY);
-    return denominator === 0 ? 0 : numerator / denominator;
+    const numerator = (n * sumXY) - (sumX * sumY);
+    const denomX = (n * sumX2) - (sumX * sumX);
+    const denomY = (n * sumY2) - (sumY * sumY);
+
+    if (denomX === 0 || denomY === 0) return 0;
+
+    return numerator / Math.sqrt(denomX * denomY);
   },
 
   /**
@@ -56,7 +63,10 @@ export const CorrelationEngine = {
    * metrics: array of MetricConfig { id }
    * logs: array of LogEntry { metricId, value }
    * lagDays: optional lag to apply to second metric
-   * OPTIMIZED: Pre-process logs into Map<metricId, sortedValues> to avoid O(N) sort/filter in nested loop
+   * OPTIMIZED:
+   * 1. Pre-process logs into Map<metricId, sortedValues>
+   * 2. Use string comparison for timestamps (avoid Date parsing overhead)
+   * 3. Use single-pass Pearson calculation
    * Returns: { 'metricId1-metricId2': correlation }
    */
   pairwiseCorrelations: (metrics = [], logs = [], lagDays = 0) => {
@@ -68,13 +78,19 @@ export const CorrelationEngine = {
 
     // Grouping Pass: O(N)
     logs.forEach(l => {
-      if (!grouped.has(l.metricId)) grouped.set(l.metricId, []);
-      grouped.get(l.metricId).push(l);
+      let list = grouped.get(l.metricId);
+      if (!list) {
+        list = [];
+        grouped.set(l.metricId, list);
+      }
+      list.push(l);
     });
 
     // Sorting Pass: O(M * K log K) where K is avg logs per metric
     grouped.forEach((list, id) => {
-      list.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      // OPTIMIZATION: String comparison is significantly faster than new Date()
+      // Relies on timestamps being valid ISO strings (enforced by schema)
+      list.sort((a, b) => (a.timestamp < b.timestamp ? -1 : (a.timestamp > b.timestamp ? 1 : 0)));
       valuesMap.set(id, list.map(l => l.value));
     });
 
