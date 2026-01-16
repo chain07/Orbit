@@ -26,10 +26,17 @@ export const MetricEngine = {
   calculateCurrentStreak: (logs = []) => {
     if (!logs || logs.length === 0) return 0;
 
-    // Get unique dates sorted descending
-    const uniqueDates = Array.from(new Set(
-      logs.map(l => new Date(l.timestamp).toLocaleDateString())
-    )).map(d => new Date(d)).sort((a, b) => b - a);
+    // Get unique dates (normalized to midnight) sorted descending
+    const uniqueDayTimestamps = new Set();
+    logs.forEach(l => {
+      const d = new Date(l.timestamp);
+      d.setHours(0, 0, 0, 0);
+      uniqueDayTimestamps.add(d.getTime());
+    });
+
+    const uniqueDates = Array.from(uniqueDayTimestamps)
+      .map(ts => new Date(ts))
+      .sort((a, b) => b - a);
 
     if (uniqueDates.length === 0) return 0;
 
@@ -62,9 +69,16 @@ export const MetricEngine = {
   calculateBestStreak: (logs = []) => {
     if (!logs || logs.length === 0) return 0;
 
-    const uniqueDates = Array.from(new Set(
-      logs.map(l => new Date(l.timestamp).toLocaleDateString())
-    )).map(d => new Date(d)).sort((a, b) => b - a);
+    const uniqueDayTimestamps = new Set();
+    logs.forEach(l => {
+      const d = new Date(l.timestamp);
+      d.setHours(0, 0, 0, 0);
+      uniqueDayTimestamps.add(d.getTime());
+    });
+
+    const uniqueDates = Array.from(uniqueDayTimestamps)
+      .map(ts => new Date(ts))
+      .sort((a, b) => b - a);
 
     if (uniqueDates.length === 0) return 0;
 
@@ -117,9 +131,16 @@ export const MetricEngine = {
   // NEW: Get Value for Specific Date
   // ----------------------
   getValueForDate: (logs = [], date) => {
-    const target = new Date(date).toLocaleDateString();
+    const target = new Date(date);
+    target.setHours(0, 0, 0, 0);
+    const targetTime = target.getTime();
+
     return logs
-      .filter(l => new Date(l.timestamp).toLocaleDateString() === target)
+      .filter(l => {
+        const d = new Date(l.timestamp);
+        d.setHours(0, 0, 0, 0);
+        return d.getTime() === targetTime;
+      })
       .reduce((acc, l) => acc + (parseFloat(l.value) || 0), 0);
   },
 
