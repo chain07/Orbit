@@ -1,3 +1,5 @@
+/* src/styles/tokens.css */
+
 /* =========================
    DayBook Prime — Design Tokens
    Extracted from Dashboard.html
@@ -22,9 +24,20 @@
   --green: #34C759;
   --red: #FF3B30;
   --orange: #FF9500;
+  --yellow: #FFCC00;
   --purple: #AF52DE;
   --indigo: #5856D6;
   --pink: #FF2D55;
+
+  /* ---------- Chart / Category Colors ---------- */
+  --color-sleep: #AF52DE;
+  --color-gym: #FF2D55;
+  --color-study: #FF9500;
+  --color-social: #38C7F4;
+  --color-media: #007AFF;
+  --color-games: #FF3B30;
+  --color-chores: #5AC8FA;
+  --color-other: #8E8E93;
 
   /* ---------- State / Telemetry Colors ---------- */
   --color-flow: #34C759;
