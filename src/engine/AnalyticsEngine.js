@@ -8,6 +8,35 @@ import { MetricType } from '../context/StorageContext';
  */
 export const AnalyticsEngine = {
   // ----------------------
+  // NEW: Calculate Trend (Percentage Change)
+  // Input: Array of numbers (e.g. last 7 days values)
+  // Output: Integer percentage (e.g. 15 for +15%, -10 for -10%)
+  // ----------------------
+  calculateTrend: (values = []) => {
+    if (!values || values.length < 2) return 0;
+
+    // Split data into two halves to compare recent vs previous performance
+    const mid = Math.floor(values.length / 2);
+    const firstHalf = values.slice(0, mid);
+    const secondHalf = values.slice(mid); // If odd length, second half includes the middle/extra item
+
+    // Calculate averages
+    const getAvg = (arr) => arr.reduce((a, b) => a + b, 0) / (arr.length || 1);
+    const avgFirst = getAvg(firstHalf);
+    const avgSecond = getAvg(secondHalf);
+
+    // Prevent divide by zero
+    if (avgFirst === 0) {
+      return avgSecond > 0 ? 100 : 0;
+    }
+
+    // Calculate percentage change
+    const percentChange = ((avgSecond - avgFirst) / avgFirst) * 100;
+    
+    return Math.round(percentChange);
+  },
+
+  // ----------------------
   // Rolling averages per metric
   // ----------------------
   rollingAverages: (metrics = [], logs = [], windowDays = 7) => {
