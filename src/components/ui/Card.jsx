@@ -1,6 +1,6 @@
 import React from "react";
-import "../styles/motion.css";
-import "../styles/tokens.css"; // or your base css file
+import "../../styles/motion.css";
+import "../../styles/tokens.css";
 
 export default function Card({
   children,
