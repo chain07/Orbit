@@ -41,8 +41,19 @@ export const AnalyticsEngine = {
   // ----------------------
   rollingAverages: (metrics = [], logs = [], windowDays = 7) => {
     const results = {};
+
+    // Pre-group logs by metricId
+    const logsByMetric = new Map();
+    logs.forEach(l => {
+      if (!logsByMetric.has(l.metricId)) logsByMetric.set(l.metricId, []);
+      logsByMetric.get(l.metricId).push(l);
+    });
+
     metrics.forEach(metric => {
-      results[metric.id] = MetricEngine.rollingAverage(logs, metric.id, windowDays);
+      const metricLogs = logsByMetric.get(metric.id) || [];
+      // Pass only the logs for this metric to MetricEngine
+      // MetricEngine will filter by metric.id again, but since we pass only relevant logs, it's efficient
+      results[metric.id] = MetricEngine.rollingAverage(metricLogs, metric.id, windowDays);
     });
     return results;
   },
@@ -105,8 +116,16 @@ export const AnalyticsEngine = {
   // ----------------------
   normalizedMetrics: (metrics = [], logs = []) => {
     const results = {};
+
+    // Pre-group logs by metricId
+    const logsByMetric = new Map();
+    logs.forEach(l => {
+      if (!logsByMetric.has(l.metricId)) logsByMetric.set(l.metricId, []);
+      logsByMetric.get(l.metricId).push(l);
+    });
+
     metrics.forEach(metric => {
-      const metricLogs = logs.filter(l => l.metricId === metric.id);
+      const metricLogs = logsByMetric.get(metric.id) || [];
       results[metric.id] = metricLogs.map(l => MetricEngine.normalizeValue(metric, l.value));
     });
     return results;
