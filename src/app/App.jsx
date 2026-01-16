@@ -8,7 +8,7 @@ import { Horizon } from '../views/Horizon';
 import { Logger } from '../views/Logger';
 import { Intel } from '../views/Intel';
 import { System } from '../views/System';
-import { BottomNav } from '../components/ui/BottomNav';
+import BottomNav from '../components/ui/BottomNav';
 import { OnboardingWizard } from '../components/system/OnboardingWizard';
 
 const AppContent = () => {
@@ -51,6 +51,17 @@ const AppContent = () => {
     }
   };
 
+  // Find active index from activeTab ID
+  const activeIndex = tabs.findIndex(tab => tab.id === activeTab);
+
+  // Handler that receives index and converts to ID
+  const handleTabChange = (index) => {
+    const selectedTab = tabs[index];
+    if (selectedTab) {
+      setActiveTab(selectedTab.id);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full w-full bg-bg-color font-system text-primary overflow-hidden relative">
       {/* Main Content Area - Scrollable */}
@@ -61,8 +72,8 @@ const AppContent = () => {
       {/* Navigation - Fixed Bottom */}
       <BottomNav
         tabs={tabs}
-        activeId={activeTab}
-        onChange={setActiveTab}
+        activeIndex={activeIndex}
+        onChange={handleTabChange}
       />
 
       {/* Onboarding Overlay */}
