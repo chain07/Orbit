@@ -1,77 +1,40 @@
-import React, { useContext, useState, useMemo } from 'react';
+import React, { useContext, useState } from 'react';
 import { StorageContext } from '../context/StorageContext';
-import { SegmentedControl } from '../components/ui/SegmentedControl';
-import { Glass } from '../components/ui/Glass';
-// CRITICAL FIX: Correct import path
-import { StackedBar } from '../components/ui/charts/StackedBar';
+import SegmentedControl from '../components/ui/SegmentedControl';
+import Glass from '../components/ui/Glass';
+import { DailyCheckInForm } from '../components/logger/DailyCheckInForm';
+import { TimeTracker } from '../components/logger/TimeTracker';
+import { Timeline } from '../components/logger/Timeline';
 import '../styles/motion.css';
 
 export const Logger = () => {
-  const { metrics, logEntries, addLogEntry } = useContext(StorageContext);
+  const { metrics, addLogEntry } = useContext(StorageContext);
   
-  // State
-  const [segment, setSegment] = useState('Daily');
-  const segments = ['Daily', 'Weekly', 'Monthly'];
+  // View State
+  const [activeMode, setActiveMode] = useState('checkin'); // 'checkin' | 'tracker'
   
-  const [newEntry, setNewEntry] = useState({
-    metricId: metrics.length > 0 ? metrics[0].id : '',
-    value: ''
-  });
+  // Tracker State
+  const [trackerMetricId, setTrackerMetricId] = useState('');
+  const [manualDuration, setManualDuration] = useState('');
 
-  const handleAdd = () => {
-    if (!newEntry.metricId || newEntry.value === '') return;
+  const modes = [
+    { label: 'Daily Check-In', value: 'checkin' },
+    { label: 'Time Tracker', value: 'tracker' }
+  ];
+
+  // Filter metrics for the Time Tracker (usually Number/Duration types)
+  const timeMetrics = metrics.filter(m => m.type === 'number' || m.type === 'duration');
+
+  const handleManualLog = () => {
+    if (!trackerMetricId || !manualDuration) return;
     
     addLogEntry({
-      metricId: newEntry.metricId,
-      value: parseFloat(newEntry.value),
+      metricId: trackerMetricId,
+      value: parseFloat(manualDuration),
       timestamp: new Date().toISOString()
     });
-    setNewEntry({ ...newEntry, value: '' });
+    setManualDuration('');
   };
-
-  // Helper to filter entries
-  const filteredEntries = useMemo(() => {
-    const now = new Date();
-    return logEntries.filter(entry => {
-      const ts = new Date(entry.timestamp);
-      if (segment === 'Daily') return ts.toDateString() === now.toDateString();
-      if (segment === 'Weekly') {
-        const weekStart = new Date(now);
-        weekStart.setDate(now.getDate() - 7); 
-        return ts >= weekStart;
-      }
-      if (segment === 'Monthly') return ts.getMonth() === now.getMonth() && ts.getFullYear() === now.getFullYear();
-      return true;
-    });
-  }, [logEntries, segment]);
-
-  // Chart Data Construction
-  const chartData = useMemo(() => {
-    if (!metrics.length || !filteredEntries.length) return null;
-
-    const entries = metrics.map(m => {
-      const entriesForMetric = filteredEntries.filter(e => e.metricId === m.id);
-      // Group values into a single object for the StackedBar expectation
-      const values = entriesForMetric.reduce((acc, curr, idx) => {
-        // StackedBar expects keys for segments, here we treat individual entries as segments
-        // Limiting to last 10 to prevent chart explosion
-        if (idx < 10) acc[`${idx}`] = curr.value; 
-        return acc;
-      }, {});
-      
-      return {
-        label: m.name, // The X-Axis label (Metric Name)
-        values: values // The stack segments
-      };
-    });
-
-    const colors = metrics.reduce((acc, m) => {
-      acc[m.name] = m.color || '#8E8E93';
-      return acc;
-    }, {});
-
-    return { entries, colors };
-  }, [metrics, filteredEntries]);
 
   return (
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
@@ -82,66 +45,103 @@ export const Logger = () => {
          <p className="text-secondary font-medium">Input engine.</p>
       </div>
 
+      {/* Main Mode Switch */}
       <SegmentedControl
-        options={segments.map(s => ({ label: s, value: s }))}
-        value={segment}
-        onChange={setSegment}
+        options={modes}
+        value={activeMode}
+        onChange={setActiveMode}
       />
 
-      {/* INPUT CARD */}
-      <Glass className="p-4">
-        <div className="flex flex-col gap-4">
-          <div className="text-sm font-bold text-secondary uppercase tracking-wide">Quick Entry</div>
-          
-          <div className="flex gap-3">
-            <div className="flex-1 relative">
-              <select
-                value={newEntry.metricId}
-                onChange={e => setNewEntry({ ...newEntry, metricId: e.target.value })}
-                className="w-full p-4 rounded-xl bg-bg-color border-none text-lg font-bold appearance-none focus:ring-2 ring-blue outline-none"
-              >
-                {metrics.map(m => (
-                  <option key={m.id} value={m.id}>{m.name}</option>
-                ))}
-              </select>
+      {/* MODE: DAILY CHECK-IN */}
+      {activeMode === 'checkin' && (
+        <div className="animate-fade-in">
+          <DailyCheckInForm />
+        </div>
+      )}
+
+      {/* MODE: TIME TRACKER */}
+      {activeMode === 'tracker' && (
+        <div className="flex flex-col gap-4 animate-fade-in">
+          <Glass className="p-4">
+            <div className="flex flex-col gap-4">
+              <div className="text-sm font-bold text-secondary uppercase tracking-wide">
+                Active Session
+              </div>
+
+              {timeMetrics.length > 0 ? (
+                <>
+                  {/* Metric Selector */}
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-bold text-secondary">Select Activity</label>
+                    <div className="relative">
+                      <select
+                        value={trackerMetricId}
+                        onChange={(e) => setTrackerMetricId(e.target.value)}
+                        className="w-full p-3 rounded-xl bg-bg-color border border-separator text-lg font-bold appearance-none outline-none focus:border-blue"
+                      >
+                        <option value="" disabled>Choose metric...</option>
+                        {timeMetrics.map(m => (
+                          <option key={m.id} value={m.id}>{m.name}</option>
+                        ))}
+                      </select>
+                      <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none opacity-50">
+                        ▼
+                      </div>
+                    </div>
+                  </div>
+
+                  {trackerMetricId ? (
+                    <div className="flex flex-col gap-6 mt-2">
+                      {/* Stopwatch Component */}
+                      <div className="p-4 rounded-xl bg-bg-color border border-separator flex flex-col items-center justify-center gap-2">
+                        <span className="text-xs font-bold text-secondary uppercase">Stopwatch</span>
+                        <TimeTracker metricKey={trackerMetricId} />
+                      </div>
+
+                      {/* Manual Entry Fallback */}
+                      <div className="border-t border-separator pt-4">
+                        <div className="text-xs font-bold text-secondary uppercase mb-2">Manual Log</div>
+                        <div className="flex gap-2">
+                          <input
+                            type="number"
+                            value={manualDuration}
+                            onChange={(e) => setManualDuration(e.target.value)}
+                            placeholder="Hours (e.g. 1.5)"
+                            className="flex-1 p-3 rounded-xl bg-bg-color border border-separator font-bold outline-none"
+                          />
+                          <button 
+                            onClick={handleManualLog}
+                            disabled={!manualDuration}
+                            className="px-6 py-3 rounded-xl bg-blue text-white font-bold disabled:opacity-50 active:scale-95 transition-transform"
+                          >
+                            Log
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-6 text-secondary italic opacity-60">
+                      Select an activity above to start tracking.
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-4 text-secondary">
+                  No duration metrics found. Go to System to add numeric metrics.
+                </div>
+              )}
             </div>
-            
-            <input
-              type="number"
-              value={newEntry.value}
-              onChange={e => setNewEntry({ ...newEntry, value: e.target.value })}
-              placeholder="0.0"
-              className="w-24 p-4 rounded-xl bg-bg-color border-none text-lg font-bold text-center focus:ring-2 ring-blue outline-none"
-            />
-          </div>
-          
-          <button 
-            onClick={handleAdd} 
-            className="w-full py-4 rounded-xl bg-blue text-white font-bold text-lg active:scale-95 transition-transform"
-          >
-            Log Entry
-          </button>
-        </div>
-      </Glass>
-
-      {/* VISUALIZATION */}
-      {chartData && (
-        <Glass className="p-4">
-          <div className="text-sm font-bold text-secondary uppercase tracking-wide mb-4">Recent Distribution</div>
-          <StackedBar
-            data={chartData.entries}
-            colors={chartData.colors}
-            height={200}
-          />
-        </Glass>
-      )}
-
-      {/* History List (Fall back if no chart data) */}
-      {!chartData && (
-        <div className="text-center text-secondary opacity-50 py-10 font-medium">
-          No logs found for this period.
+          </Glass>
         </div>
       )}
+
+      {/* TIMELINE VISUALIZATION (Shared across modes) */}
+      <div className="flex flex-col gap-2 mt-2">
+        <div className="text-sm font-bold text-secondary uppercase tracking-wide px-1">
+          Today's Stream
+        </div>
+        <Timeline />
+      </div>
     </div>
   );
 };
