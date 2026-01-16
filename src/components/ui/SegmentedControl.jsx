@@ -38,8 +38,11 @@ export default function SegmentedControl({
           x: `${(index === -1 ? 0 : index) * 100}%`,
           opacity: index === -1 ? 0 : 1
         }}
-        transition={{ type: "spring", stiffness: 400, damping: 30 }}
-        style={{ width: `calc((100% - 4px) / ${normalizedOptions.length})` }}
+        transition={{ type: "spring", stiffness: 500, damping: 35, mass: 1 }}
+        style={{
+          width: `calc((100% - 4px) / ${normalizedOptions.length})`,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.12)'
+        }}
       />
       
       {normalizedOptions.map((opt, i) => {
@@ -61,7 +64,7 @@ export default function SegmentedControl({
             className="seg-btn"
             style={style}
             onClick={() => onChange(opt.value)}
-            whileTap={{ scale: 0.95 }}
+            whileTap={{ scale: 0.97 }}
           >
             {opt.label}
           </motion.div>
