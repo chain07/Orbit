@@ -2,7 +2,7 @@
 
 /* =========================
    DayBook Prime — Design Tokens
-   Extracted from Dashboard.html
+   Refactored for User-Defined Architecture
    ========================= */
 
 :root {
@@ -19,7 +19,7 @@
   --separator: #C6C6C8;
   --grid-line: #E5E5EA;
 
-  /* ---------- Brand / Semantic Colors ---------- */
+  /* ---------- Brand / Palette Colors (Generic) ---------- */
   --blue: #007AFF;
   --green: #34C759;
   --red: #FF3B30;
@@ -28,24 +28,9 @@
   --purple: #AF52DE;
   --indigo: #5856D6;
   --pink: #FF2D55;
-
-  /* ---------- Chart / Category Colors ---------- */
-  --color-sleep: #AF52DE;
-  --color-gym: #FF2D55;
-  --color-study: #FF9500;
-  --color-social: #38C7F4;
-  --color-media: #007AFF;
-  --color-games: #FF3B30;
-  --color-chores: #5AC8FA;
-  --color-other: #8E8E93;
-
-  /* ---------- State / Telemetry Colors ---------- */
-  --color-flow: #34C759;
-  --color-idle: #007AFF;
-  --color-drag: #FFCC00;
-  --color-crash: #FF3B30;
-
-  --avg-line: #34C759;
+  --cyan: #38C7F4;
+  --sky: #5AC8FA;
+  --gray: #8E8E93;
 
   /* ---------- Radius ---------- */
   --radius-sm: 7px;
