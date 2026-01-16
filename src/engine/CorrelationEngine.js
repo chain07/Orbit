@@ -56,25 +56,37 @@ export const CorrelationEngine = {
    * metrics: array of MetricConfig { id }
    * logs: array of LogEntry { metricId, value }
    * lagDays: optional lag to apply to second metric
+   * OPTIMIZED: Pre-process logs into Map<metricId, sortedValues> to avoid O(N) sort/filter in nested loop
    * Returns: { 'metricId1-metricId2': correlation }
    */
   pairwiseCorrelations: (metrics = [], logs = [], lagDays = 0) => {
     const results = {};
 
-    // Helper: get numeric values for a metric
-    const getValues = (metricId) =>
-      logs
-        .filter(l => l.metricId === metricId)
-        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
-        .map(l => l.value);
+    // 1. Pre-process logs into Map
+    const valuesMap = new Map();
+    const grouped = new Map();
 
+    // Grouping Pass: O(N)
+    logs.forEach(l => {
+      if (!grouped.has(l.metricId)) grouped.set(l.metricId, []);
+      grouped.get(l.metricId).push(l);
+    });
+
+    // Sorting Pass: O(M * K log K) where K is avg logs per metric
+    grouped.forEach((list, id) => {
+      list.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      valuesMap.set(id, list.map(l => l.value));
+    });
+
+    // 2. Pairwise Calculation Loop: O(M^2 * K)
+    // No filter or sort inside this loop
     for (let i = 0; i < metrics.length; i++) {
       for (let j = i + 1; j < metrics.length; j++) {
         const idA = metrics[i].id;
         const idB = metrics[j].id;
 
-        const valuesA = getValues(idA);
-        const valuesB = getValues(idB);
+        const valuesA = valuesMap.get(idA) || [];
+        const valuesB = valuesMap.get(idB) || [];
 
         results[`${idA}-${idB}`] = CorrelationEngine.laggedCorrelation(valuesA, valuesB, lagDays);
       }

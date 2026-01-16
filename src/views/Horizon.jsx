@@ -1,6 +1,6 @@
 import React, { useContext, useState, useMemo } from 'react';
 import { StorageContext } from '../context/StorageContext';
-import { WidgetEngine } from '../engine/WidgetEngine';
+import { WidgetDataEngine } from '../engine/WidgetDataEngine';
 import { HorizonAgent } from '../lib/horizonAgent';
 import SegmentedControl from '../components/ui/SegmentedControl';
 import Glass from '../components/ui/Glass'; // Fixed Import path
@@ -61,8 +61,8 @@ export const Horizon = () => {
   // Widget Logic
   const widgets = useMemo(() => {
     try {
-      return WidgetEngine.generateWidgets 
-        ? WidgetEngine.generateWidgets(metrics, logEntries, segment)
+      return WidgetDataEngine.generateWidgets
+        ? WidgetDataEngine.generateWidgets(metrics, logEntries, segment)
         : [];
     } catch (e) {
       return [];
