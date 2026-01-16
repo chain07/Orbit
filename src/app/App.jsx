@@ -1,9 +1,9 @@
-import React, { useState, useContext, useEffect, useMemo, useCallback } from 'react';
-import { LayoutDashboard, PenTool, Radio, Settings } from 'lucide-react';
+import React, { useState, useContext, useEffect } from 'react';
 import '../styles/tokens.css';
 import '../styles/motion.css';
 
 import { StorageProvider, StorageContext } from '../context/StorageContext';
+import { NavigationProvider, NavigationContext } from '../context/NavigationContext';
 import { Horizon } from '../views/Horizon';
 import { Logger } from '../views/Logger';
 import { Intel } from '../views/Intel';
@@ -12,34 +12,9 @@ import BottomNav from '../components/ui/BottomNav';
 import { OnboardingWizard } from '../components/system/OnboardingWizard';
 
 const AppContent = () => {
-  const [activeTab, setActiveTab] = useState('Horizon');
-  const [navigationParams, setNavigationParams] = useState(null);
+  const { activeTab, setActiveTab, navigationParams, setNavigationParams, tabs } = useContext(NavigationContext);
   const { onboardingComplete, completeOnboarding } = useContext(StorageContext);
   const [showWizard, setShowWizard] = useState(false);
-
-  // Define Tab Configuration for Navigation
-  const tabs = useMemo(() => [
-    { id: 'Horizon', label: 'Horizon', icon: <LayoutDashboard size={24} /> },
-    { id: 'Logger', label: 'Logger', icon: <PenTool size={24} /> },
-    { id: 'Intel', label: 'Intel', icon: <Radio size={24} /> },
-    { id: 'System', label: 'System', icon: <Settings size={24} /> }
-  ], []);
-
-  // Global Navigation Event Listener
-  useEffect(() => {
-    const handleNavigation = (event) => {
-      const { tab, metricId } = event.detail;
-      if (tab) {
-        setActiveTab(tab);
-        if (metricId) {
-          setNavigationParams({ metricId });
-        }
-      }
-    };
-
-    window.addEventListener('orbit-navigate', handleNavigation);
-    return () => window.removeEventListener('orbit-navigate', handleNavigation);
-  }, []);
 
   // Onboarding Logic:
   // 1. If onboardingComplete is FALSE (new user), show wizard.
@@ -58,20 +33,16 @@ const AppContent = () => {
     setShowWizard(false);
   };
 
-  const handleGoToSystem = useCallback(() => {
-    setActiveTab('System');
-  }, []);
-
   const renderTab = () => {
     switch (activeTab) {
-      case 'Horizon': return <Horizon onGoToSystem={handleGoToSystem} />;
+      case 'Horizon': return <Horizon />;
       case 'Logger':
         // Pass params if active tab matches logic, otherwise null
         // (Though technically we just want to pass it once or check if tab is logger)
         return <Logger initialMetricId={navigationParams?.metricId} />;
       case 'Intel': return <Intel />;
       case 'System': return <System />;
-      default: return <Horizon onGoToSystem={handleGoToSystem} />;
+      default: return <Horizon />;
     }
   };
 
@@ -115,7 +86,9 @@ const AppContent = () => {
 export const App = () => {
   return (
     <StorageProvider>
-      <AppContent />
+      <NavigationProvider>
+        <AppContent />
+      </NavigationProvider>
     </StorageProvider>
   );
 };
