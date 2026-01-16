@@ -1,6 +1,6 @@
 import React from "react";
-import "../styles/motion.css";
-import "../styles/tokens.css";
+import "../../styles/motion.css";
+import "../../styles/tokens.css";
 
 export default function Glass({
   children,
