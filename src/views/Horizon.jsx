@@ -7,6 +7,7 @@ import Glass from '../components/ui/Glass'; // Fixed Import path
 import { getWidgetComponent } from '../components/widgets/WidgetRegistry';
 import { EditLayoutModal } from '../components/horizon/EditLayoutModal'; // Fixed path
 import { EmptyState } from '../components/ui/EmptyState'; // New Component
+import { motion } from 'framer-motion';
 import '../styles/motion.css';
 
 // ... (WidgetErrorBoundary class remains the same) ...
@@ -34,7 +35,7 @@ class WidgetErrorBoundary extends React.Component {
 }
 
 export const Horizon = ({ onGoToSystem }) => {
-  const { metrics, logEntries } = useContext(StorageContext);
+  const { metrics, logEntries, onboardingComplete } = useContext(StorageContext);
   const [segment, setSegment] = useState('Weekly');
   const [isEditing, setIsEditing] = useState(false);
   
@@ -73,6 +74,18 @@ export const Horizon = ({ onGoToSystem }) => {
   // If no metrics exist, we assume the user is new or wiped data.
   const hasMetrics = metrics && metrics.length > 0;
 
+  // Nudge Logic: Persistent card if criteria not met
+  // Criteria: 3+ metrics AND 1+ goal defined
+  const showNudge = useMemo(() => {
+      // If user has no metrics, EmptyState handles it. Nudge is for "Incomplete Setup"
+      if (!hasMetrics) return false;
+
+      const metricCount = metrics.length;
+      const hasGoal = metrics.some(m => m.goal !== null && m.goal !== undefined && m.goal > 0);
+
+      return metricCount < 3 || !hasGoal;
+  }, [metrics, hasMetrics]);
+
   return (
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
       
@@ -105,6 +118,25 @@ export const Horizon = ({ onGoToSystem }) => {
           actionLabel="Launch Setup"
           onAction={onGoToSystem}
         />
+      )}
+
+      {/* PERSISTENT NUDGE */}
+      {showNudge && (
+          <Glass className="bg-gradient-to-r from-blue/10 to-purple/10 border-blue/20">
+              <div className="flex justify-between items-center">
+                  <div>
+                      <div className="font-bold text-blue">Complete Your Orbit</div>
+                      <div className="text-xs text-secondary mt-1">Add at least 3 metrics and 1 goal for better insights.</div>
+                  </div>
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={onGoToSystem}
+                    className="px-3 py-2 bg-blue text-white text-xs font-bold rounded-lg shadow-sm"
+                  >
+                      Setup
+                  </motion.button>
+              </div>
+          </Glass>
       )}
 
       {/* Insights (Only show if we have them) */}

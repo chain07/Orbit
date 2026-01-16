@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import SegmentedControl from '../components/ui/SegmentedControl';
 import Glass from '../components/ui/Glass';
 import { DailyCheckInForm } from '../components/logger/DailyCheckInForm';
@@ -8,10 +8,31 @@ import { StorageContext } from '../context/StorageContext';
 import { EmptyState } from '../components/ui/EmptyState';
 import '../styles/motion.css';
 
-export const Logger = () => {
+export const Logger = ({ initialMetricId = null }) => {
   const { metrics } = useContext(StorageContext);
   const [activeMode, setActiveMode] = useState('checkin');
   const [selectedTrackerMetric, setSelectedTrackerMetric] = useState('');
+
+  // Handle Initial Metric Selection (from Quick Link)
+  useEffect(() => {
+    if (initialMetricId) {
+      // Check if metric exists and determine mode
+      const metric = metrics.find(m => m.id === initialMetricId);
+      if (metric) {
+        if (metric.type === 'duration') {
+          setActiveMode('tracker');
+          setSelectedTrackerMetric(initialMetricId);
+        } else {
+           // For non-duration metrics, likely want Check-In form, but we can't pre-select easily in current DailyCheckInForm
+           // So for now, defaulting to 'checkin' is fine, or we could pass it down if DailyCheckInForm supported it.
+           // However, if the user explicitly linked a metric, they might expect to log it.
+           // Given the current architecture, 'tracker' is for duration. 'checkin' lists all.
+           // If it's a number/boolean metric, we just switch to checkin mode.
+           setActiveMode('checkin');
+        }
+      }
+    }
+  }, [initialMetricId, metrics]);
 
   // Check if we have any metrics at all
   const hasMetrics = metrics && metrics.length > 0;

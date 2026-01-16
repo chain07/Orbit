@@ -2,9 +2,9 @@ import React, { useContext, useState, useEffect } from 'react';
 import { StorageContext } from '../context/StorageContext';
 import { Glass } from '../components/ui/Glass';
 import { MetricBuilder } from '../components/system/MetricBuilder';
-import { Standards } from '../lib/standards';
+import { Library } from '../lib/library';
 
-export const System = () => {
+export const System = ({ onNavigate }) => {
   const { 
     metrics, 
     addMetric, 
@@ -30,19 +30,19 @@ export const System = () => {
   }, []);
 
   const refreshLibrary = () => {
-    const items = Standards.list();
+    const items = Library.list();
     if (items.length === 0) {
       // Create Default "Welcome" Item if empty
       const defaultItem = {
         id: crypto.randomUUID(),
         title: 'Library Manifest',
         category: 'System',
-        sections: [
-          { heading: 'Purpose', content: 'The Library is your long-term storage for protocols, principles, core values, and insights.' },
-          { heading: 'Usage', content: 'Create items here to document how you want to operate. You can define custom sections for any topic.' }
+        blocks: [
+          { type: 'text', heading: 'Purpose', content: 'The Library is your long-term storage for protocols, principles, core values, and insights.' },
+          { type: 'text', heading: 'Usage', content: 'Create items here to document how you want to operate. You can define custom sections for any topic.' }
         ]
       };
-      Standards.add(defaultItem);
+      Library.add(defaultItem);
       setLibraryItems([defaultItem]);
     } else {
       setLibraryItems(items);
@@ -75,24 +75,33 @@ export const System = () => {
   const handleSaveLibraryItem = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    const sections = [];
+    const blocks = [];
     
-    // Parse dynamic sections
+    // Parse dynamic blocks
     const headings = formData.getAll('heading');
     const contents = formData.getAll('content');
+    const types = formData.getAll('type'); // Assuming we add a hidden input or select for type
+
     headings.forEach((h, i) => {
-      if(h || contents[i]) sections.push({ heading: h, content: contents[i] });
+      if(h || contents[i]) {
+          blocks.push({
+              heading: h,
+              content: contents[i],
+              type: types[i] || 'text'
+          });
+      }
     });
 
     const newItem = {
       id: viewingItem?.id || crypto.randomUUID(),
       title: formData.get('title'),
       category: formData.get('category'),
-      sections: sections
+      metricId: formData.get('metricId') || null,
+      blocks: blocks
     };
 
-    if (viewingItem && viewingItem.id) Standards.update(newItem);
-    else Standards.add(newItem);
+    if (viewingItem && viewingItem.id) Library.update(newItem);
+    else Library.add(newItem);
 
     setViewingItem(null);
     setIsEditingLibrary(false);
@@ -101,15 +110,24 @@ export const System = () => {
 
   const handleDeleteLibraryItem = (id) => {
     if (confirm('Delete this item?')) {
-      Standards.remove(id);
+      Library.remove(id);
       setViewingItem(null);
       refreshLibrary();
     }
   };
 
   const openNewLibraryItem = () => {
-    setViewingItem({ title: '', category: '', sections: [{ heading: '', content: '' }] });
+    setViewingItem({ title: '', category: '', metricId: '', blocks: [{ type: 'text', heading: '', content: '' }] });
     setIsEditingLibrary(true);
+  };
+
+  const handleQuickLink = (metricId) => {
+      // Dispatch a custom event for navigation since we don't have direct access to setTab here yet
+      // This is a temporary loose coupling strategy until App.jsx is updated to pass onNavigate
+      window.dispatchEvent(new CustomEvent('orbit-navigate', { detail: { tab: 'Logger', metricId } }));
+
+      // Also try calling prop if it exists (future proofing)
+      if (onNavigate) onNavigate('Logger', { metricId });
   };
 
   // --- Data Management Handlers ---
@@ -143,7 +161,7 @@ export const System = () => {
   const handleExport = () => {
     const json = exportData();
     // Include Library in export
-    json.library = Standards.list();
+    json.library = Library.list();
     // Versioning and Metadata
     json.meta = {
       version: "1.0.0",
@@ -170,7 +188,7 @@ export const System = () => {
         importData(data);
         if (data.library) {
             // Simple overwrite/merge strategy for library
-            data.library.forEach(item => Standards.update(item)); 
+            data.library.forEach(item => Library.update(item));
             refreshLibrary();
         }
         alert('Import successful');
@@ -186,7 +204,7 @@ export const System = () => {
     if (window.confirm("⚠️ WARNING: This will delete ALL metrics, logs, and library items. This action cannot be undone.")) {
       if (window.confirm("Are you absolutely sure? Type 'YES' in your mind and click OK.")) {
         clearAllData();
-        Standards.clear();
+        Library.clear();
         refreshLibrary(); // Will re-generate default manifest
         alert("System reset complete.");
       }
@@ -206,7 +224,7 @@ export const System = () => {
       <Glass>
         <div className="flex justify-between items-center mb-1">
           <div className="text-lg font-bold">Library</div>
-          <button onClick={openNewLibraryItem} className="text-xs font-bold bg-blue text-white px-3 py-2 rounded-lg">
+          <button onClick={openNewLibraryItem} whileTap={{ scale: 0.95 }} className="text-xs font-bold bg-blue text-white px-3 py-2 rounded-lg">
             + New Item
           </button>
         </div>
@@ -234,7 +252,7 @@ export const System = () => {
       <Glass>
         <div className="flex justify-between items-center mb-1">
           <div className="text-lg font-bold">Metrics</div>
-          <button onClick={handleAddMetric} className="text-xs font-bold bg-blue text-white px-3 py-2 rounded-lg">
+          <button onClick={handleAddMetric} whileTap={{ scale: 0.95 }} className="text-xs font-bold bg-blue text-white px-3 py-2 rounded-lg">
             + Add Metric
           </button>
         </div>
@@ -267,10 +285,10 @@ export const System = () => {
           {/* Import/Export/Archive */}
           <div className="flex flex-col gap-2">
              <div className="flex gap-2">
-                <button onClick={handleArchive} className="flex-1 py-3 rounded-xl bg-purple text-white font-bold active:scale-95 transition-transform">Save to Archive</button>
+                <button onClick={handleArchive} whileTap={{ scale: 0.95 }} className="flex-1 py-3 rounded-xl bg-purple text-white font-bold transition-transform">Save to Archive</button>
              </div>
              <div className="flex gap-2">
-                <button onClick={handleExport} className="flex-1 py-3 rounded-xl bg-blue text-white font-bold active:scale-95 transition-transform">Export JSON</button>
+                <button onClick={handleExport} whileTap={{ scale: 0.95 }} className="flex-1 py-3 rounded-xl bg-blue text-white font-bold transition-transform">Export JSON</button>
                 <label className="flex-1 py-3 rounded-xl border border-separator text-center font-bold cursor-pointer hover:bg-bg-color transition-colors active:scale-95">
                 Import JSON
                 <input type="file" accept="application/json" onChange={handleImport} className="hidden" />
@@ -282,6 +300,7 @@ export const System = () => {
           <div className="mt-4 pt-4 border-t border-separator">
             <button 
               onClick={handleNukeData} 
+              whileTap={{ scale: 0.95 }}
               className="w-full py-3 rounded-xl border border-red text-red font-bold hover:bg-red hover:bg-opacity-10 transition-colors"
             >
               Clear All Data (Reset)
@@ -332,20 +351,48 @@ export const System = () => {
                     <input name="category" defaultValue={viewingItem.category} className="w-full p-3 rounded-lg bg-bg-color border border-separator outline-none" placeholder="e.g. Psychology, Recovery" />
                   </div>
                   
+                  {/* Metric Link */}
+                  <div>
+                    <label className="text-xs font-bold text-secondary uppercase">Linked Metric</label>
+                    <div className="relative">
+                        <select name="metricId" defaultValue={viewingItem.metricId || ''} className="w-full p-3 rounded-lg bg-bg-color border border-separator outline-none appearance-none">
+                            <option value="">None</option>
+                            {metrics.map(m => (
+                                <option key={m.id} value={m.id}>{m.name}</option>
+                            ))}
+                        </select>
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-secondary">▼</div>
+                    </div>
+                  </div>
+
                   <div className="border-t border-separator my-2"></div>
                   
-                  {/* Dynamic Sections Editor */}
-                  <div id="sections-container" className="flex flex-col gap-4">
-                    {viewingItem.sections && viewingItem.sections.map((sec, idx) => (
-                      <div key={idx} className="flex flex-col gap-1">
-                        <input name="heading" defaultValue={sec.heading} className="font-bold text-sm bg-transparent outline-none text-blue placeholder-blue/50" placeholder="SECTION HEADING" />
-                        <textarea name="content" defaultValue={sec.content} className="w-full p-3 rounded-lg bg-bg-color border border-separator min-h-[100px] outline-none" placeholder="Content..." />
+                  {/* Dynamic Blocks Editor */}
+                  <div id="blocks-container" className="flex flex-col gap-4">
+                    {viewingItem.blocks && viewingItem.blocks.map((blk, idx) => (
+                      <div key={idx} className="flex flex-col gap-1 p-2 border border-separator rounded-lg bg-bg-color">
+                        <div className="flex justify-between mb-1">
+                             <input name="heading" defaultValue={blk.heading} className="font-bold text-sm bg-transparent outline-none text-blue placeholder-blue/50 flex-1" placeholder="HEADING" />
+                             <select name="type" defaultValue={blk.type || 'text'} className="text-xs bg-transparent text-secondary outline-none text-right">
+                                 <option value="text">Text</option>
+                                 <option value="code">Code</option>
+                                 <option value="list">List</option>
+                             </select>
+                        </div>
+                        <textarea name="content" defaultValue={blk.content} className="w-full bg-transparent outline-none min-h-[60px]" placeholder="Content..." />
                       </div>
                     ))}
-                    {/* Always show one empty slot at bottom for new sections */}
-                    <div className="flex flex-col gap-1">
-                       <input name="heading" className="font-bold text-sm bg-transparent outline-none text-blue placeholder-blue/50" placeholder="+ ADD HEADING" />
-                       <textarea name="content" className="w-full p-3 rounded-lg bg-bg-color border border-separator min-h-[80px] outline-none" placeholder="Content..." />
+                    {/* Always show one empty slot at bottom for new blocks */}
+                    <div className="flex flex-col gap-1 p-2 border border-separator border-dashed rounded-lg">
+                       <div className="flex justify-between mb-1">
+                           <input name="heading" className="font-bold text-sm bg-transparent outline-none text-blue placeholder-blue/50 flex-1" placeholder="+ ADD HEADING" />
+                           <select name="type" className="text-xs bg-transparent text-secondary outline-none text-right">
+                               <option value="text">Text</option>
+                               <option value="code">Code</option>
+                               <option value="list">List</option>
+                           </select>
+                       </div>
+                       <textarea name="content" className="w-full bg-transparent outline-none min-h-[60px]" placeholder="Content..." />
                     </div>
                   </div>
 
@@ -358,13 +405,32 @@ export const System = () => {
                 <div className="flex flex-col gap-6">
                   <div>
                     <h2 className="text-3xl font-extrabold">{viewingItem.title}</h2>
-                    <span className="inline-block mt-2 px-2 py-1 rounded bg-blue bg-opacity-10 text-blue text-xs font-bold uppercase">{viewingItem.category}</span>
+                    <div className="flex items-center gap-2 mt-2">
+                        <span className="inline-block px-2 py-1 rounded bg-blue bg-opacity-10 text-blue text-xs font-bold uppercase">{viewingItem.category}</span>
+                        {viewingItem.metricId && (
+                            <button
+                                onClick={() => handleQuickLink(viewingItem.metricId)}
+                                whileTap={{ scale: 0.95 }}
+                                className="px-2 py-1 rounded bg-green text-white text-xs font-bold uppercase hover:bg-opacity-90 transition-opacity"
+                            >
+                                Quick Link ⚡
+                            </button>
+                        )}
+                    </div>
                   </div>
                   
-                  {viewingItem.sections && viewingItem.sections.map((sec, idx) => (
+                  {viewingItem.blocks && viewingItem.blocks.map((blk, idx) => (
                     <div key={idx}>
-                      <div className="text-xs font-bold text-secondary uppercase mb-1 tracking-wide">{sec.heading}</div>
-                      <div className="text-primary leading-relaxed whitespace-pre-wrap">{sec.content}</div>
+                      <div className="text-xs font-bold text-secondary uppercase mb-1 tracking-wide">{blk.heading}</div>
+                      {blk.type === 'code' ? (
+                          <pre className="bg-black bg-opacity-5 p-3 rounded-lg overflow-x-auto text-sm font-mono">{blk.content}</pre>
+                      ) : blk.type === 'list' ? (
+                          <ul className="list-disc pl-5 space-y-1">
+                              {blk.content.split('\n').map((line, i) => <li key={i}>{line.replace(/^-\s*/, '')}</li>)}
+                          </ul>
+                      ) : (
+                          <div className="text-primary leading-relaxed whitespace-pre-wrap">{blk.content}</div>
+                      )}
                       <div className="border-b border-separator opacity-20 mt-4"></div>
                     </div>
                   ))}
