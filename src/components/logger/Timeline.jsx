@@ -3,21 +3,21 @@ import { StorageContext } from '../../context/StorageContext';
 import { Glass } from '../../components/ui/Glass';
 
 export const Timeline = () => {
-  const { logs, metrics } = useContext(StorageContext);
-  const metricMap = metrics.reduce((acc, m) => ({ ...acc, [m.key]: m }), {});
+  const { logEntries, metrics } = useContext(StorageContext);
+  const metricMap = metrics.reduce((acc, m) => ({ ...acc, [m.id]: m }), {});
 
-  const sortedLogs = [...logs].sort(
+  const sortedLogs = [...logEntries].sort(
     (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
   );
 
   return (
     <div className="flex flex-col gap-3">
       {sortedLogs.map((log, idx) => {
-        const metric = metricMap[log.metricKey];
+        const metric = metricMap[log.metricId];
         return (
           <Glass key={idx}>
             <div className="flex justify-between">
-              <span>{metric?.label || log.metricKey}</span>
+              <span>{metric?.label || log.metricId}</span>
               <span>{log.value}</span>
             </div>
             <div className="text-xs text-secondary mt-1">
