@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import {
   MetricConfig,
   LogEntry,
@@ -77,21 +77,21 @@ export const StorageProvider = ({ children }) => {
     }
   }, [metrics, logEntries, widgetLayout, onboardingComplete]);
 
-  const addMetric = (metricData) => {
+  const addMetric = useCallback((metricData) => {
     const newMetric = createMetric(metricData);
     setMetrics(prev => [...prev, newMetric]);
-  };
+  }, []);
 
-  const updateMetric = (updatedMetric) => {
+  const updateMetric = useCallback((updatedMetric) => {
     setMetrics(prev => prev.map(m => m.id === updatedMetric.id ? updatedMetric : m));
-  };
+  }, []);
 
-  const deleteMetric = (id) => {
+  const deleteMetric = useCallback((id) => {
     setMetrics(prev => prev.filter(m => m.id !== id));
     setLogEntries(prev => prev.filter(l => l.metricId !== id));
-  };
+  }, []);
 
-  const addLogEntry = (entryData) => {
+  const addLogEntry = useCallback((entryData) => {
     // ENFORCEMENT: Strictly require metricId. metricKey is prohibited.
     if (!entryData.metricId) {
       throw new Error("MANDATORY_SCHEMA_VIOLATION: addLogEntry requires a valid metricId.");
@@ -104,13 +104,13 @@ export const StorageProvider = ({ children }) => {
     });
 
     setLogEntries(prev => [...prev, newEntry]);
-  };
+  }, []);
 
-  const completeOnboarding = () => {
+  const completeOnboarding = useCallback(() => {
     setOnboardingComplete(true);
-  };
+  }, []);
 
-  const importData = (jsonData) => {
+  const importData = useCallback((jsonData) => {
     if (!jsonData) return;
     
     // Apply migration to imported data
@@ -137,9 +137,9 @@ export const StorageProvider = ({ children }) => {
     if (typeof migrated.onboardingComplete !== 'undefined') {
         setOnboardingComplete(migrated.onboardingComplete);
     }
-  };
+  }, []);
 
-  const exportData = () => {
+  const exportData = useCallback(() => {
     return {
       metrics,
       logEntries,
@@ -147,33 +147,48 @@ export const StorageProvider = ({ children }) => {
       onboardingComplete,
       exportedAt: new Date().toISOString()
     };
-  };
+  }, [metrics, logEntries, widgetLayout, onboardingComplete]);
 
-  const clearAllData = () => {
+  const clearAllData = useCallback(() => {
     setMetrics([]);
     setLogEntries([]);
     setWidgetLayout({});
     setOnboardingComplete(false);
     localStorage.removeItem('orbit_db');
-  };
+  }, []);
+
+  const value = useMemo(() => ({
+    metrics,
+    logEntries,
+    widgetLayout,
+    onboardingComplete,
+    addMetric,
+    updateMetric,
+    deleteMetric,
+    addLogEntry,
+    completeOnboarding,
+    importData,
+    importJSON: importData,
+    exportData,
+    exportJSON: exportData,
+    clearAllData
+  }), [
+    metrics,
+    logEntries,
+    widgetLayout,
+    onboardingComplete,
+    addMetric,
+    updateMetric,
+    deleteMetric,
+    addLogEntry,
+    completeOnboarding,
+    importData,
+    exportData,
+    clearAllData
+  ]);
 
   return (
-    <StorageContext.Provider value={{
-      metrics,
-      logEntries,
-      widgetLayout,
-      onboardingComplete,
-      addMetric,
-      updateMetric,
-      deleteMetric,
-      addLogEntry,
-      completeOnboarding,
-      importData,
-      importJSON: importData,
-      exportData,
-      exportJSON: exportData,
-      clearAllData
-    }}>
+    <StorageContext.Provider value={value}>
       {children}
     </StorageContext.Provider>
   );
