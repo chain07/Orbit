@@ -128,8 +128,16 @@ export const MetricEngine = {
     // 1. Bucket values by date string key (YYYY-M-D)
     const buckets = {};
 
+    // Optimization: Calculate cutoff to skip old logs
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - (days - 1));
+    cutoff.setHours(0, 0, 0, 0);
+    const cutoffTime = cutoff.getTime();
+
     logs.forEach(l => {
       const d = new Date(l.timestamp);
+      if (d.getTime() < cutoffTime) return;
+
       // Construct key manually to avoid slow string formatting
       const key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
       buckets[key] = (buckets[key] || 0) + (parseFloat(l.value) || 0);
