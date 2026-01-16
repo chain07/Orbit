@@ -8,6 +8,7 @@ import { getWidgetComponent } from '../components/widgets/WidgetRegistry';
 import { EditLayoutModal } from '../components/horizon/EditLayoutModal'; // Fixed path
 import { EmptyState } from '../components/ui/EmptyState'; // New Component
 import { motion } from 'framer-motion';
+import { X } from 'lucide-react';
 import '../styles/motion.css';
 
 // ... (WidgetErrorBoundary class remains the same) ...
@@ -38,6 +39,7 @@ export const Horizon = ({ onGoToSystem }) => {
   const { metrics, logEntries, onboardingComplete } = useContext(StorageContext);
   const [segment, setSegment] = useState('Weekly');
   const [isEditing, setIsEditing] = useState(false);
+  const [isNudgeDismissed, setIsNudgeDismissed] = useState(false);
   
   // Date Header
   const todayDate = new Date().toLocaleDateString('en-US', { 
@@ -79,12 +81,13 @@ export const Horizon = ({ onGoToSystem }) => {
   const showNudge = useMemo(() => {
       // If user has no metrics, EmptyState handles it. Nudge is for "Incomplete Setup"
       if (!hasMetrics) return false;
+      if (isNudgeDismissed) return false;
 
       const metricCount = metrics.length;
       const hasGoal = metrics.some(m => m.goal !== null && m.goal !== undefined && m.goal > 0);
 
       return metricCount < 3 || !hasGoal;
-  }, [metrics, hasMetrics]);
+  }, [metrics, hasMetrics, isNudgeDismissed]);
 
   return (
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
@@ -122,8 +125,14 @@ export const Horizon = ({ onGoToSystem }) => {
 
       {/* PERSISTENT NUDGE */}
       {showNudge && (
-          <Glass className="bg-gradient-to-r from-blue/10 to-purple/10 border-blue/20">
-              <div className="flex justify-between items-center">
+          <Glass className="bg-gradient-to-r from-blue/10 to-purple/10 border-blue/20 relative">
+              <button
+                  onClick={() => setIsNudgeDismissed(true)}
+                  className="absolute top-2 right-2 p-1 text-secondary hover:text-primary transition-colors"
+              >
+                  <X size={14} />
+              </button>
+              <div className="flex justify-between items-center pr-6">
                   <div>
                       <div className="font-bold text-blue">Complete Your Orbit</div>
                       <div className="text-xs text-secondary mt-1">Add at least 3 metrics and 1 goal for better insights.</div>
