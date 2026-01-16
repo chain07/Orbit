@@ -86,7 +86,7 @@ export const Logger = () => {
 
               {selectedTrackerMetric ? (
                  <div className="mt-2 p-6 bg-bg-color rounded-xl flex justify-center border border-separator border-opacity-50">
-                   <TimeTracker metricKey={selectedTrackerMetric} />
+                   <TimeTracker metricId={selectedTrackerMetric} />
                  </div>
               ) : (
                 <div className="text-center text-secondary opacity-60 italic py-8 border-2 border-dashed border-separator rounded-xl">

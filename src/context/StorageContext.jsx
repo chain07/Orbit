@@ -1,38 +1,18 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import {
+  MetricConfig,
+  LogEntry,
+  MetricType,
+  WidgetType,
+  createLog,
+  createMetric,
+  validateMetrics,
+  validateLogEntries,
+  migrateData
+} from '../types/schemas';
 
-export const MetricType = Object.freeze({
-  BOOLEAN: 'boolean',
-  NUMBER: 'number',
-  PERCENTAGE: 'percentage',
-});
-
-export const WidgetType = Object.freeze({
-  RING: 'ring',
-  SPARKLINE: 'sparkline',
-  BAR: 'bar',
-  GENERIC: 'generic',
-});
-
-export class MetricConfig {
-  constructor({ id, label, type, goal, color, widgetType }) {
-    this.id = id;
-    this.label = label;
-    this.type = type;
-    this.goal = goal;
-    this.color = color;
-    this.widgetType = widgetType;
-    this.dashboardVisible = true;
-  }
-}
-
-export class LogEntry {
-  constructor({ id, metricId, value, timestamp }) {
-    this.id = id;
-    this.metricId = metricId;
-    this.value = value;
-    this.timestamp = timestamp || new Date().toISOString();
-  }
-}
+// Re-export for backward compatibility
+export { MetricConfig, LogEntry, MetricType, WidgetType };
 
 export const StorageContext = createContext();
 
@@ -50,9 +30,19 @@ export const StorageProvider = ({ children }) => {
     try {
       const storedData = localStorage.getItem('orbit_db');
       if (storedData) {
-        const parsed = JSON.parse(storedData);
-        if (parsed.metrics) setMetrics(parsed.metrics);
-        if (parsed.logEntries) setLogEntries(parsed.logEntries);
+        let parsed = JSON.parse(storedData);
+
+        // Phase 1: Migrate Data
+        parsed = migrateData(parsed);
+
+        if (parsed.metrics) {
+            validateMetrics(parsed.metrics);
+            setMetrics(parsed.metrics);
+        }
+        if (parsed.logEntries) {
+            validateLogEntries(parsed.logEntries, parsed.metrics || []);
+            setLogEntries(parsed.logEntries);
+        }
         if (parsed.widgetLayout) setWidgetLayout(parsed.widgetLayout);
         if (typeof parsed.onboardingComplete !== 'undefined') {
           setOnboardingComplete(parsed.onboardingComplete);
@@ -85,12 +75,12 @@ export const StorageProvider = ({ children }) => {
   }, [metrics, logEntries, widgetLayout, onboardingComplete]);
 
   const addMetric = (metricData) => {
-    const newMetric = {
-      ...metricData,
-      id: metricData.id || crypto.randomUUID(),
-      created: new Date().toISOString()
-    };
-    setMetrics(prev => [...prev, newMetric]);
+    try {
+      const newMetric = createMetric(metricData);
+      setMetrics(prev => [...prev, newMetric]);
+    } catch (e) {
+      console.error("Failed to add metric", e);
+    }
   };
 
   const updateMetric = (updatedMetric) => {
@@ -103,13 +93,16 @@ export const StorageProvider = ({ children }) => {
   };
 
   const addLogEntry = (entryData) => {
-    const newEntry = new LogEntry({
-      id: crypto.randomUUID(),
-      metricId: entryData.metricId || entryData.metricKey,
-      value: entryData.value,
-      timestamp: entryData.timestamp
-    });
-    setLogEntries(prev => [...prev, newEntry]);
+    try {
+      const newEntry = createLog({
+        metricId: entryData.metricId, // Strict, no fallback
+        value: entryData.value,
+        timestamp: entryData.timestamp
+      });
+      setLogEntries(prev => [...prev, newEntry]);
+    } catch (e) {
+      console.error("Failed to add log entry", e);
+    }
   };
 
   const completeOnboarding = () => {

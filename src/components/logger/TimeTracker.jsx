@@ -2,12 +2,12 @@ import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { StorageContext } from '../../context/StorageContext';
 import { RotateCcw } from 'lucide-react';
 
-export const TimeTracker = ({ metricKey }) => {
+export const TimeTracker = ({ metricId }) => {
   const { metrics, addLogEntry } = useContext(StorageContext);
   
   // State
   const [mode, setMode] = useState('timer'); // 'timer' | 'manual'
-  const [selectedMetricId, setSelectedMetricId] = useState(metricKey || '');
+  const [selectedMetricId, setSelectedMetricId] = useState(metricId || '');
   
   // Timer State
   const [running, setRunning] = useState(false);
@@ -19,8 +19,8 @@ export const TimeTracker = ({ metricKey }) => {
 
   // Sync prop if provided
   useEffect(() => {
-    if (metricKey) setSelectedMetricId(metricKey);
-  }, [metricKey]);
+    if (metricId) setSelectedMetricId(metricId);
+  }, [metricId]);
 
   // Timer Logic
   useEffect(() => {
