@@ -1,5 +1,5 @@
 // src/engine/MetricEngine.js
-import { MetricType } from '../types/schemas';
+import { MetricType } from '../types/schemas.js';
 
 /**
  * MetricEngine
@@ -88,11 +88,18 @@ export const MetricEngine = {
 
   // ----------------------
   // NEW: Get Today's Value (Sum)
+  // OPTIMIZED: Uses numeric timestamp comparison instead of toLocaleDateString
   // ----------------------
   getTodayValue: (logs = []) => {
-    const today = new Date().toLocaleDateString();
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime();
+
     return logs
-      .filter(l => new Date(l.timestamp).toLocaleDateString() === today)
+      .filter(l => {
+        const ts = new Date(l.timestamp).getTime();
+        return ts >= startOfDay && ts < endOfDay;
+      })
       .reduce((acc, l) => acc + (parseFloat(l.value) || 0), 0);
   },
 
@@ -115,13 +122,26 @@ export const MetricEngine = {
 
   // ----------------------
   // NEW: Get Last N Days Values (Array for Charts)
+  // OPTIMIZED: Single pass bucketing instead of N filters
   // ----------------------
   getLastNDaysValues: (logs = [], days = 7) => {
+    // 1. Bucket values by date string key (YYYY-M-D)
+    const buckets = {};
+
+    logs.forEach(l => {
+      const d = new Date(l.timestamp);
+      // Construct key manually to avoid slow string formatting
+      const key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+      buckets[key] = (buckets[key] || 0) + (parseFloat(l.value) || 0);
+    });
+
+    // 2. Generate result array from buckets
     const values = [];
     for (let i = days - 1; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
-      values.push(MetricEngine.getValueForDate(logs, d));
+      const key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+      values.push(buckets[key] || 0);
     }
     return values;
   },

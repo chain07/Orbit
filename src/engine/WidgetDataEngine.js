@@ -1,6 +1,6 @@
-import { MetricEngine } from './MetricEngine';
-import { AnalyticsEngine } from './AnalyticsEngine';
-import { MetricType, WidgetType } from '../types/schemas';
+import { MetricEngine } from './MetricEngine.js';
+import { AnalyticsEngine } from './AnalyticsEngine.js';
+import { MetricType, WidgetType } from '../types/schemas.js';
 
 /**
  * WidgetDataEngine
@@ -77,12 +77,11 @@ export const WidgetDataEngine = {
    * Returns: { value: number (0-100), label: string, color: string, title: string }
    */
   ringData: (metric, logs) => {
-    // MetricEngine.goalCompletion returns 0-100 per naming conventions
     const completion = MetricEngine.goalCompletion ? MetricEngine.goalCompletion(metric, logs) : 0;
 
     return {
       value: completion,
-      label: metric.label, // RAW VALUE: Metric Label. Display formatting handled by UI.
+      label: metric.label,
       color: metric.color || '#007AFF',
       title: metric.label
     };
@@ -95,14 +94,11 @@ export const WidgetDataEngine = {
   sparklineData: (metric, logs, segment = 'Weekly') => {
     const days = segment === 'Monthly' ? 30 : 7;
 
-    // Get historical raw values
     const rawHistory = MetricEngine.getLastNDaysValues
       ? MetricEngine.getLastNDaysValues(logs, days)
       : new Array(days).fill(0);
 
-    // Normalize to 0-1 for Sparkline
     const normalizedData = rawHistory.map(val => MetricEngine.normalizeValue(metric, val));
-
     const currentVal = MetricEngine.getTodayValue ? MetricEngine.getTodayValue(logs) : 0;
 
     return {
@@ -110,7 +106,6 @@ export const WidgetDataEngine = {
       current: currentVal,
       label: metric.label,
       color: metric.color || '#007AFF',
-      // Trend calculation omitted for Sparkline as allowed by schema (trendLabel optional)
     };
   },
 
@@ -121,8 +116,9 @@ export const WidgetDataEngine = {
   heatmapData: (metric, logs) => {
     const values = {};
 
-    // Group logs by date
+    // Group logs by date - O(N)
     const logsByDate = logs.reduce((acc, log) => {
+      // Use split('T') which is faster/consistent vs toLocaleDateString
       const date = log.timestamp.split('T')[0];
       if (!acc[date]) acc[date] = [];
       acc[date].push(log);
@@ -134,13 +130,9 @@ export const WidgetDataEngine = {
         let dayValue = 0;
 
         if (metric.type === MetricType.BOOLEAN) {
-             // For Boolean, usually "Any" is enough, but strictly "goalCompletion" logic?
-             // MetricEngine.normalizeValue for boolean: true -> 1, false -> 0.
-             // If multiple logs, if any is true, we consider it done (1).
              const hasTrue = dayLogs.some(l => l.value);
-             dayValue = hasTrue ? 1 : 0; // Already normalized
+             dayValue = hasTrue ? 1 : 0;
         } else {
-             // Sum values for Number/Duration
              const total = dayLogs.reduce((sum, l) => sum + (parseFloat(l.value) || 0), 0);
              dayValue = MetricEngine.normalizeValue(metric, total);
         }
@@ -165,33 +157,32 @@ export const WidgetDataEngine = {
       ? MetricEngine.calculateBestStreak(logs)
       : 0;
 
-    // Check if goal met today
-    const todayVal = MetricEngine.getTodayValue ? MetricEngine.getTodayValue(logs) : 0;
-    const isActive = metric.type === MetricType.BOOLEAN
-        ? todayVal >= 1 // For boolean sum is count of trues? getTodayValue sums parseFloat.
-        // Wait, MetricEngine.getTodayValue parses floats. true -> NaN.
-        // MetricEngine.getTodayValue implementation:
-        // .reduce((acc, l) => acc + (parseFloat(l.value) || 0), 0);
-        // parseFloat(true) is NaN.
-        // So getTodayValue returns 0 for booleans.
-        // I need to handle boolean check manually here or fix MetricEngine (out of scope?).
-        // Actually I should use MetricEngine.goalCompletion logic for "isActive"?
-        // Or check logs manually.
-        : todayVal >= (metric.goal || 1);
+    // OPTIMIZED: Is Active Check
+    // Avoid toLocaleDateString inside loop.
+    let isActive = false;
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime();
 
-    // Fix for isActive on Boolean if getTodayValue is broken for booleans
-    let safeIsActive = isActive;
+    // 1. Get today's logs for this metric
+    // Use simple numeric timestamp check
+    const todayLogs = logs.filter(l => {
+       const t = new Date(l.timestamp).getTime();
+       return t >= startOfDay && t < endOfDay;
+    });
+
     if (metric.type === MetricType.BOOLEAN) {
-        const today = new Date().toLocaleDateString();
-        const todayLogs = logs.filter(l => new Date(l.timestamp).toLocaleDateString() === today);
-        safeIsActive = todayLogs.some(l => l.value === true);
+        isActive = todayLogs.some(l => l.value === true);
+    } else {
+        const sum = todayLogs.reduce((acc, l) => acc + (parseFloat(l.value) || 0), 0);
+        isActive = sum >= (metric.goal || 1);
     }
 
     return {
       current,
       best,
-      isActive: safeIsActive,
-      unit: 'Days' // Static unit
+      isActive,
+      unit: 'Days'
     };
   },
 
@@ -200,24 +191,14 @@ export const WidgetDataEngine = {
    * Returns: { value: number, label: string, unit: string, trend: number, trendDirection: string }
    */
   numberData: (metric, logs, segment = 'Weekly') => {
-    const total = MetricEngine.getTotal ? MetricEngine.getTotal(logs) : 0;
     const todayVal = MetricEngine.getTodayValue ? MetricEngine.getTodayValue(logs) : 0;
 
-    // For Cumulative metrics (if such type existed, but schema only has NUMBER/DURATION/BOOLEAN)
-    // Assuming NUMBER/DURATION are daily goals usually.
-    // If user wants cumulative, they might interpret NUMBER that way.
-    // But usually NumberWidget shows "Today" or "Total"?
-    // Standard seems to be Today's value for tracking.
-    const val = todayVal;
-
-    // Trend Calculation
-    // Use last N days history
     const days = segment === 'Monthly' ? 30 : 7;
     const history = MetricEngine.getLastNDaysValues(logs, days);
-    const trend = AnalyticsEngine.calculateTrend(history); // Returns number (percentage)
+    const trend = AnalyticsEngine.calculateTrend(history);
 
     return {
-      value: val,
+      value: todayVal,
       label: metric.label,
       unit: metric.unit,
       trend: trend,
@@ -230,7 +211,6 @@ export const WidgetDataEngine = {
    * Returns: { data: Array }
    */
   historyData: (metric, logs) => {
-    // Return last 10 raw logs
     const sorted = [...logs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     const recent = sorted.slice(0, 10);
 

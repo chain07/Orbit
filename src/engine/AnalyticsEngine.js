@@ -1,6 +1,6 @@
 // src/engine/AnalyticsEngine.js
-import { MetricEngine } from './MetricEngine';
-import { MetricType } from '../types/schemas';
+import { MetricEngine } from './MetricEngine.js';
+import { MetricType } from '../types/schemas.js';
 
 /**
  * AnalyticsEngine
@@ -50,18 +50,25 @@ export const AnalyticsEngine = {
   // ----------------------
   // Trend delta calculation
   // Compares average of current window vs previous window
+  // OPTIMIZED: Uses Map for O(1) metric log lookup
   // ----------------------
   trendDeltas: (metrics = [], logs = [], windowDays = 7) => {
     const results = {};
     const today = new Date();
+    const currentWindowStart = new Date(today.getTime() - windowDays * 24 * 60 * 60 * 1000);
+    const previousWindowStart = new Date(today.getTime() - 2 * windowDays * 24 * 60 * 60 * 1000);
+
+    // Pre-group logs by metricId
+    const logsByMetric = new Map();
+    logs.forEach(l => {
+      if (!logsByMetric.has(l.metricId)) logsByMetric.set(l.metricId, []);
+      logsByMetric.get(l.metricId).push(l);
+    });
 
     metrics.forEach(metric => {
-      const currentWindowStart = new Date(today.getTime() - windowDays * 24 * 60 * 60 * 1000);
-      const previousWindowStart = new Date(today.getTime() - 2 * windowDays * 24 * 60 * 60 * 1000);
+      const metricLogs = logsByMetric.get(metric.id) || [];
 
-      const metricLogs = logs
-        .filter(l => l.metricId === metric.id)
-        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      metricLogs.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
       const currentWindowLogs = metricLogs.filter(l => new Date(l.timestamp) >= currentWindowStart);
       const previousWindowLogs = metricLogs.filter(l => {
@@ -94,22 +101,35 @@ export const AnalyticsEngine = {
 
   // ----------------------
   // Lagged correlations (Pearson) between pairs of metrics
+  // OPTIMIZED: Pre-calculates sorted values to avoid inner loop filtering/sorting
   // ----------------------
   laggedCorrelations: (metrics = [], logs = [], lagDays = 0) => {
     const correlations = {};
 
-    const getValues = (metricId) =>
-      logs
-        .filter(l => l.metricId === metricId)
-        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
-        .map(l => l.value);
+    // 1. Pre-calculate sorted values for all metrics
+    const valuesCache = {};
 
+    // Group first to avoid repeated filters on big logs array
+    const groupedLogs = new Map();
+    logs.forEach(l => {
+        if (!groupedLogs.has(l.metricId)) groupedLogs.set(l.metricId, []);
+        groupedLogs.get(l.metricId).push(l);
+    });
+
+    metrics.forEach(metric => {
+        const mLogs = groupedLogs.get(metric.id) || [];
+        mLogs.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+        valuesCache[metric.id] = mLogs.map(l => l.value);
+    });
+
+    // 2. Pairwise loop
     for (let i = 0; i < metrics.length; i++) {
       for (let j = i + 1; j < metrics.length; j++) {
         const idA = metrics[i].id;
         const idB = metrics[j].id;
-        const valuesA = getValues(idA).slice(0, -lagDays || undefined);
-        const valuesB = getValues(idB).slice(lagDays);
+
+        const valuesA = valuesCache[idA] ? valuesCache[idA].slice(0, -lagDays || undefined) : [];
+        const valuesB = valuesCache[idB] ? valuesCache[idB].slice(lagDays) : [];
 
         if (valuesA.length !== valuesB.length || valuesA.length === 0) {
           correlations[`${idA}-${idB}`] = null;
