@@ -4,9 +4,13 @@
    Global Motion Defaults
 -------------------------------- */
 :root {
+  /* Standard iOS easing */
   --ease-ios: cubic-bezier(0.25, 1, 0.5, 1);
+  /* Spring for bouncy elements (Tabs) */
   --ease-spring: cubic-bezier(0.25, 1, 0.5, 1.2);
-  --ease-standard: ease;
+  /* "Snappy" curve from HTML Segmented Control */
+  --ease-snappy: cubic-bezier(0.2, 0.8, 0.2, 1); 
+  
   --dur-fast: 0.2s;
   --dur-med: 0.4s;
   --dur-slow: 0.6s;
@@ -16,7 +20,7 @@
    Page & View Transitions
 -------------------------------- */
 .fade-in {
-  animation: fadeIn var(--dur-med) ease-out;
+  animation: fadeIn var(--dur-med) ease-out forwards;
 }
 
 @keyframes fadeIn {
@@ -31,7 +35,7 @@
 }
 
 .slide-in {
-  animation: slideIn var(--dur-med) ease-out;
+  animation: slideIn var(--dur-med) ease-out forwards;
 }
 
 @keyframes slideIn {
@@ -58,7 +62,6 @@
   transform: scale(0.98);
 }
 
-/* Optional hover (desktop only, safe to keep) */
 @media (hover: hover) {
   .card:hover {
     transform: translateY(-1px);
@@ -67,55 +70,47 @@
 }
 
 /* -----------------------------
-   Buttons
+   Buttons & Micro-Interactions
 -------------------------------- */
-.btn-ios {
+.btn-ios, button {
   transition:
-    background-color 0.3s ease,
-    transform 0.2s ease;
+    background-color 0.2s ease,
+    transform 0.1s ease,
+    opacity 0.2s ease;
 }
 
-.btn-ios:active {
-  transform: scale(0.97);
-}
-
-.btn-success {
-  transform: scale(0.98);
+.btn-ios:active, button:active {
+  transform: scale(0.96); /* Tighter click feel */
+  opacity: 0.8;
 }
 
 /* -----------------------------
    Segmented Control
 -------------------------------- */
 .seg-indicator {
-  transition: transform 0.5s var(--ease-spring);
+  /* Matches HTML Reference exactly */
+  transition: transform 0.3s var(--ease-snappy), width 0.3s var(--ease-snappy);
 }
 
 .seg-btn {
-  transition: color var(--dur-fast) var(--ease-standard);
+  transition: color 0.2s ease;
 }
 
 /* -----------------------------
    Bottom Tab Bar
 -------------------------------- */
 .tab-item svg {
-  transition: fill 0.3s ease;
+  transition: fill 0.3s ease, transform 0.2s var(--ease-spring);
+}
+
+.tab-item:active svg {
+    transform: scale(0.9);
 }
 
 .tab-indicator {
   transition:
     transform 0.4s var(--ease-spring),
     width 0.3s ease;
-}
-
-/* -----------------------------
-   Charts & Data
--------------------------------- */
-.ds-seg {
-  transition: width 0.6s var(--ease-ios);
-}
-
-.spot-bar-fill {
-  transition: width 0.5s ease;
 }
 
 /* -----------------------------
@@ -130,12 +125,10 @@
 }
 
 /* -----------------------------
-   Reduced Motion Accessibility
+   Reduced Motion
 -------------------------------- */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
   }
