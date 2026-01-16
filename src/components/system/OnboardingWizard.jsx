@@ -23,11 +23,11 @@ export const OnboardingWizard = ({ onComplete }) => {
   });
 
   [span_1](start_span)// Implemented properly to handle updates (replacing unused placeholder)[span_1](end_span)
-  const updateField = (metricKey, field, value) => {
+  const updateField = (metricSlot, field, value) => {
     setFormData(prev => ({
       ...prev,
-      [metricKey]: {
-        ...prev[metricKey],
+      [metricSlot]: {
+        ...prev[metricSlot],
         [field]: value
       }
     }));
@@ -74,8 +74,8 @@ export const OnboardingWizard = ({ onComplete }) => {
   };
 
   [span_2](start_span)// Implements actual metric creation form for each step[span_2](end_span)
-  const renderMetricForm = (metricKey) => {
-    const data = formData[metricKey];
+  const renderMetricForm = (metricSlot) => {
+    const data = formData[metricSlot];
     return (
       <div className="flex flex-col gap-4 animate-fade-in">
         <div>
@@ -83,7 +83,7 @@ export const OnboardingWizard = ({ onComplete }) => {
           <input 
             type="text" 
             value={data.name}
-            onChange={(e) => updateField(metricKey, 'name', e.target.value)}
+            onChange={(e) => updateField(metricSlot, 'name', e.target.value)}
             placeholder="e.g. Morning Jog"
             className="w-full p-3 rounded-xl bg-bg-color border border-separator text-lg font-bold outline-none focus:border-blue"
           />
@@ -93,13 +93,13 @@ export const OnboardingWizard = ({ onComplete }) => {
            <label className="text-xs font-bold text-secondary uppercase">Type</label>
            <div className="flex gap-2 mt-1">
              <button 
-                onClick={() => updateField(metricKey, 'type', 'boolean')}
+                onClick={() => updateField(metricSlot, 'type', 'boolean')}
                 className={`flex-1 py-2 rounded-lg font-bold text-sm transition-colors ${data.type === 'boolean' ? 'bg-blue text-white' : 'bg-bg-color border border-separator'}`}
              >
                 Yes/No
              </button>
              <button 
-                onClick={() => updateField(metricKey, 'type', 'number')}
+                onClick={() => updateField(metricSlot, 'type', 'number')}
                 className={`flex-1 py-2 rounded-lg font-bold text-sm transition-colors ${data.type === 'number' ? 'bg-blue text-white' : 'bg-bg-color border border-separator'}`}
              >
                 Number
@@ -114,7 +114,7 @@ export const OnboardingWizard = ({ onComplete }) => {
              {['#007AFF', '#34C759', '#FF9500', '#FF3B30', '#AF52DE'].map(c => (
                <button
                  key={c}
-                 onClick={() => updateField(metricKey, 'color', c)}
+                 onClick={() => updateField(metricSlot, 'color', c)}
                  style={{ backgroundColor: c }}
                  className={`w-8 h-8 rounded-full ${data.color === c ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
                />
