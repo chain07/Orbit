@@ -127,6 +127,28 @@ export const MetricEngine = {
   },
 
   // ----------------------
+  // NEW: Get Logs for a specific time window
+  // ----------------------
+  getLogsForWindow: (logs = [], days = 7, windowOffset = 0) => {
+    const now = new Date();
+    const conversion = 1000 * 60 * 60 * 24;
+
+    const endDiff = windowOffset * days;
+    const startDiff = (windowOffset + 1) * days;
+
+    return logs.filter(l => {
+      const d = new Date(l.timestamp);
+      const diff = (now - d) / conversion;
+
+      if (windowOffset === 0) {
+        return diff <= startDiff;
+      }
+
+      return diff > endDiff && diff <= startDiff;
+    });
+  },
+
+  // ----------------------
   // Goal completion %
   // ----------------------
   goalCompletion: (metricConfig, logs = []) => {

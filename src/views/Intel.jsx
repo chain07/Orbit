@@ -43,22 +43,12 @@ export const Intel = () => {
     let days = 7;
     if (segment === 'Daily') days = 1;
     if (segment === 'Monthly') days = 30;
-
-    const now = new Date();
     
     // Filter logs for current window
-    const currentLogs = logEntries.filter(l => {
-      const d = new Date(l.timestamp);
-      const diff = (now - d) / (1000 * 60 * 60 * 24);
-      return diff <= days;
-    });
+    const currentLogs = MetricEngine.getLogsForWindow(logEntries, days, 0);
 
     // Filter logs for previous window (for trend comparison)
-    const prevLogs = logEntries.filter(l => {
-      const d = new Date(l.timestamp);
-      const diff = (now - d) / (1000 * 60 * 60 * 24);
-      return diff > days && diff <= (days * 2);
-    });
+    const prevLogs = MetricEngine.getLogsForWindow(logEntries, days, 1);
 
     // 1. Reliability (Average Goal Completion)
     let totalCompletion = 0;
