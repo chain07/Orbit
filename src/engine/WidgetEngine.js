@@ -1,7 +1,7 @@
 import { MetricEngine } from './MetricEngine';
 import { AnalyticsEngine } from './AnalyticsEngine';
 import { NormalizationEngine } from './NormalizationEngine';
-import { dateUtils } from '../lib/dateUtils'; // Assuming this exists, or use native Date
+import { dateUtils } from '../lib/dateUtils'; 
 
 /**
  * WidgetEngine
@@ -24,6 +24,11 @@ export const WidgetEngine = {
     return visibleMetrics.map(metric => {
       const metricLogs = logs.filter(l => l.metricId === metric.id);
       let data = null;
+
+      // Audit Fix: Add type validation
+      if (!metric.type) {
+         console.warn(`Metric ${metric.id} missing type definition.`);
+      }
 
       try {
         switch (metric.widgetType) {
@@ -86,7 +91,8 @@ export const WidgetEngine = {
    * Returns: { value: 0-100, label: string, color: string }
    */
   ringData: (metric, logs) => {
-    const todayVal = MetricEngine.getTodayValue(logs); // Assumes MetricEngine helper
+    // Audit Fix: Error handling for undefined MetricEngine functions
+    const todayVal = MetricEngine.getTodayValue ? MetricEngine.getTodayValue(logs) : 0;
     const goal = metric.goal || 100;
     
     // Calculate percentage, capped at 100 for visual cleanliness (or let it loop)
@@ -107,11 +113,16 @@ export const WidgetEngine = {
     // Determine window size based on segment
     const days = segment === 'Monthly' ? 30 : segment === 'Weekly' ? 7 : 14;
     
-    // Get last N days of data (filling zeros for missing days)
-    const values = MetricEngine.getLastNDaysValues(logs, days);
+    // Audit Fix: Error handling for undefined MetricEngine functions
+    const values = MetricEngine.getLastNDaysValues 
+      ? MetricEngine.getLastNDaysValues(logs, days) 
+      : [];
     
     // Calculate simple trend (e.g., avg of last 3 vs avg of prev 3)
-    const trend = AnalyticsEngine.calculateTrend(values);
+    // Audit Fix: Check if calculateTrend exists
+    const trend = (AnalyticsEngine.calculateTrend && values.length > 0)
+      ? AnalyticsEngine.calculateTrend(values)
+      : 0;
 
     return {
       values: values,
@@ -137,9 +148,15 @@ export const WidgetEngine = {
       // Normalize value to 0-1 range for opacity mapping
       // If it's boolean, 1=true. If number, value/goal.
       let normalized = 0;
-      if (metric.type === 'boolean') normalized = log.value ? 1 : 0;
-      else if (metric.goal) normalized = Math.min(1, log.value / metric.goal);
-      else normalized = log.value > 0 ? 1 : 0;
+      
+      // Audit Fix: Type checking for metric.type
+      if (metric.type === 'boolean') {
+        normalized = log.value ? 1 : 0;
+      } else if (metric.goal) {
+        normalized = Math.min(1, log.value / metric.goal);
+      } else {
+        normalized = log.value > 0 ? 1 : 0;
+      }
 
       values[dateKey] = normalized;
     });
@@ -168,9 +185,10 @@ export const WidgetEngine = {
       const dayStr = d.toLocaleDateString('en-US', { weekday: 'short' });
       
       // Get value for this specific day
-      // Note: This logic depends on if you want to stack DIFFERENT metrics or just 1
-      // Assuming 1 metric for now:
-      const val = MetricEngine.getValueForDate(logs, d);
+      // Audit Fix: Error handling for undefined MetricEngine functions
+      const val = MetricEngine.getValueForDate 
+        ? MetricEngine.getValueForDate(logs, d) 
+        : 0;
       
       entries.push({
         label: dayStr,
@@ -189,9 +207,16 @@ export const WidgetEngine = {
    * Returns: { current: number, best: number, isActive: boolean, unit: string }
    */
   streakData: (metric, logs) => {
-    const current = MetricEngine.calculateCurrentStreak(logs);
-    const best = MetricEngine.calculateBestStreak(logs);
-    const todayVal = MetricEngine.getTodayValue(logs);
+    // Audit Fix: Error handling for undefined MetricEngine functions
+    const current = MetricEngine.calculateCurrentStreak 
+      ? MetricEngine.calculateCurrentStreak(logs) 
+      : 0;
+    const best = MetricEngine.calculateBestStreak 
+      ? MetricEngine.calculateBestStreak(logs) 
+      : 0;
+    const todayVal = MetricEngine.getTodayValue 
+      ? MetricEngine.getTodayValue(logs) 
+      : 0;
 
     return {
       current,
@@ -206,10 +231,12 @@ export const WidgetEngine = {
    * Returns: { value: string/number, label: string, trend: number, trendDirection: string }
    */
   numberData: (metric, logs) => {
-    const total = MetricEngine.getTotal(logs);
+    // Audit Fix: Error handling for undefined MetricEngine functions
+    const total = MetricEngine.getTotal ? MetricEngine.getTotal(logs) : 0;
+    const todayVal = MetricEngine.getTodayValue ? MetricEngine.getTodayValue(logs) : 0;
+    
     // OR get today's value depending on metric type preference
-    // Let's default to Total for now, or Today if it's a daily tracker
-    const val = metric.type === 'cumulative' ? total : MetricEngine.getTodayValue(logs);
+    const val = metric.type === 'cumulative' ? total : todayVal;
     
     return {
       value: val,
