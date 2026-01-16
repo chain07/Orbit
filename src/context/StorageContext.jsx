@@ -1,8 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-// ----------------------
-// Schemas
-// ----------------------
 export const MetricType = Object.freeze({
   BOOLEAN: 'boolean',
   NUMBER: 'number',
@@ -18,28 +15,25 @@ export const WidgetType = Object.freeze({
 
 export class MetricConfig {
   constructor({ id, label, type, goal, color, widgetType }) {
-    this.id = id; // unique string
-    this.label = label; // string
-    this.type = type; // MetricType
-    this.goal = goal; // number
-    this.color = color; // hex or string
-    this.widgetType = widgetType; // WidgetType
+    this.id = id;
+    this.label = label;
+    this.type = type;
+    this.goal = goal;
+    this.color = color;
+    this.widgetType = widgetType;
     this.dashboardVisible = true;
   }
 }
 
 export class LogEntry {
   constructor({ id, metricId, value, timestamp }) {
-    this.id = id; // unique string
-    this.metricId = metricId; // MetricConfig id
-    this.value = value; // number or boolean
+    this.id = id;
+    this.metricId = metricId;
+    this.value = value;
     this.timestamp = timestamp || new Date().toISOString();
   }
 }
 
-// ----------------------
-// Storage Context
-// ----------------------
 export const StorageContext = createContext();
 
 export const useStorage = () => {
@@ -47,13 +41,11 @@ export const useStorage = () => {
 };
 
 export const StorageProvider = ({ children }) => {
-  // 1. Core State
   const [metrics, setMetrics] = useState([]);
   const [logEntries, setLogEntries] = useState([]);
   const [widgetLayout, setWidgetLayout] = useState({});
   const [onboardingComplete, setOnboardingComplete] = useState(false);
 
-  // 2. Load from LocalStorage on Mount
   useEffect(() => {
     try {
       const storedData = localStorage.getItem('orbit_db');
@@ -71,7 +63,6 @@ export const StorageProvider = ({ children }) => {
     }
   }, []);
 
-  // 3. Save to LocalStorage on Change
   useEffect(() => {
     const dataToSave = {
       metrics,
@@ -79,12 +70,20 @@ export const StorageProvider = ({ children }) => {
       widgetLayout,
       onboardingComplete
     };
-    localStorage.setItem('orbit_db', JSON.stringify(dataToSave));
+    
+    // Audit Fix: Add error handling for localStorage quota exceeded
+    try {
+      localStorage.setItem('orbit_db', JSON.stringify(dataToSave));
+    } catch (e) {
+      if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+        alert("Storage Quota Exceeded! ORBIT cannot save new data. Please export your data and clear space.");
+        console.error("LocalStorage Quota Exceeded", e);
+      } else {
+        console.error("Failed to save to localStorage", e);
+      }
+    }
   }, [metrics, logEntries, widgetLayout, onboardingComplete]);
 
-  // ----------------------
-  // Actions: Metrics
-  // ----------------------
   const addMetric = (metricData) => {
     const newMetric = {
       ...metricData,
@@ -100,13 +99,9 @@ export const StorageProvider = ({ children }) => {
 
   const deleteMetric = (id) => {
     setMetrics(prev => prev.filter(m => m.id !== id));
-    // Also clean up logs associated with this metric
     setLogEntries(prev => prev.filter(l => l.metricId !== id));
   };
 
-  // ----------------------
-  // Actions: Logging
-  // ----------------------
   const addLogEntry = (entryData) => {
     const newEntry = new LogEntry({
       id: crypto.randomUUID(),
@@ -117,21 +112,34 @@ export const StorageProvider = ({ children }) => {
     setLogEntries(prev => [...prev, newEntry]);
   };
 
-  // ----------------------
-  // Actions: Onboarding
-  // ----------------------
   const completeOnboarding = () => {
     setOnboardingComplete(true);
   };
 
-  // ----------------------
-  // Actions: Data Management
-  // ----------------------
+  // Audit Fix: Add Data validation on import to prevent corrupted state
   const importData = (jsonData) => {
     if (!jsonData) return;
-    if (Array.isArray(jsonData.metrics)) setMetrics(jsonData.metrics);
-    if (Array.isArray(jsonData.logEntries)) setLogEntries(jsonData.logEntries);
-    if (jsonData.widgetLayout) setWidgetLayout(jsonData.widgetLayout);
+
+    // Validate Metrics: Must be array and have IDs
+    if (Array.isArray(jsonData.metrics)) {
+      const validMetrics = jsonData.metrics.filter(m => 
+        m && typeof m === 'object' && m.id && m.name
+      );
+      setMetrics(validMetrics);
+    }
+
+    // Validate Logs: Must be array and have metricId + value
+    if (Array.isArray(jsonData.logEntries)) {
+      const validLogs = jsonData.logEntries.filter(l => 
+        l && typeof l === 'object' && l.metricId && (l.value !== undefined)
+      );
+      setLogEntries(validLogs);
+    }
+
+    if (jsonData.widgetLayout && typeof jsonData.widgetLayout === 'object') {
+      setWidgetLayout(jsonData.widgetLayout);
+    }
+
     if (typeof jsonData.onboardingComplete !== 'undefined') {
         setOnboardingComplete(jsonData.onboardingComplete);
     }
@@ -157,21 +165,16 @@ export const StorageProvider = ({ children }) => {
 
   return (
     <StorageContext.Provider value={{
-      // State
       metrics,
       logEntries,
-      logs: logEntries, // Alias
+      // Audit Fix: Removed duplicate 'logs: logEntries' export
       widgetLayout,
       onboardingComplete,
-
-      // Actions
       addMetric,
       updateMetric,
       deleteMetric,
       addLogEntry,
       completeOnboarding,
-
-      // Data Management
       importData,
       importJSON: importData,
       exportData,
