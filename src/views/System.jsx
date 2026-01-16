@@ -5,7 +5,15 @@ import { MetricBuilder } from '../components/system/MetricBuilder';
 import { Standards } from '../lib/standards';
 
 export const System = () => {
-  const { metrics, addMetric, updateMetric, deleteMetric, exportData, importData } = useContext(StorageContext);
+  const { 
+    metrics, 
+    addMetric, 
+    updateMetric, 
+    deleteMetric, 
+    exportData, 
+    importData, 
+    clearAllData 
+  } = useContext(StorageContext);
   
   // Metric Management State
   const [showBuilder, setShowBuilder] = useState(false);
@@ -13,7 +21,7 @@ export const System = () => {
 
   // Library Management State
   const [libraryItems, setLibraryItems] = useState([]);
-  const [viewingItem, setViewingItem] = useState(null); // The item currently being read/edited
+  const [viewingItem, setViewingItem] = useState(null);
   const [isEditingLibrary, setIsEditingLibrary] = useState(false);
 
   // Load Library on Mount
@@ -109,6 +117,13 @@ export const System = () => {
     const json = exportData();
     // Include Library in export
     json.library = Standards.list();
+    // Versioning and Metadata
+    json.meta = {
+      version: "1.0.0",
+      exportedAt: new Date().toISOString(),
+      platform: "ORBIT_PWA"
+    };
+
     const blob = new Blob([JSON.stringify(json, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -128,7 +143,7 @@ export const System = () => {
         importData(data);
         if (data.library) {
             // Simple overwrite/merge strategy for library
-            data.library.forEach(item => Standards.update(item)); // Update if exists, will add if implementation supports upsert or we just clear first
+            data.library.forEach(item => Standards.update(item)); 
             refreshLibrary();
         }
         alert('Import successful');
@@ -138,6 +153,17 @@ export const System = () => {
       }
     };
     reader.readAsText(file);
+  };
+
+  const handleNukeData = () => {
+    if (window.confirm("⚠️ WARNING: This will delete ALL metrics, logs, and library items. This action cannot be undone.")) {
+      if (window.confirm("Are you absolutely sure? Type 'YES' in your mind and click OK.")) {
+        clearAllData();
+        Standards.clear();
+        refreshLibrary(); // Will re-generate default manifest
+        alert("System reset complete.");
+      }
+    }
   };
 
   return (
@@ -151,12 +177,13 @@ export const System = () => {
 
       {/* --- LIBRARY SECTION --- */}
       <Glass>
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-1">
           <div className="text-lg font-bold">Library</div>
           <button onClick={openNewLibraryItem} className="text-xs font-bold bg-blue text-white px-3 py-2 rounded-lg">
             + New Item
           </button>
         </div>
+        <div className="text-xs text-secondary mb-4">Qualitative Protocols & Principles</div>
 
         <div className="flex flex-col gap-2">
           {libraryItems.length === 0 && <div className="text-secondary text-sm italic">Library is empty.</div>}
@@ -178,12 +205,13 @@ export const System = () => {
 
       {/* --- METRICS SECTION --- */}
       <Glass>
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-1">
           <div className="text-lg font-bold">Metrics</div>
           <button onClick={handleAddMetric} className="text-xs font-bold bg-blue text-white px-3 py-2 rounded-lg">
             + Add Metric
           </button>
         </div>
+        <div className="text-xs text-secondary mb-4">Quantitative Data Points</div>
 
         <div className="flex flex-col gap-2">
           {metrics.map(m => (
@@ -198,6 +226,9 @@ export const System = () => {
               </div>
             </div>
           ))}
+          {metrics.length === 0 && (
+             <div className="text-center text-secondary py-4 italic text-sm">No metrics configured.</div>
+          )}
         </div>
       </Glass>
 
@@ -205,12 +236,24 @@ export const System = () => {
       <Glass>
         <div className="flex flex-col gap-3">
           <div className="text-lg font-bold">Data Management</div>
+          
+          {/* Import/Export */}
           <div className="flex gap-2">
-            <button onClick={handleExport} className="flex-1 py-3 rounded-xl bg-blue text-white font-bold">Export JSON</button>
-            <label className="flex-1 py-3 rounded-xl border border-separator text-center font-bold cursor-pointer hover:bg-bg-color transition-colors">
+            <button onClick={handleExport} className="flex-1 py-3 rounded-xl bg-blue text-white font-bold active:scale-95 transition-transform">Export JSON</button>
+            <label className="flex-1 py-3 rounded-xl border border-separator text-center font-bold cursor-pointer hover:bg-bg-color transition-colors active:scale-95">
               Import JSON
               <input type="file" accept="application/json" onChange={handleImport} className="hidden" />
             </label>
+          </div>
+
+          {/* Danger Zone */}
+          <div className="mt-4 pt-4 border-t border-separator">
+            <button 
+              onClick={handleNukeData} 
+              className="w-full py-3 rounded-xl border border-red text-red font-bold hover:bg-red hover:bg-opacity-10 transition-colors"
+            >
+              Clear All Data (Reset)
+            </button>
           </div>
         </div>
       </Glass>
