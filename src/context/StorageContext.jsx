@@ -69,24 +69,47 @@ export const StorageProvider = ({ children }) => {
     }
   }, []);
 
+  // Ref to store the latest data for unmount persistence
+  const dataRef = React.useRef({ metrics, logEntries, timeLogs, widgetLayout, onboardingComplete });
+
   useEffect(() => {
-    const dataToSave = {
-      metrics,
-      logEntries,
-      timeLogs,
-      widgetLayout,
-      onboardingComplete
-    };
-    try {
-      localStorage.setItem('orbit_db', JSON.stringify(dataToSave));
-    } catch (e) {
-      if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
-        alert("Storage Quota Exceeded! Please export your data and clear space.");
-      } else {
-        console.error("Failed to save to localStorage", e);
-      }
-    }
+    dataRef.current = { metrics, logEntries, timeLogs, widgetLayout, onboardingComplete };
   }, [metrics, logEntries, timeLogs, widgetLayout, onboardingComplete]);
+
+  useEffect(() => {
+    const saveToStorage = () => {
+      try {
+        localStorage.setItem('orbit_db', JSON.stringify(dataRef.current));
+      } catch (e) {
+        if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+          alert("Storage Quota Exceeded! Please export your data and clear space.");
+        } else {
+          console.error("Failed to save to localStorage", e);
+        }
+      }
+    };
+
+    const handler = setTimeout(saveToStorage, 1000); // Debounce for 1 second
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [metrics, logEntries, timeLogs, widgetLayout, onboardingComplete]);
+
+  // Ensure data is saved on unmount
+  useEffect(() => {
+    return () => {
+       // We can't easily know if the last debounce has run.
+       // But saving on unmount is safer than losing data.
+       // However, if we just saved (handler ran), this duplicates the save.
+       // Duplicate save is better than data loss.
+       try {
+        localStorage.setItem('orbit_db', JSON.stringify(dataRef.current));
+      } catch (e) {
+        // Ignore errors on unmount
+      }
+    };
+  }, []);
 
   const addMetric = useCallback((metricData) => {
     const newMetric = createMetric(metricData);
