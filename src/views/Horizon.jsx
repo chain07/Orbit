@@ -8,8 +8,7 @@ import Glass from '../components/ui/Glass'; // Fixed Import path
 import { getWidgetComponent } from '../components/widgets/WidgetRegistry';
 import { EditLayoutModal } from '../components/horizon/EditLayoutModal'; // Fixed path
 import { EmptyState } from '../components/ui/EmptyState'; // New Component
-import { motion } from 'framer-motion';
-import { X } from 'lucide-react';
+import { Icons } from '../components/ui/Icons';
 import '../styles/motion.css';
 
 // ... (WidgetErrorBoundary class remains the same) ...
@@ -127,25 +126,30 @@ export const Horizon = () => {
 
       {/* PERSISTENT NUDGE */}
       {showNudge && (
-          <Glass className="bg-gradient-to-r from-blue/10 to-purple/10 border-blue/20 relative">
+          <Glass
+            className="relative"
+            style={{
+              background: 'linear-gradient(to right, rgba(0,122,255,0.1), rgba(175,82,222,0.1))',
+              borderColor: 'rgba(0,122,255,0.2)'
+            }}
+          >
               <button
                   onClick={() => setIsNudgeDismissed(true)}
                   className="absolute top-2 right-2 p-1 text-secondary hover:text-primary transition-colors"
               >
-                  <X size={14} />
+                  <Icons.X size={14} />
               </button>
               <div className="flex justify-between items-center pr-6">
                   <div>
                       <div className="font-bold text-blue">Complete Your Orbit</div>
                       <div className="text-xs text-secondary mt-1">Add at least 3 metrics and 1 goal for better insights.</div>
                   </div>
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
+                  <button
                     onClick={() => setActiveTab('System')}
-                    className="px-3 py-2 bg-blue text-white text-xs font-bold rounded-lg shadow-sm"
+                    className="px-3 py-2 bg-blue text-white text-xs font-bold rounded-lg shadow-sm active:scale-95 transition-transform"
                   >
                       Setup
-                  </motion.button>
+                  </button>
               </div>
           </Glass>
       )}

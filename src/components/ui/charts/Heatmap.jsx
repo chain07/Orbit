@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import { motion } from 'framer-motion';
 
 /**
  * HeatMap
@@ -114,15 +113,13 @@ export const HeatMap = ({
           {weeks.map((week, wIdx) => (
             <div key={wIdx} className="flex flex-col gap-[2px]">
               {week.map((day, dIdx) => (
-                <motion.div
+                <div
                   key={dIdx}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: (wIdx * 0.02) + (dIdx * 0.005) }}
-                  className={`rounded-xs ${day.val !== null ? colorScale(day.val) : 'bg-transparent'}`}
+                  className={`rounded-xs ${day.val !== null ? colorScale(day.val) : 'bg-transparent'} transition-opacity duration-500`}
                   style={{ 
                     width: size, 
                     height: size,
+                    transitionDelay: `${(wIdx * 0.02) + (dIdx * 0.005)}s`
                   }}
                   title={day.inRange ? `${day.date}: ${day.val || 0}` : ''}
                 />
