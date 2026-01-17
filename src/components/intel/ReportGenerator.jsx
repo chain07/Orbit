@@ -2,8 +2,7 @@ import React, { useState, useContext, useMemo, useEffect } from 'react';
 import { StorageContext } from '../../context/StorageContext';
 import { ReportEngine } from '../../engine/ReportEngine';
 import { Glass } from '../ui/Glass';
-import { Copy, Download, Check, Save, Archive, X } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Icons } from '../ui/Icons';
 
 export const ReportGenerator = ({ segment = 'Weekly' }) => {
   const { metrics, logEntries } = useContext(StorageContext);
@@ -86,7 +85,7 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
                 className={`p-2 rounded-lg transition-colors ${showArchive ? 'bg-blue text-white' : 'text-secondary hover:bg-bg-color'}`}
                 title="View Saved Reports"
              >
-                 <Archive size={18} />
+                 <Icons.Archive size={18} />
              </button>
              <span className="text-xs text-secondary font-medium">{segment}</span>
           </div>
@@ -114,41 +113,38 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
 
         {/* Action Buttons */}
         <div className="flex gap-2 pt-2 border-t border-separator">
-          <motion.button
-            whileTap={{ scale: 0.95 }}
+          <button
             onClick={handleCopy}
-            className="flex-1 py-3 rounded-xl bg-blue text-white font-bold text-sm flex items-center justify-center gap-2"
+            className="flex-1 py-3 rounded-xl bg-blue text-white font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
           >
             {copied ? (
               <>
-                <Check size={16} />
+                <Icons.Check size={16} />
                 Copied!
               </>
             ) : (
               <>
-                <Copy size={16} />
+                <Icons.Copy size={16} />
                 Copy
               </>
             )}
-          </motion.button>
+          </button>
 
-          <motion.button
-            whileTap={{ scale: 0.95 }}
+          <button
             onClick={handleSave}
-            className="flex-1 py-3 rounded-xl bg-green text-white font-bold text-sm flex items-center justify-center gap-2"
+            className="flex-1 py-3 rounded-xl bg-green text-white font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
           >
-             {saved ? <Check size={16} /> : <Save size={16} />}
+             {saved ? <Icons.Check size={16} /> : <Icons.Save size={16} />}
              Save
-          </motion.button>
+          </button>
 
-          <motion.button
-            whileTap={{ scale: 0.95 }}
+          <button
             onClick={handleDownload}
-            className="flex-1 py-3 rounded-xl border border-separator font-bold text-sm flex items-center justify-center gap-2"
+            className="flex-1 py-3 rounded-xl border border-separator font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
           >
-            <Download size={16} />
+            <Icons.Download size={16} />
             DL
-          </motion.button>
+          </button>
         </div>
       </div>
     </Glass>
@@ -191,7 +187,7 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
                         onClick={() => setSelectedReport(null)}
                         className="p-2 hover:bg-separator/20 rounded-full transition-colors"
                     >
-                        <X size={20} />
+                        <Icons.X size={20} />
                     </button>
                 </div>
                 <div className="flex-1 overflow-y-auto p-4 bg-bg-color">
@@ -208,7 +204,7 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
                         }}
                         className="flex items-center gap-2 px-4 py-2 bg-blue text-white rounded-lg font-bold text-sm"
                     >
-                        {copied ? <Check size={16} /> : <Copy size={16} />}
+                        {copied ? <Icons.Check size={16} /> : <Icons.Copy size={16} />}
                         Copy to Clipboard
                     </button>
                 </div>

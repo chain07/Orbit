@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { StorageContext } from '../../context/StorageContext';
-import { X, GripVertical, Eye, EyeOff } from 'lucide-react';
+import { Icons } from '../../components/ui/Icons';
 
 export const EditLayoutModal = ({ onClose }) => {
   const { metrics, updateMetric } = useContext(StorageContext);
@@ -51,7 +51,7 @@ export const EditLayoutModal = ({ onClose }) => {
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-separator bg-opacity-20 flex items-center justify-center hover:bg-opacity-30 transition-colors"
           >
-            <X size={18} />
+            <Icons.X size={18} />
           </button>
         </div>
 
@@ -79,14 +79,14 @@ export const EditLayoutModal = ({ onClose }) => {
                       disabled={index === 0}
                       className="text-secondary disabled:opacity-30 hover:text-primary transition-colors"
                     >
-                      <GripVertical size={16} />
+                      <Icons.GripVertical size={16} />
                     </button>
                     <button
                       onClick={() => moveDown(index)}
                       disabled={index === localMetrics.length - 1}
                       className="text-secondary disabled:opacity-30 hover:text-primary transition-colors"
                     >
-                      <GripVertical size={16} />
+                      <Icons.GripVertical size={16} />
                     </button>
                   </div>
 
@@ -112,9 +112,9 @@ export const EditLayoutModal = ({ onClose }) => {
                     className="p-2 rounded-lg hover:bg-bg-color transition-colors"
                   >
                     {metric.dashboardVisible ? (
-                      <Eye size={20} className="text-blue" />
+                      <Icons.Eye size={20} className="text-blue" />
                     ) : (
-                      <EyeOff size={20} className="text-secondary" />
+                      <Icons.EyeOff size={20} className="text-secondary" />
                     )}
                   </button>
                 </div>

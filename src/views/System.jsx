@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { StorageContext } from '../context/StorageContext';
 import { Glass } from '../components/ui/Glass';
 import { MetricBuilder } from '../components/system/MetricBuilder';
+import { DataManagement } from '../components/system/DataManagement';
 import { Library } from '../lib/library';
 
 export const System = ({ onNavigate }) => {
@@ -10,9 +11,6 @@ export const System = ({ onNavigate }) => {
     addMetric, 
     updateMetric, 
     deleteMetric, 
-    exportData, 
-    importData, 
-    clearAllData 
   } = useContext(StorageContext);
   
   // Metric Management State
@@ -130,87 +128,6 @@ export const System = ({ onNavigate }) => {
       if (onNavigate) onNavigate('Logger', { metricId });
   };
 
-  // --- Data Management Handlers ---
-  const handleArchive = () => {
-    try {
-      // 1. Snapshot current state
-      const snapshot = {
-        metrics,
-        logEntries: exportData().logEntries, // using export helper to get consistent state
-        archivedAt: new Date().toISOString()
-      };
-
-      // 2. Load existing archive
-      const existingArchiveJson = localStorage.getItem('orbit_archive');
-      let archive = [];
-      if (existingArchiveJson) {
-        archive = JSON.parse(existingArchiveJson);
-      }
-
-      // 3. Append and Save
-      archive.push(snapshot);
-      localStorage.setItem('orbit_archive', JSON.stringify(archive));
-
-      alert(`Archive saved. Total snapshots: ${archive.length}`);
-    } catch (e) {
-      console.error("Archive failed", e);
-      alert("Failed to save archive (Quota exceeded?)");
-    }
-  };
-
-  const handleExport = () => {
-    const json = exportData();
-    // Include Library in export
-    json.library = Library.list();
-    // Versioning and Metadata
-    json.meta = {
-      version: "1.0.0",
-      exportedAt: new Date().toISOString(),
-      platform: "ORBIT_PWA"
-    };
-
-    const blob = new Blob([JSON.stringify(json, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `orbit-data-${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleImport = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      try {
-        const data = JSON.parse(ev.target.result);
-        importData(data);
-        if (data.library) {
-            // Simple overwrite/merge strategy for library
-            data.library.forEach(item => Library.update(item));
-            refreshLibrary();
-        }
-        alert('Import successful');
-      } catch (err) {
-        console.error("Invalid JSON", err);
-        alert('Failed to parse JSON');
-      }
-    };
-    reader.readAsText(file);
-  };
-
-  const handleNukeData = () => {
-    if (window.confirm("⚠️ WARNING: This will delete ALL metrics, logs, and library items. This action cannot be undone.")) {
-      if (window.confirm("Are you absolutely sure? Type 'YES' in your mind and click OK.")) {
-        clearAllData();
-        Library.clear();
-        refreshLibrary(); // Will re-generate default manifest
-        alert("System reset complete.");
-      }
-    }
-  };
-
   return (
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
       
@@ -224,7 +141,7 @@ export const System = ({ onNavigate }) => {
       <Glass>
         <div className="flex justify-between items-center mb-1">
           <div className="text-lg font-bold">Library</div>
-          <button onClick={openNewLibraryItem} whileTap={{ scale: 0.95 }} className="text-xs font-bold bg-blue text-white px-3 py-2 rounded-lg">
+          <button onClick={openNewLibraryItem} className="text-xs font-bold bg-blue text-white px-3 py-2 rounded-lg active:scale-95 transition-transform">
             + New Item
           </button>
         </div>
@@ -252,7 +169,7 @@ export const System = ({ onNavigate }) => {
       <Glass>
         <div className="flex justify-between items-center mb-1">
           <div className="text-lg font-bold">Metrics</div>
-          <button onClick={handleAddMetric} whileTap={{ scale: 0.95 }} className="text-xs font-bold bg-blue text-white px-3 py-2 rounded-lg">
+          <button onClick={handleAddMetric} className="text-xs font-bold bg-blue text-white px-3 py-2 rounded-lg active:scale-95 transition-transform">
             + Add Metric
           </button>
         </div>
@@ -278,36 +195,7 @@ export const System = ({ onNavigate }) => {
       </Glass>
 
       {/* --- DATA MANAGEMENT --- */}
-      <Glass>
-        <div className="flex flex-col gap-3">
-          <div className="text-lg font-bold">Data Management</div>
-          
-          {/* Import/Export/Archive */}
-          <div className="flex flex-col gap-2">
-             <div className="flex gap-2">
-                <button onClick={handleArchive} whileTap={{ scale: 0.95 }} className="flex-1 py-3 rounded-xl bg-purple text-white font-bold transition-transform">Save to Archive</button>
-             </div>
-             <div className="flex gap-2">
-                <button onClick={handleExport} whileTap={{ scale: 0.95 }} className="flex-1 py-3 rounded-xl bg-blue text-white font-bold transition-transform">Export JSON</button>
-                <label className="flex-1 py-3 rounded-xl border border-separator text-center font-bold cursor-pointer hover:bg-bg-color transition-colors active:scale-95">
-                Import JSON
-                <input type="file" accept="application/json" onChange={handleImport} className="hidden" />
-                </label>
-             </div>
-          </div>
-
-          {/* Danger Zone */}
-          <div className="mt-4 pt-4 border-t border-separator">
-            <button 
-              onClick={handleNukeData} 
-              whileTap={{ scale: 0.95 }}
-              className="w-full py-3 rounded-xl border border-red text-red font-bold hover:bg-red hover:bg-opacity-10 transition-colors"
-            >
-              Clear All Data (Reset)
-            </button>
-          </div>
-        </div>
-      </Glass>
+      <DataManagement />
 
       {/* --- MODALS / EDITORS --- */}
 
@@ -410,8 +298,7 @@ export const System = ({ onNavigate }) => {
                         {viewingItem.metricId && (
                             <button
                                 onClick={() => handleQuickLink(viewingItem.metricId)}
-                                whileTap={{ scale: 0.95 }}
-                                className="px-2 py-1 rounded bg-green text-white text-xs font-bold uppercase hover:bg-opacity-90 transition-opacity"
+                                className="px-2 py-1 rounded bg-green text-white text-xs font-bold uppercase hover:bg-opacity-90 transition-opacity active:scale-95 transition-transform"
                             >
                                 Quick Link ⚡
                             </button>
