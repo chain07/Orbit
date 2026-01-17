@@ -1,7 +1,7 @@
 # ORBIT Naming Conventions
 
-**Version:** 1.1.0
-**Last Updated:** 2026-01-20
+**Version:** 1.2.0
+**Last Updated:** 2026-05-20
 **Status:** 🔒 LOCKED - Changes require architecture review
 
 ---
@@ -21,6 +21,22 @@ This document is the **single source of truth** for naming across the ORBIT code
 2. **Explicit Over Implicit** - `metricId` not `id`, `startDate` not `start`
 3. **Singular vs Plural Matters** - `metric` = one thing, `metrics` = array of things
 4. **No Abbreviations** - `metric` not `met`, `value` not `val` (exception: common acronyms like `id`, `url`)
+5. **Zero External Dependencies** - Use internal utilities and standards over external libraries.
+
+---
+
+## Icons (Zero Dependency)
+
+All icons must be imported from the internal Icon Registry.
+
+```javascript
+// ✅ CORRECT
+import { Icons } from '../components/ui/Icons';
+<Icons.Settings size={24} />
+
+// ❌ WRONG
+import { Settings } from 'lucide-react'; // Banned
+```
 
 ---
 
@@ -489,6 +505,8 @@ export default MetricEngine;  // Prefer named export
 | `bool` | `boolean` | Not JavaScript type name |
 | `num` | `number` | Abbreviation |
 | `str` | `string` | Abbreviation |
+| `lucide-react` | `Icons` | External dependency banned |
+| `framer-motion` | `CSS Transitions` | External dependency banned |
 
 ---
 
@@ -560,6 +578,7 @@ When reviewing PRs:
 
 | Date | Version | Change | Author |
 |------|---------|--------|--------|
+| 2026-05-20 | 1.2.0 | Removed external dependencies (lucide, framer-motion). Updated Icon guidelines. | Jules |
 | 2026-01-20 | 1.1.0 | Added RANGE, SELECT, TEXT metric types. Expanded TimeLog schema. | Jules |
 | 2026-01-16 | 1.0.0 | Initial creation from stabilization audit | System Architect |
 

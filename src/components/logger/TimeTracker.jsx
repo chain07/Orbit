@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { StorageContext } from '../../context/StorageContext';
 import SegmentedControl from '../../components/ui/SegmentedControl';
-import { RotateCcw } from 'lucide-react';
+import { Icons } from '../../components/ui/Icons';
 
 export const TimeTracker = ({ metricId }) => {
   const { metrics, addTimeLog } = useContext(StorageContext);
@@ -181,7 +181,7 @@ export const TimeTracker = ({ metricId }) => {
                       onClick={() => { setElapsed(0); setStartTime(null); }}
                       className="px-4 py-4 border border-separator text-secondary rounded-xl font-bold btn-ios bg-white"
                     >
-                      <RotateCcw size={20} />
+                      <Icons.RotateCcw size={20} />
                     </button>
                   )}
                 </>

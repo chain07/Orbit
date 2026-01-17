@@ -1,6 +1,5 @@
 // src/components/ui/RingChart.jsx
 import React from 'react';
-import { motion } from 'framer-motion';
 
 /**
  * RingChart
@@ -41,7 +40,7 @@ export const RingChart = ({
           fill="none"
         />
         {/* Animated Progress Circle */}
-        <motion.circle
+        <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
@@ -49,12 +48,12 @@ export const RingChart = ({
           strokeWidth={strokeWidth}
           fill="none"
           strokeDasharray={circumference}
-          strokeDashoffset={circumference}
+          strokeDashoffset={offset}
           strokeLinecap="round"
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 0.8, ease: 'easeInOut' }}
           transform={`rotate(-90 ${size / 2} ${size / 2})`}
+          style={{
+            transition: 'stroke-dashoffset 0.8s ease-in-out'
+          }}
         />
       </svg>
       {label && (
