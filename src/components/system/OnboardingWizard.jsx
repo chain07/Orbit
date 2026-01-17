@@ -1,7 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { StorageContext } from '../../context/StorageContext';
 import { Glass } from '../../components/ui/Glass';
-import { motion } from 'framer-motion';
 
 export const OnboardingWizard = ({ onComplete }) => {
   const { addMetric } = useContext(StorageContext);
@@ -193,21 +192,19 @@ export const OnboardingWizard = ({ onComplete }) => {
 
             <div className="flex flex-col gap-3 pt-4 border-t border-separator">
                 <div className="flex justify-between gap-3">
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
+                  <button
                     onClick={prevStep}
                     disabled={currentStep === 0}
-                    className={`px-6 py-3 font-bold rounded-xl transition-colors ${currentStep === 0 ? 'text-secondary opacity-50 cursor-not-allowed' : 'text-primary hover:bg-bg-color'}`}
+                    className={`px-6 py-3 font-bold rounded-xl transition-colors active:scale-95 transition-transform ${currentStep === 0 ? 'text-secondary opacity-50 cursor-not-allowed' : 'text-primary hover:bg-bg-color'}`}
                   >
                     Back
-                  </motion.button>
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
+                  </button>
+                  <button
                     onClick={nextStep}
-                    className="px-8 py-3 bg-blue text-white font-bold rounded-xl shadow-lg shadow-blue/20"
+                    className="px-8 py-3 bg-blue text-white font-bold rounded-xl shadow-lg shadow-blue/20 active:scale-95 transition-transform"
                   >
                     {currentStep === steps.length - 1 ? 'Launch ORBIT 🚀' : 'Next'}
-                  </motion.button>
+                  </button>
                 </div>
 
                 <button onClick={handleSkip} className="text-xs text-secondary font-bold hover:text-primary transition-colors py-2">

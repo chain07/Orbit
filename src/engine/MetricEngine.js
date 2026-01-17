@@ -152,18 +152,15 @@ export const MetricEngine = {
     // 1. Bucket values by date string key (YYYY-M-D)
     const buckets = {};
     const now = new Date();
-    // Pre-calculate cutoff time to filter old logs early
-    // We go back 'days' days, set to start of day
+
+    // Calculate cutoff time to filter old logs early.
+    // Logic: We need the last 'days' days.
+    // If days=7, we need Today, Yesterday, ..., Today-6.
+    // So cutoff is Today-6 at 00:00:00.
     const cutoffDate = new Date(now);
-    cutoffDate.setDate(cutoffDate.getDate() - days);
+    cutoffDate.setDate(cutoffDate.getDate() - (days - 1));
     cutoffDate.setHours(0, 0, 0, 0);
     const cutoffTime = cutoffDate.getTime();
-
-    // Optimization: Calculate cutoff to skip old logs
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - (days - 1));
-    cutoff.setHours(0, 0, 0, 0);
-    const cutoffTime = cutoff.getTime();
 
     logs.forEach(l => {
       const d = new Date(l.timestamp);

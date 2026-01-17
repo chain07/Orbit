@@ -1,5 +1,4 @@
 import React, { useMemo } from "react";
-import { motion } from "framer-motion";
 import "../../styles/motion.css";
 
 export default function SegmentedControl({
@@ -31,17 +30,20 @@ export default function SegmentedControl({
   return (
     <div className={`segmented-wrap ${className}`}>
       {/* Animated Indicator Piston - Native Fidelity Update */}
-      <motion.div
+      <div
         className="seg-indicator"
-        initial={false}
-        animate={{
-          x: `${(index === -1 ? 0 : index) * 100}%`,
-          opacity: index === -1 ? 0 : 1
-        }}
-        transition={{ type: "spring", stiffness: 500, damping: 35, mass: 1 }}
         style={{
           width: `calc((100% - 4px) / ${normalizedOptions.length})`,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.12)'
+          transform: `translateX(${(index === -1 ? 0 : index) * 100}%)`,
+          opacity: index === -1 ? 0 : 1,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+          position: 'absolute',
+          top: '2px',
+          bottom: '2px',
+          left: '2px', // Base offset
+          borderRadius: 'var(--radius-sm)', // Assuming standard radius
+          backgroundColor: 'var(--card-bg)', // White/Card bg
+          transition: 'transform 0.3s var(--ease-spring), opacity 0.2s ease'
         }}
       />
       
@@ -59,15 +61,19 @@ export default function SegmentedControl({
             style.color = "var(--text-secondary)";
         }
         return (
-          <motion.div
+          <div
             key={opt.value}
-            className="seg-btn"
-            style={style}
+            className="seg-btn active:scale-95 transition-transform duration-100 ease-out"
+            style={{
+                ...style,
+                position: 'relative',
+                zIndex: 1,
+                cursor: 'pointer'
+            }}
             onClick={() => onChange(opt.value)}
-            whileTap={{ scale: 0.97 }}
           >
             {opt.label}
-          </motion.div>
+          </div>
         );
       })}
     </div>
