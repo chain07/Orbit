@@ -133,7 +133,7 @@ Chart colors must be consistent.
 
 ## 7. Iconography
 
-* **Library:** Lucide React is the exclusive icon set.
+* **Library:** Internal Icon Registry (`src/components/ui/Icons.jsx`) is the exclusive source. External libraries like Lucide React are **BANNED**.
 * **Stroke Width:** Fixed at 2px for a balanced, readable weight.
 * **Size Standard:**
 
@@ -156,6 +156,7 @@ A critical UI element for the Logger and Dashboard views.
 ### 8.2 Bottom Navigation
 
 * **Material:** Must use the strict Glass Token (blur(20px), 0.72 opacity).
+* **Placement:** Fixed at `bottom: calc(30px + env(safe-area-inset-bottom))` to respect iOS Home Indicator.
 * **Active State:** The background "pill" behind the active icon slides with spring motion; it does not fade in/out.
 * **Transition:** Switching tabs triggers a subtle elastic scale or fade-in for the new view.
 

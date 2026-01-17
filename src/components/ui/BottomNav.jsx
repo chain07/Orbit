@@ -1,39 +1,50 @@
-import React from "react";
+import React, { useRef, useEffect, useState } from "react";
 import Glass from "./Glass";
 import "../../styles/motion.css";
 
 export default function BottomNav({ tabs, activeIndex, onChange }) {
+  const [indicatorStyle, setIndicatorStyle] = useState({ width: 0, transform: 'translateX(0px)' });
+  const itemsRef = useRef([]);
+
+  useEffect(() => {
+    const activeItem = itemsRef.current[activeIndex];
+    if (activeItem) {
+      // Calculate position relative to the container (which has padding: 6px)
+      // The indicator absolute position is top: 6px, left: 6px.
+      // So translateX should be (item.offsetLeft - 6)
+      const offsetLeft = activeItem.offsetLeft;
+      const width = activeItem.offsetWidth;
+
+      setIndicatorStyle({
+        width: `${width}px`,
+        transform: `translateX(${offsetLeft - 6}px)`
+      });
+    }
+  }, [activeIndex, tabs]);
+
   return (
     <div className="tab-bar-container">
+      {/*
+         We use Glass but we override its styles in layout.css via .tab-bar class.
+         We remove the inline styles that Glass component usually adds if they conflict.
+         However, Glass adds backdropFilter which we want.
+         The className "tab-bar" handles the geometry overrides.
+      */}
       <Glass className="tab-bar">
+        <div
+            className="tab-indicator"
+            style={indicatorStyle}
+        />
         {tabs.map((tab, i) => {
           const isActive = i === activeIndex;
           return (
             <div
-              key={tab.id}
+              key={tab.id || i}
+              ref={el => itemsRef.current[i] = el}
               className={`tab-item ${isActive ? "active" : ""}`}
               onClick={() => onChange(i)}
-              style={{ position: 'relative', cursor: 'pointer' }}
             >
-              {isActive && (
-                <div
-                  className="tab-indicator-fluid"
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    borderRadius: '99px',
-                    backgroundColor: 'rgba(255,255,255,0.1)',
-                    zIndex: -1,
-                    transition: 'all 0.3s var(--ease-spring)'
-                  }}
-                />
-              )}
-              <div
-                className="relative z-10 transition-transform duration-200 ease-out active:scale-95"
-                style={{
-                   transform: isActive ? 'scale(1)' : 'scale(1)'
-                }}
-              >
+              <div className="relative z-10 active:scale-95 transition-transform duration-200">
                 {tab.icon}
               </div>
             </div>

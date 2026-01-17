@@ -57,7 +57,7 @@ export const Intel = () => {
       />
 
       {/* STAT CARDS */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* System Health Card */}
         <Glass className="flex flex-col justify-between min-h-[140px]">
           <div className="text-xs font-bold text-secondary uppercase tracking-wide">System Health</div>

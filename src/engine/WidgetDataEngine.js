@@ -98,11 +98,12 @@ export const WidgetDataEngine = {
       ? MetricEngine.getLastNDaysValues(logs, days)
       : new Array(days).fill(0);
 
-    const normalizedData = rawHistory.map(val => MetricEngine.normalizeValue(metric, val));
+    // FIX: Return raw values so the Sparkline component can handle scaling correctly.
+    // Previously returned 0-1 normalized values, which caused flatlining or incorrect axis.
     const currentVal = MetricEngine.getTodayValue ? MetricEngine.getTodayValue(logs) : 0;
 
     return {
-      data: normalizedData,
+      data: rawHistory,
       current: currentVal,
       label: metric.label,
       color: metric.color || '#007AFF',
@@ -134,7 +135,9 @@ export const WidgetDataEngine = {
              dayValue = hasTrue ? 1 : 0;
         } else {
              const total = dayLogs.reduce((sum, l) => sum + (parseFloat(l.value) || 0), 0);
-             dayValue = MetricEngine.normalizeValue(metric, total);
+             // FIX: Return 0-100 percentage or raw-ish value for intensity.
+             // Previous was 0-1. We multiply by 100 to match Ring/Chart standard scale.
+             dayValue = MetricEngine.normalizeValue(metric, total) * 100;
         }
         values[date] = dayValue;
     });

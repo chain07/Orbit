@@ -1,6 +1,7 @@
 /* src/styles/index.css */
 @import "./tokens.css";
 @import "./motion.css";
+@import "./layout.css";
 
 *,
 *::before,
