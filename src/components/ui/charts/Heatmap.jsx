@@ -20,9 +20,12 @@ export const HeatMap = ({
   // Default color scale (GitHub Green-ish)
   colorScale = (v) => {
     if (v === 0 || v === undefined) return 'bg-separator opacity-20'; // Empty/None
-    if (v <= 0.25) return 'bg-green opacity-40';
-    if (v <= 0.50) return 'bg-green opacity-60';
-    if (v <= 0.75) return 'bg-green opacity-80';
+    // Support both 0-1 and 0-100 scales
+    const n = v > 1 ? v / 100 : v;
+
+    if (n <= 0.25) return 'bg-green opacity-40';
+    if (n <= 0.50) return 'bg-green opacity-60';
+    if (n <= 0.75) return 'bg-green opacity-80';
     return 'bg-green'; // Full
   },
 }) => {
