@@ -19,6 +19,7 @@ Adherence: The project has drifted from the documentation in key areas (Icons, M
  * [ ] [Dependency] Found `framer-motion` imports (Must Migrate to CSS/Vanilla).
 
 4. Compliance Violations
+
 | File | Violation | Docs Reference | Severity |
 |---|---|---|---|
 | src/engine/MetricEngine.js | Syntax Error (Duplicate `const cutoffTime`) | N/A (JS Syntax) | Critical |
