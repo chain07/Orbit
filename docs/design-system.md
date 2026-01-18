@@ -181,3 +181,48 @@ The system renders data via the WidgetRegistry. The following types must be supp
 * **Internal Rendering**: SVG math normalizes this to 0–1 to calculate stroke-dasharray and coordinate paths.
 * **Ring Charts**: Background tracks must be distinct from the value path (using --neutral-graph color).
 * **Animation**: Chart entries must animate via CSS transitions or the native Web Animations API (no heavy JS animation libraries).
+
+## 10. Universal Button System (OrbitButton)
+
+The Orbit Button architecture uses a nested shell-and-core strategy to ensure consistent physics (squash-and-stretch) and visual weight across the application.
+
+### 10.1 Architecture
+The component is split into two layers:
+1.  **Wrapper (`.btn-orbit`)**: Handles the bounding box, layout positioning, and touch target compliance (min-height: 48px).
+2.  **Core (`.btn-core`)**: Handles the visual presentation (background, border-radius, typography) and the inner content.
+
+This separation allows the inner core to perform `scale(0.95)` animations without affecting the outer layout flow of the parent container.
+
+### 10.2 Tokens & Physics
+*   **Radius**: `--radius-btn: 14px`
+*   **Press Scale**: `--scale-press: 0.95`
+*   **Transition (Release)**: `cubic-bezier(0.19, 1, 0.22, 1)` (High tension spring back)
+*   **Transition (Press)**: `cubic-bezier(0, 0, 0.2, 1)` (Instant squish)
+
+### 10.3 Variants
+All buttons must use one of the strict semantic variants. Custom overrides are discouraged.
+
+*   **Primary**:
+    *   **Background**: `var(--blue)` (Orbit Blue)
+    *   **Text**: White
+    *   **Shadow**: Inner bevel `inset 0 1px 0.5px rgba(255,255,255,0.25)`
+    *   **Usage**: Main Call-to-Action (Save, Create, Submit).
+
+*   **Secondary**:
+    *   **Background**: `rgba(0, 0, 0, 0.08)` (Light Mode) / `rgba(255, 255, 255, 0.1)` (Dark Mode)
+    *   **Text**: `var(--text-primary)`
+    *   **Usage**: Alternative actions (Cancel, Back, Edit).
+
+*   **Destructive**:
+    *   **Background**: `rgba(255, 59, 48, 0.1)` (Red Tint)
+    *   **Text**: `var(--red)`
+    *   **Usage**: Dangerous actions (Delete, Reset, Clear).
+
+### 10.4 Implementation
+Buttons are implemented via the `<OrbitButton />` component (`src/components/ui/OrbitButton.jsx`), which automatically handles the nested structure and interaction states (`onPointerDown`, `onKeyDown`).
+
+```jsx
+<OrbitButton variant="primary" icon={<Icons.Save size={18} />}>
+  Save Changes
+</OrbitButton>
+```
