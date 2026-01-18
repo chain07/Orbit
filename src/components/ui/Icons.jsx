@@ -35,8 +35,7 @@ export const Icons = {
   ),
   PenTool: (props) => (
     <IconWrapper {...props}>
-      <path d="M12 19l7-7 3 3-7 7-3-3z" />
-      <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-17" />
+      <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
     </IconWrapper>
   ),
   Radio: (props) => (
@@ -117,6 +116,58 @@ export const Icons = {
       <ellipse cx="12" cy="5" rx="9" ry="3" />
       <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
       <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+    </IconWrapper>
+  ),
+  BookOpen: (props) => (
+    <IconWrapper {...props}>
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+    </IconWrapper>
+  ),
+  ChevronRight: (props) => (
+    <IconWrapper {...props}>
+      <polyline points="9 18 15 12 9 6" />
+    </IconWrapper>
+  ),
+  ChevronUp: (props) => (
+    <IconWrapper {...props}>
+      <polyline points="18 15 12 9 6 15" />
+    </IconWrapper>
+  ),
+  ChevronDown: (props) => (
+    <IconWrapper {...props}>
+      <polyline points="6 9 12 15 18 9" />
+    </IconWrapper>
+  ),
+  BarChart2: (props) => (
+    <IconWrapper {...props}>
+      <line x1="18" y1="20" x2="18" y2="10" />
+      <line x1="12" y1="20" x2="12" y2="4" />
+      <line x1="6" y1="20" x2="6" y2="14" />
+    </IconWrapper>
+  ),
+  Activity: (props) => (
+    <IconWrapper {...props}>
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+    </IconWrapper>
+  ),
+  Trash: (props) => (
+    <IconWrapper {...props}>
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+    </IconWrapper>
+  ),
+  Plus: (props) => (
+    <IconWrapper {...props}>
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </IconWrapper>
+  ),
+  Upload: (props) => (
+    <IconWrapper {...props}>
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="17 8 12 3 7 8" />
+      <line x1="12" y1="3" x2="12" y2="15" />
     </IconWrapper>
   )
 };

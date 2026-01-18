@@ -56,7 +56,7 @@ export const Logger = ({ initialMetricId = null }) => {
       {/* Header with Safe Padding */}
       <div className="flex flex-col gap-1 safe-pt">
         <h1 className="text-3xl font-extrabold tracking-tight">Logger</h1>
-        <p className="text-secondary font-medium">Input engine.</p>
+        <p className="text-secondary font-medium leading-tight">Input engine.</p>
       </div>
 
       {/* Mode Switch - N-01: Ensured existence and styling */}

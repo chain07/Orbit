@@ -192,7 +192,7 @@ export const System = ({ onNavigate }) => {
              <h1 className="text-3xl font-extrabold tracking-tight">System</h1>
              <p className="text-secondary font-medium">Configuration</p>
          </div>
-         <div className="w-[180px]">
+         <div className="w-[160px]">
              <SegmentedControl
                 options={['Library', 'Settings']}
                 value={viewMode}

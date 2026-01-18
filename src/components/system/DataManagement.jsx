@@ -264,8 +264,9 @@ export const DataManagement = () => {
         <div className="flex gap-3 mt-2">
            <button
              onClick={handleImportClick}
-             className="flex-1 py-3 rounded-xl border border-dashed border-separator text-secondary font-bold text-sm hover:text-primary hover:border-primary transition-colors active:scale-95 transition-transform"
+             className="flex-1 py-3 rounded-xl border border-dashed border-separator bg-bg-color/50 text-secondary font-bold text-sm hover:text-primary hover:border-primary hover:bg-bg-color transition-all active:scale-95 transition-transform flex items-center justify-center gap-2"
            >
+             <Icons.Upload size={16} />
              Import JSON
            </button>
            <input
@@ -278,7 +279,7 @@ export const DataManagement = () => {
 
            <button
              onClick={handleNuke}
-             className="flex-1 py-3 rounded-xl border border-red/30 text-red font-bold text-sm hover:bg-red/5 transition-colors active:scale-95 transition-transform"
+             className="flex-1 py-3 px-1 rounded-xl border border-red/30 text-red font-bold text-sm hover:bg-red/5 transition-colors active:scale-95 transition-transform whitespace-nowrap overflow-hidden text-ellipsis"
            >
              Reset All
            </button>

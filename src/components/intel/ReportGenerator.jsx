@@ -88,10 +88,10 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
              </div>
              <button
                 onClick={() => setShowArchive(!showArchive)}
-                className={`p-2 rounded-lg transition-colors ${showArchive ? 'bg-blue text-white' : 'text-secondary hover:bg-bg-color'}`}
-                title="View Saved Reports"
+                className={`p-2 rounded-lg transition-all active:scale-95 ${showArchive ? 'bg-blue text-white shadow-lg shadow-blue/20' : 'text-secondary hover:text-primary hover:bg-bg-color'}`}
+                title="Archived Reports"
              >
-                 <Icons.Archive size={18} />
+                 <Icons.Archive size={20} />
              </button>
           </div>
         </div>
