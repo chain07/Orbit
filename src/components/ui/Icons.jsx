@@ -35,7 +35,9 @@ export const Icons = {
   ),
   PenTool: (props) => (
     <IconWrapper {...props}>
-      <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+      {/* Improved Edit/Pen Icon */}
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
     </IconWrapper>
   ),
   Radio: (props) => (
@@ -148,6 +150,7 @@ export const Icons = {
   ),
   Activity: (props) => (
     <IconWrapper {...props}>
+      {/* Improved Activity/Signal Icon (Symmetrical) */}
       <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
     </IconWrapper>
   ),
@@ -168,6 +171,12 @@ export const Icons = {
       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
       <polyline points="17 8 12 3 7 8" />
       <line x1="12" y1="3" x2="12" y2="15" />
+    </IconWrapper>
+  ),
+  Edit3: (props) => (
+    <IconWrapper {...props}>
+       <path d="M12 20h9" />
+       <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
     </IconWrapper>
   )
 };

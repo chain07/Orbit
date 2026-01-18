@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Glass } from '../ui/Glass';
-import { Icons } from '../ui/Icons'; // Assuming Icons exists or I remove if unused
+import { Icons } from '../ui/Icons';
 
 export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
   const [form, setForm] = useState({
@@ -52,7 +52,8 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
       {/* Header */}
       <div className="p-4 border-b border-separator flex justify-between items-center bg-bg-color sticky top-0 z-10">
         <h2 className="text-lg font-bold">{metric ? 'Edit Metric' : 'New Metric'}</h2>
-        <button onClick={onCancel} className="text-blue font-bold active:opacity-50">Cancel</button>
+        {/* Fixed: Updated Back/Cancel button color for better visibility */}
+        <button onClick={onCancel} className="text-secondary font-bold active:opacity-50">Cancel</button>
       </div>
 
       <div className="p-4 flex flex-col gap-6 overflow-y-auto">

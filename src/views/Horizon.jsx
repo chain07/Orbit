@@ -4,14 +4,13 @@ import { NavigationContext } from '../context/NavigationContext';
 import { WidgetDataEngine } from '../engine/WidgetDataEngine';
 import { HorizonAgent } from '../lib/horizonAgent';
 import SegmentedControl from '../components/ui/SegmentedControl';
-import Glass from '../components/ui/Glass'; // Fixed Import path
+import Glass from '../components/ui/Glass';
 import { getWidgetComponent } from '../components/widgets/WidgetRegistry';
-import { EditLayoutModal } from '../components/horizon/EditLayoutModal'; // Fixed path
-import { EmptyState } from '../components/ui/EmptyState'; // New Component
+import { EditLayoutModal } from '../components/horizon/EditLayoutModal';
+import { EmptyState } from '../components/ui/EmptyState';
 import { Icons } from '../components/ui/Icons';
 import '../styles/motion.css';
 
-// ... (WidgetErrorBoundary class remains the same) ...
 class WidgetErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -42,14 +41,12 @@ export const Horizon = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isNudgeDismissed, setIsNudgeDismissed] = useState(false);
   
-  // Date Header
   const todayDate = new Date().toLocaleDateString('en-US', { 
     weekday: 'long', 
     month: 'long', 
     day: 'numeric' 
   });
 
-  // Insights Logic
   const topInsights = useMemo(() => {
     if (!HorizonAgent || !HorizonAgent.generateAllInsights) return [];
     try {
@@ -62,7 +59,6 @@ export const Horizon = () => {
     }
   }, [metrics, logEntries]);
 
-  // Widget Logic
   const widgets = useMemo(() => {
     try {
       return WidgetDataEngine.generateWidgets
@@ -73,14 +69,9 @@ export const Horizon = () => {
     }
   }, [metrics, logEntries, segment]);
 
-  // --- ZERO STATE LOGIC ---
-  // If no metrics exist, we assume the user is new or wiped data.
   const hasMetrics = metrics && metrics.length > 0;
 
-  // Nudge Logic: Persistent card if criteria not met
-  // Criteria: 3+ metrics AND 1+ goal defined
   const showNudge = useMemo(() => {
-      // If user has no metrics, EmptyState handles it. Nudge is for "Incomplete Setup"
       if (!hasMetrics) return false;
       if (isNudgeDismissed) return false;
 
@@ -93,8 +84,8 @@ export const Horizon = () => {
   return (
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
       
-      {/* Header - Safe Area Padding Applied */}
-      <div className="flex flex-col gap-1 safe-pt">
+      {/* Header - Fixed Gap */}
+      <div className="flex flex-col gap-0 safe-pt">
         <div className="text-xs font-bold text-secondary uppercase tracking-wide">
           {todayDate}
         </div>
@@ -113,7 +104,6 @@ export const Horizon = () => {
         </div>
       </div>
 
-      {/* ZERO STATE: No Metrics */}
       {!hasMetrics && (
         <EmptyState 
           icon="🚀"
@@ -124,7 +114,6 @@ export const Horizon = () => {
         />
       )}
 
-      {/* PERSISTENT NUDGE (Dynamic Positioning) */}
       {showNudge && (
           <Glass
             className="relative mb-6"
@@ -154,7 +143,6 @@ export const Horizon = () => {
           </Glass>
       )}
 
-      {/* Insights (Only show if we have them) */}
       {hasMetrics && topInsights.length > 0 && (
         <Glass className="p-4 border-l-4 border-blue">
           <div className="flex flex-col gap-2">
@@ -170,7 +158,6 @@ export const Horizon = () => {
         </Glass>
       )}
 
-      {/* Main Content */}
       {hasMetrics && (
         <>
           <SegmentedControl

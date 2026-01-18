@@ -12,7 +12,7 @@ import { System } from '../views/System';
 import BottomNav from '../components/ui/BottomNav';
 import UpdateManager from '../components/system/UpdateManager';
 import { OnboardingWizard } from '../components/system/OnboardingWizard';
-import { Glass } from '../components/ui/Glass'; // Import Glass for overlay
+import { GlobalErrorBoundary } from '../components/system/GlobalErrorBoundary'; // Restored for production safety
 
 const AppContent = () => {
   const { activeTab, setActiveTab, navigationParams, setNavigationParams, tabs } = useContext(NavigationContext);
@@ -23,6 +23,8 @@ const AppContent = () => {
   // 1. If onboardingComplete is FALSE (new user), show wizard.
   // 2. If it turns TRUE (loaded from storage or finished), hide wizard.
   useEffect(() => {
+    // Only show wizard if explicitly false (new user) AND we are on Horizon tab
+    // This prevents "Ghost Sheet" on other tabs.
     if (onboardingComplete === false) {
       setShowWizard(true);
     } else if (onboardingComplete === true) {
@@ -32,7 +34,6 @@ const AppContent = () => {
 
   const handleOnboardingFinish = () => {
     completeOnboarding();
-    // Local state update provides instant feedback while Context saves async
     setShowWizard(false);
   };
 
@@ -40,8 +41,6 @@ const AppContent = () => {
     switch (activeTab) {
       case 'Horizon': return <Horizon />;
       case 'Logger':
-        // Pass params if active tab matches logic, otherwise null
-        // (Though technically we just want to pass it once or check if tab is logger)
         return <Logger initialMetricId={navigationParams?.metricId} />;
       case 'Intel': return <Intel />;
       case 'System': return <System />;
@@ -49,40 +48,35 @@ const AppContent = () => {
     }
   };
 
-  // Find active index from activeTab ID
   const activeIndex = tabs.findIndex(tab => tab.id === activeTab);
 
-  // Handler that receives index and converts to ID
   const handleTabChange = (index) => {
     const selectedTab = tabs[index];
     if (selectedTab) {
       setActiveTab(selectedTab.id);
-      // Clear navigation params on manual tab switch to prevent stuck state
       setNavigationParams(null);
     }
   };
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-bg-color font-system text-primary relative">
-      {/* Main Content Area - Native Scroll */}
+      {/* Main Content Area */}
       <main className="flex-1 w-full layout-padding">
-        <ErrorBoundary>
-            {renderTab()}
-        </ErrorBoundary>
+         {renderTab()}
       </main>
       
-      {/* Update Manager - Floating Prompt */}
+      {/* Update Manager */}
       <UpdateManager />
 
-      {/* Navigation - Fixed Bottom */}
+      {/* Navigation */}
       <BottomNav
         tabs={tabs}
         activeIndex={activeIndex}
         onChange={handleTabChange}
       />
 
-      {/* Onboarding Overlay - Dedicated Modal with high Z-Index */}
-      {showWizard && (
+      {/* Onboarding Overlay - Fixed: Only show on Horizon to prevent ghosting */}
+      {showWizard && activeTab === 'Horizon' && (
         <div className="fixed inset-0 z-[200] bg-bg-color animate-fade-in overflow-y-auto flex items-center justify-center p-4">
           <div className="w-full max-w-lg h-full max-h-[90vh]">
             <OnboardingWizard onComplete={handleOnboardingFinish} />
@@ -95,12 +89,12 @@ const AppContent = () => {
 
 export const App = () => {
   return (
-    <StorageProvider>
-      <NavigationProvider>
-        <ErrorBoundary>
-            <AppContent />
-        </ErrorBoundary>
-      </NavigationProvider>
-    </StorageProvider>
+    <GlobalErrorBoundary>
+      <StorageProvider>
+        <NavigationProvider>
+           <AppContent />
+        </NavigationProvider>
+      </StorageProvider>
+    </GlobalErrorBoundary>
   );
 };

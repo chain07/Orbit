@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect, useMemo } from 'react';
 import { StorageContext } from '../../context/StorageContext';
 import { Glass } from '../ui/Glass';
 import { Icons } from '../ui/Icons';
+import '../../styles/index.css';
 
 export const DataManagement = () => {
   const {
@@ -14,15 +15,12 @@ export const DataManagement = () => {
   } = useContext(StorageContext);
 
   const [storageStats, setStorageStats] = useState({ usedBytes: 0, percent: 0, mb: '0.00' });
-  const [importing, setImporting] = useState(false);
 
-  // --- SECTION A: STORAGE METER ---
   useEffect(() => {
     const calculateUsage = () => {
       try {
         const db = localStorage.getItem('orbit_db') || '';
         const archive = localStorage.getItem('orbit_archive') || '';
-        // UTF-16 characters are 2 bytes
         const totalBytes = (db.length + archive.length) * 2;
         const limitBytes = 5242880; // 5MB limit
         const percent = Math.min((totalBytes / limitBytes) * 100, 100);
@@ -38,18 +36,16 @@ export const DataManagement = () => {
     };
 
     calculateUsage();
-    // Re-calculate when data changes (debounced by React updates usually, but simplified here)
     const interval = setInterval(calculateUsage, 2000);
     return () => clearInterval(interval);
   }, [logEntries, timeLogs]);
 
   const getMeterColor = (p) => {
     if (p >= 80) return 'bg-red';
-    if (p >= 60) return 'bg-orange'; // using orange for yellow/warn
+    if (p >= 60) return 'bg-orange';
     return 'bg-green';
   };
 
-  // --- SECTION B: ARCHIVAL ENGINE ---
   const handleArchiveOldData = () => {
     const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
     const cutoffTime = Date.now() - ONE_YEAR_MS;
@@ -69,7 +65,6 @@ export const DataManagement = () => {
       return;
     }
 
-    // Prepare Archive Payload
     const archivePayload = {
       meta: {
         type: 'ORBIT_ARCHIVE',
@@ -81,7 +76,6 @@ export const DataManagement = () => {
       timeLogs: oldTimeLogs
     };
 
-    // Download
     const blob = new Blob([JSON.stringify(archivePayload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -92,35 +86,17 @@ export const DataManagement = () => {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    // Prune State
-    // We export current full state but with filtered logs
     const fullData = exportData();
     fullData.logEntries = logEntries.filter(l => l.timestamp >= cutoffIso);
     fullData.timeLogs = timeLogs.filter(l => l.startTime >= cutoffIso);
 
-    // Re-import the pruned state
     importData(fullData);
     alert("Archive complete. Old data removed.");
   };
 
-  // --- SECTION C: UNIVERSAL EXPORT ---
   const handleExportJSON = () => {
     const data = exportData();
-    // Include Library/Archives if needed? The instruction says "Keep the existing full database backup functionality".
-    // System.jsx implementation included Library.
-    // DataManagement doesn't have direct access to Library state unless passed or imported.
-    // Library is singleton in src/lib/library.js.
-    // I should probably include it to match System.jsx behavior.
-    // But `DataManagement` component implies it manages `StorageContext` data.
-    // I will try to fetch Library data directly.
-
     const json = { ...data };
-    // Library is not currently exported via StorageContext.
-    // If strict architectural separation is required, DataManagement should strictly manage StorageContext data.
-    // However, for a "Universal Export", missing the Library is a gap.
-    // But since importing Library here might cause issues if not careful, and strictness is preferred:
-    // We will stick to StorageContext data only to prevent crashes.
-
     const blob = new Blob([JSON.stringify(json, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -135,20 +111,14 @@ export const DataManagement = () => {
       alert("No logs to export.");
       return;
     }
-
-    // Header
     let csvContent = "Date,Metric,Value\n";
-
-    // Rows
     logEntries.forEach(log => {
       const metric = metrics.find(m => m.id === log.metricId);
       const metricName = metric ? (metric.label || metric.name) : 'Unknown Metric';
-      const date = log.timestamp; // Keep ISO for precision
+      const date = log.timestamp;
       const value = log.value;
-      // Escape CSV special chars if needed (simplified)
       csvContent += `${date},"${metricName}",${value}\n`;
     });
-
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -194,13 +164,12 @@ export const DataManagement = () => {
         <h2 className="text-xl font-bold">Data Management</h2>
       </div>
 
-      {/* SECTION A: STORAGE METER */}
       <div className="flex flex-col gap-2">
         <div className="flex justify-between text-xs font-bold text-secondary uppercase tracking-wide">
           <span>Local Storage</span>
           <span>{storageStats.mb} / 5.00 MB ({storageStats.percent.toFixed(1)}%)</span>
         </div>
-        <div className="w-full h-3 bg-separator/20 rounded-full overflow-hidden">
+        <div className="w-full h-3 bg-separator/20 rounded-full overflow-hidden relative">
           <div
             className={`h-full transition-all duration-500 ${getMeterColor(storageStats.percent)}`}
             style={{ width: `${storageStats.percent}%` }}
@@ -216,7 +185,6 @@ export const DataManagement = () => {
 
       <div className="border-t border-separator/50" />
 
-      {/* SECTION B: ARCHIVAL */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2 text-primary font-bold">
           <Icons.Archive size={18} className="text-purple" />
@@ -236,7 +204,6 @@ export const DataManagement = () => {
 
       <div className="border-t border-separator/50" />
 
-      {/* SECTION C: UNIVERSAL EXPORT & ACTIONS */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2 text-primary font-bold">
           <Icons.Save size={18} className="text-green" />
@@ -269,6 +236,8 @@ export const DataManagement = () => {
              <Icons.Upload size={16} />
              Import JSON
            </button>
+
+           {/* Fixed: Hidden input relying on index.css .hidden */}
            <input
              type="file"
              id="import-file"
@@ -277,9 +246,10 @@ export const DataManagement = () => {
              onChange={handleImportFile}
            />
 
+           {/* Fixed: Reset All button overflow and styling */}
            <button
              onClick={handleNuke}
-             className="flex-1 py-3 px-1 rounded-xl border border-red/30 text-red font-bold text-sm hover:bg-red/5 transition-colors active:scale-95 transition-transform whitespace-nowrap overflow-hidden text-ellipsis"
+             className="flex-1 py-3 px-2 rounded-xl border border-red/30 text-red font-bold text-sm hover:bg-red/5 transition-colors active:scale-95 transition-transform text-center"
            >
              Reset All
            </button>

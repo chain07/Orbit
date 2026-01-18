@@ -6,6 +6,7 @@ import { TimeTracker } from '../components/logger/TimeTracker';
 import { Timeline } from '../components/logger/Timeline';
 import { StorageContext } from '../context/StorageContext';
 import { EmptyState } from '../components/ui/EmptyState';
+import { Icons } from '../components/ui/Icons';
 import '../styles/motion.css';
 
 export const Logger = ({ initialMetricId = null }) => {
@@ -13,10 +14,8 @@ export const Logger = ({ initialMetricId = null }) => {
   const [activeMode, setActiveMode] = useState('checkin');
   const [selectedTrackerMetric, setSelectedTrackerMetric] = useState('');
 
-  // Handle Initial Metric Selection (from Quick Link)
   useEffect(() => {
     if (initialMetricId) {
-      // Check if metric exists and determine mode
       const metric = metrics.find(m => m.id === initialMetricId);
       if (metric) {
         if (metric.type === 'duration') {
@@ -29,21 +28,18 @@ export const Logger = ({ initialMetricId = null }) => {
     }
   }, [initialMetricId, metrics]);
 
-  // Check if we have any metrics at all
   const hasMetrics = metrics && metrics.length > 0;
-
-  // Filter metrics that make sense for time tracking
   const timeMetrics = metrics.filter(m => m.type === 'number' || m.type === 'duration');
 
   if (!hasMetrics) {
     return (
       <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
-        <div className="flex flex-col gap-1 safe-pt">
+        <div className="flex flex-col gap-0 safe-pt">
            <h1 className="text-3xl font-extrabold tracking-tight">Logger</h1>
            <p className="text-secondary font-medium">Input engine.</p>
         </div>
         <EmptyState 
-           icon="📝"
+           icon={<Icons.Edit3 size={48} className="text-secondary opacity-50" />}
            title="No Metrics Configured"
            message="You need to define what to track before you can log data."
         />
@@ -53,13 +49,12 @@ export const Logger = ({ initialMetricId = null }) => {
 
   return (
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
-      {/* Header with Safe Padding */}
-      <div className="flex flex-col gap-1 safe-pt">
+      {/* Header - Fixed Gap */}
+      <div className="flex flex-col gap-0 safe-pt">
         <h1 className="text-3xl font-extrabold tracking-tight">Logger</h1>
         <p className="text-secondary font-medium leading-tight">Input engine.</p>
       </div>
 
-      {/* Mode Switch - N-01: Ensured existence and styling */}
       <SegmentedControl
         options={[
           { label: 'Daily Check-In', value: 'checkin' },
@@ -69,7 +64,6 @@ export const Logger = ({ initialMetricId = null }) => {
         onChange={setActiveMode}
       />
 
-      {/* Mode Content */}
       <div className="fade-in">
         {activeMode === 'checkin' ? (
           <DailyCheckInForm />
@@ -80,7 +74,6 @@ export const Logger = ({ initialMetricId = null }) => {
                 Activity Tracker
               </div>
               
-              {/* Activity Selector */}
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-bold text-secondary uppercase">Select Activity</label>
                 <div className="relative">
@@ -114,7 +107,6 @@ export const Logger = ({ initialMetricId = null }) => {
         )}
       </div>
 
-      {/* Timeline Visualization */}
       <div className="flex flex-col gap-2 mt-4">
         <div className="section-label px-1 text-secondary font-bold text-xs uppercase">
           Today's Timeline

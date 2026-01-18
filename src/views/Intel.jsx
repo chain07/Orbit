@@ -6,7 +6,6 @@ import { AnalyticsEngine } from '../engine/AnalyticsEngine';
 import SegmentedControl from '../components/ui/SegmentedControl';
 import Glass from '../components/ui/Glass';
 import { ReportGenerator } from '../components/intel/ReportGenerator';
-// Charts
 import { RingChart } from '../components/ui/charts/RingChart';
 import { HeatMap } from '../components/ui/charts/Heatmap';
 import { Sparkline } from '../components/ui/charts/Sparkline';
@@ -18,7 +17,6 @@ export const Intel = () => {
   const [segment, setSegment] = useState('Weekly');
   const segments = ['Daily', 'Weekly', 'Monthly'];
 
-  // Generate insights
   const insights = useMemo(() => {
     if (!HorizonAgent || !HorizonAgent.generateAllInsights) return [];
     try {
@@ -30,12 +28,10 @@ export const Intel = () => {
     }
   }, [metrics, logEntries, segment]);
 
-  // Generate widgets
   const widgets = useMemo(() => 
     WidgetDataEngine.generateWidgets(metrics, logEntries, segment),
   [metrics, logEntries, segment]);
 
-  // Calculate Real System Health & Stats using AnalyticsEngine
   const stats = useMemo(() => {
     return AnalyticsEngine.calculateSystemHealth(metrics, logEntries, segment);
   }, [metrics, logEntries, segment]);
@@ -43,12 +39,13 @@ export const Intel = () => {
   return (
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
       
-      {/* Header - Safe Padding */}
-      <div className="flex flex-col gap-1 safe-pt">
+      {/* Header - Fixed Gap */}
+      <div className="flex flex-col gap-0 safe-pt">
         <h1 className="text-3xl font-extrabold tracking-tight">Intelligence</h1>
         <p className="text-secondary font-medium">Pattern and telemetry analysis.</p>
       </div>
 
+      {/* Added Margin Bottom */}
       <div className="mb-4">
         <SegmentedControl
           options={segments.map(s => ({ label: s, value: s }))}
@@ -57,9 +54,7 @@ export const Intel = () => {
         />
       </div>
 
-      {/* STAT CARDS - S-02: Refined Styling */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* System Health Card */}
         <Glass className="flex flex-col justify-between min-h-[140px] relative overflow-hidden">
           <div className="text-xs font-bold text-secondary uppercase tracking-wide z-10">System Health</div>
           <div className="flex flex-col items-center my-2 z-10">
@@ -69,11 +64,9 @@ export const Intel = () => {
              </div>
           </div>
           <div className="text-xs text-secondary text-center opacity-80 z-10">Operational Baseline</div>
-          {/* Subtle Background decoration */}
           <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-blue opacity-5 rounded-full blur-2xl"></div>
         </Glass>
 
-        {/* Intensity Card */}
         <Glass className="flex flex-col justify-between min-h-[140px] relative overflow-hidden">
           <div className="text-xs font-bold text-secondary uppercase tracking-wide z-10">Intensity</div>
           <div className="flex flex-col items-center my-2 z-10">
@@ -86,15 +79,12 @@ export const Intel = () => {
              </div>
           </div>
           <div className="text-xs text-secondary text-center opacity-80 z-10">Status: {stats.status}</div>
-           {/* Subtle Background decoration */}
            <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-orange opacity-5 rounded-full blur-2xl"></div>
         </Glass>
       </div>
 
-      {/* REPORT GENERATOR - L-05, S-03, S-04 */}
       <ReportGenerator segment={segment} />
 
-      {/* ANALYSIS STREAM */}
       {insights.length > 0 && (
         <div className="flex flex-col gap-2">
           <div className="section-label px-1 text-secondary font-bold text-xs uppercase">Analysis Stream</div>
@@ -107,7 +97,6 @@ export const Intel = () => {
         </div>
       )}
 
-      {/* TELEMETRY GRIDS */}
       <div className="flex flex-col gap-2">
         <div className="section-label px-1 text-secondary font-bold text-xs uppercase">Telemetry</div>
         <div className="widget-grid">
