@@ -60,9 +60,9 @@ const AppContent = () => {
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-bg-color font-system text-primary overflow-hidden relative">
-      {/* Main Content Area - Scrollable */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden safe-bottom pb-24">
+    <div className="flex flex-col min-h-screen w-full bg-bg-color font-system text-primary relative">
+      {/* Main Content Area - Native Scroll */}
+      <main className="flex-1 w-full layout-padding">
         {renderTab()}
       </main>
       
@@ -73,9 +73,9 @@ const AppContent = () => {
         onChange={handleTabChange}
       />
 
-      {/* Onboarding Overlay */}
+      {/* Onboarding Overlay - Fixed & Scrollable */}
       {showWizard && (
-        <div className="absolute inset-0 z-50 bg-bg-color animate-fade-in">
+        <div className="fixed inset-0 z-50 bg-bg-color animate-fade-in overflow-y-auto">
           <OnboardingWizard onComplete={handleOnboardingFinish} />
         </div>
       )}

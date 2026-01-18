@@ -21,7 +21,7 @@ export const EmptyState = ({
       {actionLabel && onAction && (
         <button 
           onClick={onAction}
-          className="mt-4 py-2 px-5 rounded-full bg-blue text-white text-sm font-bold shadow-lg shadow-blue/20 active:scale-95 transition-transform"
+          className="btn-primary mt-4 shadow-lg shadow-blue/20"
         >
           {actionLabel}
         </button>

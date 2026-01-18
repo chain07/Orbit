@@ -105,7 +105,7 @@ export const Horizon = () => {
           {hasMetrics && (
             <button 
               onClick={() => setIsEditing(true)}
-              className="text-xs font-bold px-3 py-1 rounded-full border border-separator text-secondary hover:bg-bg-color hover:text-primary transition-colors active:scale-95"
+              className="btn-secondary h-8 min-h-[32px] px-3 text-xs"
             >
               Edit Layout
             </button>
