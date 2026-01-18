@@ -10,41 +10,9 @@ import { Logger } from '../views/Logger';
 import { Intel } from '../views/Intel';
 import { System } from '../views/System';
 import BottomNav from '../components/ui/BottomNav';
+import UpdateManager from '../components/system/UpdateManager';
 import { OnboardingWizard } from '../components/system/OnboardingWizard';
 import { Glass } from '../components/ui/Glass'; // Import Glass for overlay
-
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
-  }
-  componentDidCatch(error, errorInfo) {
-    console.error("Uncaught Error:", error, errorInfo);
-  }
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-bg-color p-8 text-center">
-          <div className="text-4xl mb-4">💥</div>
-          <h1 className="text-xl font-bold text-primary mb-2">Something went wrong</h1>
-          <pre className="text-xs text-secondary bg-separator/10 p-4 rounded-lg overflow-x-auto max-w-full text-left">
-            {this.state.error?.toString()}
-          </pre>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-6 px-6 py-3 bg-blue text-white font-bold rounded-xl"
-          >
-            Reload App
-          </button>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
 
 const AppContent = () => {
   const { activeTab, setActiveTab, navigationParams, setNavigationParams, tabs } = useContext(NavigationContext);
@@ -103,6 +71,9 @@ const AppContent = () => {
         </ErrorBoundary>
       </main>
       
+      {/* Update Manager - Floating Prompt */}
+      <UpdateManager />
+
       {/* Navigation - Fixed Bottom */}
       <BottomNav
         tabs={tabs}
