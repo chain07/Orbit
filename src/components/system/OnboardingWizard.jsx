@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { StorageContext } from '../../context/StorageContext';
 import { Glass } from '../../components/ui/Glass';
+import '../../styles/index.css'; // Ensure standard buttons are available
 
 export const OnboardingWizard = ({ onComplete }) => {
   const { addMetric } = useContext(StorageContext);
@@ -100,13 +101,13 @@ export const OnboardingWizard = ({ onComplete }) => {
            <div className="flex gap-2 mt-1">
              <button 
                 onClick={() => updateField(metricSlot, 'type', 'boolean')}
-                className={`flex-1 py-2 rounded-lg font-bold text-sm transition-colors ${data.type === 'boolean' ? 'bg-blue text-white' : 'bg-bg-color border border-separator'}`}
+                className={`flex-1 py-3 rounded-lg font-bold text-sm transition-colors ${data.type === 'boolean' ? 'bg-blue text-white' : 'bg-bg-color border border-separator'}`}
              >
                 Yes/No
              </button>
              <button 
                 onClick={() => updateField(metricSlot, 'type', 'number')}
-                className={`flex-1 py-2 rounded-lg font-bold text-sm transition-colors ${data.type === 'number' ? 'bg-blue text-white' : 'bg-bg-color border border-separator'}`}
+                className={`flex-1 py-3 rounded-lg font-bold text-sm transition-colors ${data.type === 'number' ? 'bg-blue text-white' : 'bg-bg-color border border-separator'}`}
              >
                 Number
              </button>
@@ -122,7 +123,7 @@ export const OnboardingWizard = ({ onComplete }) => {
                  key={c}
                  onClick={() => updateField(metricSlot, 'color', c)}
                  style={{ backgroundColor: c }}
-                 className={`w-8 h-8 rounded-full ${data.color === c ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
+                 className={`w-10 h-10 rounded-full ${data.color === c ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
                />
              ))}
            </div>
@@ -165,55 +166,50 @@ export const OnboardingWizard = ({ onComplete }) => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4 bg-bg-color">
-      <div className="w-full max-w-md">
-        <Glass>
-          <div className="flex flex-col gap-6">
-            <div className="flex justify-between items-center border-b border-separator pb-4">
-                <div>
-                  <h2 className="text-xl font-extrabold">{steps[currentStep].title}</h2>
-                  <span className="text-xs text-secondary font-bold">Step {currentStep + 1} of {steps.length}</span>
-                </div>
-                {/* Progress dot indicator */}
-                <div className="flex gap-1">
-                  {steps.map((_, idx) => (
-                    <div 
-                      key={idx} 
-                      className={`w-2 h-2 rounded-full ${idx === currentStep ? 'bg-blue' : 'bg-separator opacity-30'}`}
-                    />
-                  ))}
-                </div>
+    <Glass className="h-full flex flex-col p-6 shadow-2xl border border-glass-border">
+        <div className="flex justify-between items-center border-b border-separator pb-4 mb-4">
+            <div>
+              <h2 className="text-xl font-extrabold">{steps[currentStep].title}</h2>
+              <span className="text-xs text-secondary font-bold">Step {currentStep + 1} of {steps.length}</span>
+            </div>
+            {/* Progress dot indicator */}
+            <div className="flex gap-1">
+              {steps.map((_, idx) => (
+                <div
+                  key={idx}
+                  className={`w-2 h-2 rounded-full ${idx === currentStep ? 'bg-blue' : 'bg-separator opacity-30'}`}
+                />
+              ))}
+            </div>
+        </div>
+
+        {/* Form Content */}
+        <div className="flex-1 overflow-y-auto min-h-[250px]">
+          {currentStep < 3 ? renderMetricForm(steps[currentStep].key) : renderGoalForm()}
+        </div>
+
+        {/* Footer Actions */}
+        <div className="flex flex-col gap-3 pt-4 border-t border-separator mt-4">
+            <div className="flex justify-between gap-3">
+              <button
+                onClick={prevStep}
+                disabled={currentStep === 0}
+                className={`btn-secondary flex-1 ${currentStep === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                Back
+              </button>
+              <button
+                onClick={nextStep}
+                className="btn-primary flex-1"
+              >
+                {currentStep === steps.length - 1 ? 'Launch ORBIT 🚀' : 'Next'}
+              </button>
             </div>
 
-            {/* Replaced placeholder div with actual form inputs */}
-            <div className="min-h-[250px]">
-              {currentStep < 3 ? renderMetricForm(steps[currentStep].key) : renderGoalForm()}
-            </div>
-
-            <div className="flex flex-col gap-3 pt-4 border-t border-separator">
-                <div className="flex justify-between gap-3">
-                  <button
-                    onClick={prevStep}
-                    disabled={currentStep === 0}
-                    className={`px-6 py-3 font-bold rounded-xl transition-colors active:scale-95 transition-transform ${currentStep === 0 ? 'text-secondary opacity-50 cursor-not-allowed' : 'text-primary hover:bg-bg-color'}`}
-                  >
-                    Back
-                  </button>
-                  <button
-                    onClick={nextStep}
-                    className="px-8 py-3 bg-blue text-white font-bold rounded-xl shadow-lg shadow-blue/20 active:scale-95 transition-transform"
-                  >
-                    {currentStep === steps.length - 1 ? 'Launch ORBIT 🚀' : 'Next'}
-                  </button>
-                </div>
-
-                <button onClick={handleSkip} className="text-xs text-secondary font-bold hover:text-primary transition-colors py-2">
-                    Skip Setup
-                </button>
-            </div>
-          </div>
-        </Glass>
-      </div>
-    </div>
+            <button onClick={handleSkip} className="text-xs text-secondary font-bold hover:text-primary transition-colors py-2 text-center">
+                Skip Setup
+            </button>
+        </div>
+    </Glass>
   );
 };

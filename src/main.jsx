@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { App } from './app/App'
+import { GlobalErrorBoundary } from './components/system/GlobalErrorBoundary'
 import './styles/index.css'
 
 // Register Service Worker for PWA Offline capabilities
@@ -18,6 +19,8 @@ if ('serviceWorker' in navigator) {
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    <GlobalErrorBoundary>
+      <App />
+    </GlobalErrorBoundary>
   </React.StrictMode>,
 )

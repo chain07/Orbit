@@ -28,6 +28,7 @@
   --text-secondary: #8E8E93; /* Zinc 500 equivalent */
 
   /* ---------- Typography (Geist) ---------- */
+  /* L-09: Standardized Font Family */
   --font-system: "Geist", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
 
   /* ---------- Geometry (Inset Grouped) ---------- */

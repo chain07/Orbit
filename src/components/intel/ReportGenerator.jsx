@@ -3,6 +3,7 @@ import { StorageContext } from '../../context/StorageContext';
 import { ReportEngine } from '../../engine/ReportEngine';
 import { Glass } from '../ui/Glass';
 import { Icons } from '../ui/Icons';
+import '../../styles/index.css'; // For standard buttons
 
 export const ReportGenerator = ({ segment = 'Weekly' }) => {
   const { metrics, logEntries } = useContext(StorageContext);
@@ -77,9 +78,14 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
     <div className="flex flex-col gap-4">
     <Glass className="p-4">
       <div className="flex flex-col gap-4">
+        {/* Header - L-05: Aligned Timeframe */}
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-bold">Report Generator</h3>
-          <div className="flex gap-2 items-center">
+          <div className="flex items-center gap-3">
+             <div className="flex items-center gap-1.5 px-3 py-1 bg-secondary/10 rounded-full">
+                 <Icons.BarChart2 size={14} className="text-secondary" />
+                 <span className="text-xs font-bold text-secondary uppercase tracking-wide translate-y-[1px]">{segment}</span>
+             </div>
              <button
                 onClick={() => setShowArchive(!showArchive)}
                 className={`p-2 rounded-lg transition-colors ${showArchive ? 'bg-blue text-white' : 'text-secondary hover:bg-bg-color'}`}
@@ -87,40 +93,48 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
              >
                  <Icons.Archive size={18} />
              </button>
-             <span className="text-xs text-secondary font-medium">{segment}</span>
           </div>
         </div>
 
-        {/* Section Toggles */}
-        <div className="flex flex-col gap-2 border-t border-separator pt-3">
-          <div className="text-xs font-bold text-secondary uppercase tracking-wide mb-1">
+        {/* Section Toggles - S-03: Styled Switches */}
+        <div className="flex flex-col gap-3 border-t border-separator pt-4">
+          <div className="text-xs font-bold text-secondary uppercase tracking-wide">
             Include Sections
           </div>
-          {Object.entries(selectedSections).map(([key, value]) => (
-            <label key={key} className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={value}
-                onChange={() => toggleSection(key)}
-                className="w-4 h-4 rounded border-separator"
-              />
-              <span className="text-sm font-medium capitalize">
-                {key.replace(/([A-Z])/g, ' $1').trim()}
-              </span>
-            </label>
-          ))}
+          <div className="grid grid-cols-2 gap-3">
+            {Object.entries(selectedSections).map(([key, value]) => (
+                <label key={key} className="flex items-center justify-between p-2 rounded-lg hover:bg-bg-color/50 transition-colors cursor-pointer group">
+                  <span className="text-sm font-medium capitalize text-primary/80 group-hover:text-primary transition-colors">
+                    {key.replace(/([A-Z])/g, ' $1').trim()}
+                  </span>
+
+                  {/* CSS-Only Toggle Switch */}
+                  <div className="relative inline-block w-10 h-6 align-middle select-none transition duration-200 ease-in">
+                      <input
+                        type="checkbox"
+                        name={key}
+                        checked={value}
+                        onChange={() => toggleSection(key)}
+                        className="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-transform duration-200 ease-in-out left-0.5 top-0.5 checked:translate-x-full"
+                        style={{ border: 'none', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}
+                      />
+                      <div className={`toggle-label block overflow-hidden h-6 rounded-full cursor-pointer transition-colors duration-200 ${value ? 'bg-blue' : 'bg-separator'}`}></div>
+                  </div>
+                </label>
+            ))}
+          </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-2 pt-2 border-t border-separator">
+        {/* Action Buttons - S-04: Styled Standard Buttons */}
+        <div className="flex gap-3 pt-4 border-t border-separator">
           <button
             onClick={handleCopy}
-            className="flex-1 py-3 rounded-xl bg-blue text-white font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
+            className="btn-primary flex-1 h-11 flex items-center justify-center gap-2 text-sm"
           >
             {copied ? (
               <>
                 <Icons.Check size={16} />
-                Copied!
+                Copied
               </>
             ) : (
               <>
@@ -132,7 +146,7 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
 
           <button
             onClick={handleSave}
-            className="flex-1 py-3 rounded-xl bg-green text-white font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
+            className="btn-secondary flex-1 h-11 flex items-center justify-center gap-2 text-sm"
           >
              {saved ? <Icons.Check size={16} /> : <Icons.Save size={16} />}
              Save
@@ -140,10 +154,10 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
 
           <button
             onClick={handleDownload}
-            className="flex-1 py-3 rounded-xl border border-separator font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
+            className="btn-secondary w-12 h-11 flex items-center justify-center"
+            title="Download Markdown"
           >
-            <Icons.Download size={16} />
-            DL
+            <Icons.Download size={18} />
           </button>
         </div>
       </div>
@@ -176,8 +190,8 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
 
     {/* Report Viewer Modal */}
     {selectedReport && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-            <Glass className="w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden shadow-2xl">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+            <Glass className="w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden shadow-2xl p-0">
                 <div className="flex justify-between items-center p-4 border-b border-separator bg-bg-color">
                     <div>
                         <div className="text-sm font-bold text-blue uppercase">{selectedReport.segment} Report</div>
@@ -202,7 +216,7 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
                             setCopied(true);
                             setTimeout(() => setCopied(false), 2000);
                         }}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue text-white rounded-lg font-bold text-sm"
+                        className="btn-primary flex items-center gap-2 px-4 py-2 text-sm"
                     >
                         {copied ? <Icons.Check size={16} /> : <Icons.Copy size={16} />}
                         Copy to Clipboard
