@@ -154,14 +154,16 @@ html, body {
 
 /* --- ORBIT Liquid Native Button System --- */
 .btn-liquid {
-  height: 48px;
+  height: 42px; /* Revised to 42px per specs */
   border-radius: 9999px;
-  padding-left: 24px;
-  padding-right: 24px;
+  padding-left: 20px;
+  padding-right: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px; /* Standardize icon gap */
   font-family: inherit; /* Geist */
+  font-size: 14px; /* Explicit size */
   font-weight: 500;
   letter-spacing: -0.01em;
   border: none;
@@ -177,15 +179,16 @@ html, body {
 
 /* Variant: Primary (Orbit Blue) */
 .btn-liquid.variant-primary {
-  background-color: var(--blue);
+  background: linear-gradient(135deg, #007AFF 0%, #0056B3 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+  /* Premium Shadow: Subtle depth + Inner highlight */
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1), inset 0 1px 0.5px rgba(255,255,255,0.2);
 }
 
 /* Variant: Glass (Translucent) */
 .btn-liquid.variant-glass {
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 0.5px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.04); /* Dark tint for visibility on light/white cards */
+  border: 1px solid rgba(0,0,0,0.1); /* Explicit separator color */
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   color: var(--text-primary);
@@ -198,7 +201,8 @@ html, body {
 }
 
 .btn-liquid.variant-ghost:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--text-primary);
 }
 
 /* --- Form Toggles (Checkbox) --- */

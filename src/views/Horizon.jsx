@@ -96,7 +96,8 @@ export const Horizon = () => {
           {hasMetrics && (
             <button 
               onClick={() => setIsEditing(true)}
-              className="btn-liquid variant-glass h-10 px-4 text-xs"
+              className="btn-liquid variant-glass"
+              style={{ height: '36px', padding: '0 16px', fontSize: '13px' }}
             >
               Edit Layout
             </button>

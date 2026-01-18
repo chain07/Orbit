@@ -152,7 +152,8 @@ export const TimeTracker = ({ metricId }) => {
               {elapsed === 0 ? (
                 <button 
                   onClick={() => setRunning(true)}
-                  className="btn-liquid flex-1 bg-green text-white shadow-lg shadow-green/20"
+                  className="btn-liquid variant-primary flex-1 bg-green shadow-none"
+                  style={{ backgroundColor: 'var(--green)' }}
                 >
                   Start
                 </button>
@@ -160,9 +161,8 @@ export const TimeTracker = ({ metricId }) => {
                 <>
                   <button 
                     onClick={() => setRunning(!running)}
-                    className={`btn-liquid flex-1 shadow-lg ${
-                      running ? 'bg-orange text-white shadow-orange/20' : 'bg-green text-white shadow-green/20'
-                    }`}
+                    className="btn-liquid flex-1 text-white"
+                    style={{ backgroundColor: running ? 'var(--orange)' : 'var(--green)' }}
                   >
                     {running ? 'Pause' : 'Resume'}
                   </button>
