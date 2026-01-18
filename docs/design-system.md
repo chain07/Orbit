@@ -19,8 +19,10 @@ We use a single, consistent glass token system. Do not allow deviations.
 *   **`--material-glass`**:
     *   `background: rgba(255, 255, 255, 0.75)`
     *   `backdrop-filter: blur(20px) saturate(180%)`
+    *   *Note: The "saturate" is key for the premium feel.*
 *   **`--material-border`**:
     *   `border: 1px solid rgba(0, 0, 0, 0.1)`
+    *   *Purpose: Subtle separation, essential for glass on white.*
 
 ---
 
@@ -34,26 +36,22 @@ We use a single, consistent glass token system. Do not allow deviations.
 
 ---
 
-## 4. Component Specs: The "CSS-Native" Segmented Control
+## 4. Color & Semantic Signals
 
-We rely on CSS logic rather than React state for high-performance animations.
+### 4.1 Base Palette
+*   **Monochrome:** Slate/Zinc 50-900 for all text and surfaces.
 
-### 4.1 Implementation Strategy
-*   **Pattern:** Radio Group + CSS `:has()` selector.
-*   **Prohibition:** Do NOT use React state for animation positions.
-*   **DOM Structure:**
-    *   Wrapper container.
-    *   Hidden `<input type="radio">` elements.
-    *   Paired `<label>` elements for text.
-    *   Single `.glider` div for the sliding background.
+### 4.2 Semantic Signals (The "Instrument Panel")
+These colors are tuned to be legible against glass and white backgrounds. Do not use for decoration; strictly for status indication.
 
-### 4.2 Animation Logic
-*   Use sibling combinators: `.wrapper:has(input:nth-of-type(1):checked) ~ .glider { transform: translateX(0%); }`
-
-### 4.3 Visuals
-*   **Container:** `background: rgba(118, 118, 128, 0.12)`, Rounded (9px).
-*   **Glider:** White, Shadow (`0px 3px 8px rgba(0,0,0,0.12)`), Rounded (7px).
-*   **Timing:** `transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)`.
+*   **Negative (Error/Critical):** `#FF3B30` (System Red)
+    *   *Usage:* Destructive actions, critical failures.
+*   **Notice (Warning/Pending):** `#FF9500` (System Orange)
+    *   *Usage:* Alerts that do not block functionality.
+*   **Positive (Success/Complete):** `#34C759` (System Green)
+    *   *Usage:* Completion states, positive trends.
+*   **Informative (Active/Neutral):** `#007AFF` (Orbit Blue)
+    *   *Usage:* Active states, links, neutral info.
 
 ---
 

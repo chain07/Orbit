@@ -99,17 +99,3 @@ The "Welcome to ORBIT" empty state card displays a missing glyph symbol (`[]`) i
 
 **Root Cause:**
 The `EmptyState` component uses a raw emoji character (`🚀`) which is failing to render. This is likely due to the lack of a robust emoji font fallback in the font stack, or environment limitations (headless browser).
-
-## 6. Phase 2 Debug Report: The "Dead UI" Investigation
-
-**Diagnosis:**
-The "Dead UI" (unresponsive buttons) was primarily caused by a combination of visual and layout regressions:
-1.  **Visual False Positives:** Buttons appeared present but were unstyled (missing CSS utility classes like `rounded-full`, `bg-blue`), leading to a "broken" look that users interpreted as non-functional or "dead".
-2.  **Layout Trap (Scroll Freeze):** The root application container (`App.jsx`) applied `overflow: hidden` and `height: 100%`, while inner containers attempted to scroll. This created a conflict with the native body scroll strategy, potentially trapping content off-screen or preventing interaction in specific viewport conditions (e.g., keyboard open).
-3.  **Overlay Blocking:** The `OnboardingWizard` overlay was absolute positioned but relied on conditional rendering. If the app state was indeterminate or the wizard content overflowed without `overflow-y-auto`, users could be stuck with unreachable buttons ("Next" offscreen).
-
-**Remediation Actions:**
-- **Global Button Audit:** Implemented `.btn-primary` and `.btn-secondary` classes and applied them to all core action buttons to restore visual affordance.
-- **Scroll Liberation:** Refactored `App.jsx` to use `min-h-screen` and removed `overflow-hidden`, allowing the document body to scroll natively (`html, body { overflow-y: auto }`).
-- **Overlay Fix:** Updated `OnboardingWizard` container to `fixed inset-0 overflow-y-auto` to ensure it overlays correctly and is scrollable on small screens.
-- **Prop Verification:** Confirmed that `Glass` and generic components correctly pass `...props` (specifically `onClick`) to their DOM nodes.
