@@ -81,8 +81,8 @@ const AppContent = () => {
         onChange={handleTabChange}
       />
 
-      {/* Onboarding Overlay - Dedicated Modal with high Z-Index */}
-      {showWizard && (
+      {/* Onboarding Overlay - Dedicated Modal with high Z-Index (Horizon Only) */}
+      {showWizard && activeTab === 'Horizon' && (
         <div className="fixed inset-0 z-[200] bg-bg-color animate-fade-in overflow-y-auto flex items-center justify-center p-4">
           <div className="w-full max-w-lg h-full max-h-[90vh]">
             <OnboardingWizard onComplete={handleOnboardingFinish} />
