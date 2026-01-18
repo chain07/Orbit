@@ -31,7 +31,6 @@ export const EditLayoutModal = ({ onClose }) => {
   };
 
   const handleSave = () => {
-    // Update all metrics with new visibility and order
     localMetrics.forEach((metric, index) => {
       updateMetric({
         ...metric,
@@ -127,13 +126,13 @@ export const EditLayoutModal = ({ onClose }) => {
         <div className="p-4 border-t border-separator bg-bg-color flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 py-3 rounded-xl border border-separator font-bold"
+            className="flex-1 btn-secondary"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="flex-1 py-3 rounded-xl bg-blue text-white font-bold active:scale-95 transition-transform"
+            className="flex-1 btn-primary"
           >
             Save Layout
           </button>

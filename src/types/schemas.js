@@ -180,7 +180,8 @@ export class MetricConfig {
     displayOrder = 0,
     created = new Date().toISOString(),
     range = null,
-    options = []
+    options = [],
+    config = {}
   }) {
     // Validate required fields
     validateUUID(id, 'id');
@@ -228,6 +229,7 @@ export class MetricConfig {
     this.created = created;
     this.range = range;
     this.options = options;
+    this.config = config || {};
     
     // Freeze to prevent accidental mutation
     Object.freeze(this);
@@ -264,7 +266,8 @@ export class MetricConfig {
       displayOrder: this.displayOrder,
       created: this.created,
       range: this.range,
-      options: this.options
+      options: this.options,
+      config: this.config
     };
   }
   

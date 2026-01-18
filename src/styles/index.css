@@ -2,6 +2,7 @@
 @import "./tokens.css";
 @import "./motion.css";
 @import "./layout.css";
+@import "./segmented.css";
 
 *,
 *::before,
@@ -13,16 +14,18 @@
 html, body {
   margin: 0;
   padding: 0;
-  height: 100%;
   width: 100%;
   background: var(--bg-color);
   color: var(--text-primary);
   font-family: var(--font-system);
-  overflow: hidden;
+
+  /* Liquid Native Scroll Rule */
+  overflow-y: auto;
+  overscroll-behavior-y: none;
 }
 
 #root {
-  height: 100%;
+  min-height: 100dvh;
   width: 100%;
 }
 
@@ -65,21 +68,12 @@ html, body {
 .text-green { color: var(--green); }
 .text-red { color: var(--red); }
 .text-orange { color: var(--orange); }
-.text-yellow { color: var(--yellow); }
-.text-purple { color: var(--purple); }
-.text-pink { color: var(--pink); }
-.text-cyan { color: var(--cyan); }
-.text-indigo { color: var(--indigo); }
 
+/* Background helpers */
 .bg-blue { background-color: var(--blue); }
 .bg-green { background-color: var(--green); }
 .bg-red { background-color: var(--red); }
 .bg-orange { background-color: var(--orange); }
-.bg-yellow { background-color: var(--yellow); }
-.bg-purple { background-color: var(--purple); }
-.bg-pink { background-color: var(--pink); }
-.bg-cyan { background-color: var(--cyan); }
-.bg-indigo { background-color: var(--indigo); }
 
 /* --- Component Classes --- */
 .card {
@@ -90,11 +84,12 @@ html, body {
   margin-bottom: 16px;
 }
 
+/* Liquid Glass Implementation */
 .glass {
   background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 0.5px solid rgba(0,0,0,0.05);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-card);
   padding: 20px;
   margin-bottom: 16px;
@@ -109,4 +104,49 @@ html, body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 16px;
+}
+
+/* Global Button Styles */
+.btn-primary {
+  background-color: var(--blue);
+  color: white;
+  height: 44px;
+  min-height: 44px;
+  border-radius: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.1s ease, opacity 0.2s ease;
+}
+.btn-primary:active {
+  transform: scale(0.97);
+}
+
+.btn-secondary {
+  background-color: rgba(0,0,0,0.05); /* Light Gray */
+  color: var(--blue);
+  height: 44px;
+  min-height: 44px;
+  border-radius: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.1s ease, background-color 0.2s ease;
+}
+.btn-secondary:active {
+  transform: scale(0.97);
+}
+
+@media (prefers-color-scheme: dark) {
+  .btn-secondary {
+    background-color: rgba(255,255,255,0.1); /* Dark Mode Adjustment */
+  }
 }
