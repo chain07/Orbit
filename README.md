@@ -74,8 +74,8 @@ ORBIT is designed to be lightweight and self-reliant, requiring only a modern we
 
 ### Tech Stack Components
 
-* **Tailwind CSS:** Utility-first styling and theme token management.
-* **Lucide React:** Native-style iconography.
+* **Standard CSS:** Enables custom, responsive layouts and designs built from scratch, entirely free from external dependencies or pre-built component restrictions. 
+* **Icon Library:** Polished, custom iconography drawn without Lucide (no external dependencies). 
 * **Strict Constraint:** Zero external charting libraries (e.g., Chart.js) and zero external animation libraries (e.g., Framer Motion) are permitted.
 
 ---
