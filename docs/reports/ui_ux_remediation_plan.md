@@ -81,3 +81,21 @@ The following modifications ensure strict adherence to the **ORBIT Liquid Native
 - **Scroll:** Verified `overflow-y: auto` is applied to body.
 - **Glass:** Verified `BottomNav` and `.glass` class use new tokens.
 - **Fonts:** Verified `Index.html` includes preload for Geist.
+
+## 5. Unsolved Issues
+
+The following visual regressions and issues have been identified but remain unresolved in this phase:
+
+### 5.1 Unformatted Buttons & Components
+**Observation:**
+Buttons in `EmptyState` ("Launch Setup") and `EditLayoutModal` ("Cancel", "Save Layout") appear unformatted (square, default system style).
+
+**Root Cause:**
+These components rely on Tailwind-style utility classes (e.g., `rounded-full`, `text-white`, `bg-opacity-*`, `shadow-lg`, `inset-0`) which are **missing from `src/styles/index.css`**. The project does not have Tailwind CSS installed, and the manual CSS file does not define these specific utilities.
+
+### 5.2 Missing Iconography
+**Observation:**
+The "Welcome to ORBIT" empty state card displays a missing glyph symbol (`[]`) instead of the intended icon.
+
+**Root Cause:**
+The `EmptyState` component uses a raw emoji character (`🚀`) which is failing to render. This is likely due to the lack of a robust emoji font fallback in the font stack, or environment limitations (headless browser).
