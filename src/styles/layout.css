@@ -1,10 +1,21 @@
 /* src/styles/layout.css */
 /* Extracted from reference/dispatch.html for Native iOS fidelity */
 
+:root {
+  --safe-area-top: env(safe-area-inset-top);
+  --safe-area-bottom: env(safe-area-inset-bottom);
+  --nav-height: 60px;
+}
+
+/* Global Padding Strategy */
+.layout-padding {
+  padding-bottom: calc(var(--safe-area-bottom) + var(--nav-height) + 20px);
+}
+
 /* Fixed Bottom Navigation Container */
 .tab-bar-container {
   position: fixed;
-  bottom: calc(30px + env(safe-area-inset-bottom)); /* 30px + safe area */
+  bottom: calc(30px + var(--safe-area-bottom));
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
@@ -15,16 +26,17 @@
 
 /* Glass Pill Styling */
 .tab-bar {
-  /* Override Glass component defaults */
+  /* Liquid Glass Token Implementation */
   background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+
   border-radius: 35px !important;
   padding: 6px !important;
   display: flex;
   gap: 4px;
   box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-  border: 0.5px solid rgba(255,255,255,0.1);
+  border: 1px solid var(--glass-border);
   position: relative;
 }
 
