@@ -115,7 +115,7 @@ The application structure is fixed.
 ## 6. Maintenance & Operations
 
 ### 6.1 Build & Deploy
-* **PWA:** Custom Service Worker (`sw.js`) handles aggressive caching for zero-connectivity.
+* **PWA:** Managed via `vite-plugin-pwa` for reliable caching and update lifecycles.
 * **Manifest:** Defined as a standalone tool with **portrait-locked** orientation.
 
 ### 6.2 Data Integrity
