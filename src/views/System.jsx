@@ -164,9 +164,7 @@ export const System = ({ onNavigate }) => {
                });
           }
       });
-      // Force reload to ensure all widgets update if Context doesn't trigger deep re-render
-      // (Though Context should handle it, explicit reload is safer for 'Dev Mode' hacks)
-      setTimeout(() => window.location.reload(), 500);
+      alert("Test data seeded.");
   };
 
   // T-01: Export Archive Test
@@ -255,14 +253,11 @@ export const System = ({ onNavigate }) => {
 
             {/* Preferences */}
             <Glass className="p-0 overflow-hidden">
-                <div className="font-bold text-lg p-4 border-b border-separator/50 flex items-center gap-2">
-                    <Icons.Settings size={20} className="text-secondary" />
-                    App Preferences
-                </div>
+                <div className="font-bold text-lg p-4 border-b border-separator/50">App Preferences</div>
                 <div className="flex flex-col">
                     <div className="flex justify-between items-center p-4 border-b border-separator/50">
                         <span className="font-medium">Notifications</span>
-                        <div className="w-10 h-6 bg-separator/30 rounded-full relative opacity-50">
+                        <div className="w-10 h-6 bg-separator/30 rounded-full relative">
                             <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"></div>
                         </div>
                     </div>

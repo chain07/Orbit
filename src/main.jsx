@@ -4,18 +4,8 @@ import { App } from './app/App'
 import { GlobalErrorBoundary } from './components/system/GlobalErrorBoundary'
 import './styles/index.css'
 
-// Register Service Worker for PWA Offline capabilities
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(registration => {
-        console.log('SW registered: ', registration);
-      })
-      .catch(registrationError => {
-        console.log('SW registration failed: ', registrationError);
-      });
-  });
-}
+// Service Worker registration is now handled by vite-plugin-pwa via virtual module
+// in components/system/UpdateManager.jsx
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

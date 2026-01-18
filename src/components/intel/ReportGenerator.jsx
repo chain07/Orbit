@@ -108,16 +108,17 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
                     {key.replace(/([A-Z])/g, ' $1').trim()}
                   </span>
 
-                  {/* CSS-Only Checkbox (Spring Physics) */}
-                  <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-300 ${value ? 'bg-blue border-blue' : 'border-separator bg-transparent'}`}>
+                  {/* CSS-Only Toggle Switch */}
+                  <div className="relative inline-block w-10 h-6 align-middle select-none transition duration-200 ease-in">
                       <input
                         type="checkbox"
                         name={key}
                         checked={value}
                         onChange={() => toggleSection(key)}
-                        className="hidden"
+                        className="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-transform duration-200 ease-in-out left-0.5 top-0.5 checked:translate-x-full"
+                        style={{ border: 'none', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}
                       />
-                      <Icons.Check size={14} className={`text-white transition-transform duration-200 ${value ? 'scale-100' : 'scale-0'}`} />
+                      <div className={`toggle-label block overflow-hidden h-6 rounded-full cursor-pointer transition-colors duration-200 ${value ? 'bg-blue' : 'bg-separator'}`}></div>
                   </div>
                 </label>
             ))}
