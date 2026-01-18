@@ -10,6 +10,7 @@ import { Logger } from '../views/Logger';
 import { Intel } from '../views/Intel';
 import { System } from '../views/System';
 import BottomNav from '../components/ui/BottomNav';
+import UpdateManager from '../components/system/UpdateManager';
 import { OnboardingWizard } from '../components/system/OnboardingWizard';
 import { Glass } from '../components/ui/Glass'; // Import Glass for overlay
 
@@ -68,6 +69,9 @@ const AppContent = () => {
         {renderTab()}
       </main>
       
+      {/* Update Manager - Floating Prompt */}
+      <UpdateManager />
+
       {/* Navigation - Fixed Bottom */}
       <BottomNav
         tabs={tabs}
