@@ -60,10 +60,12 @@ export class GlobalErrorBoundary extends React.Component {
 
           <button
             onClick={() => window.location.reload()}
-            className="btn-liquid variant-primary"
-            style={{ marginTop: '24px', boxShadow: '0 4px 12px rgba(0, 122, 255, 0.3)' }}
+            className="btn-orbit btn-primary"
+            style={{ marginTop: '24px' }}
           >
-            Reboot System
+            <div className="btn-core">
+              Reboot System
+            </div>
           </button>
         </div>
       );

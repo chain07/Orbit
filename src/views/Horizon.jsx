@@ -9,6 +9,7 @@ import { getWidgetComponent } from '../components/widgets/WidgetRegistry';
 import { EditLayoutModal } from '../components/horizon/EditLayoutModal';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Icons } from '../components/ui/Icons';
+import { OrbitButton } from '../components/ui/OrbitButton';
 import '../styles/motion.css';
 
 class WidgetErrorBoundary extends React.Component {
@@ -94,13 +95,13 @@ export const Horizon = () => {
             Hi, Captain.
           </h1>
           {hasMetrics && (
-            <button 
+            <OrbitButton
               onClick={() => setIsEditing(true)}
-              className="btn-liquid variant-glass"
-              style={{ height: '36px', padding: '0 16px', fontSize: '13px' }}
+              variant="secondary"
+              className="!w-auto !h-9 !px-4 !text-xs"
             >
               Edit Layout
-            </button>
+            </OrbitButton>
           )}
         </div>
       </div>
@@ -123,23 +124,24 @@ export const Horizon = () => {
               borderColor: 'rgba(0,122,255,0.2)'
             }}
           >
-              <button
+              <OrbitButton
                   onClick={() => setIsNudgeDismissed(true)}
-                  className="btn-liquid variant-ghost absolute top-2 right-2 w-8 h-8 p-0 flex items-center justify-center text-secondary hover:text-primary"
-              >
-                  <Icons.X size={14} />
-              </button>
+                  variant="secondary"
+                  className="absolute top-2 right-2 !w-8 !h-8 !p-0"
+                  icon={<Icons.X size={14} />}
+              />
               <div className="flex justify-between items-center pr-6">
                   <div>
                       <div className="font-bold text-blue">Complete Your Orbit</div>
                       <div className="text-xs text-secondary mt-1">Add at least 3 metrics and 1 goal for better insights.</div>
                   </div>
-                  <button
+                  <OrbitButton
                     onClick={() => setActiveTab('System')}
-                    className="btn-liquid variant-primary px-4 py-2 text-xs h-8"
+                    variant="primary"
+                    className="!w-auto !h-8 !px-4 !text-xs"
                   >
                       Setup
-                  </button>
+                  </OrbitButton>
               </div>
           </Glass>
       )}

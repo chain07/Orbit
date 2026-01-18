@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { StorageContext } from '../../context/StorageContext';
 import { Glass } from '../../components/ui/Glass';
+import { OrbitButton } from '../ui/OrbitButton';
 import '../../styles/index.css'; // Ensure standard buttons are available
 
 export const OnboardingWizard = ({ onComplete }) => {
@@ -99,18 +100,20 @@ export const OnboardingWizard = ({ onComplete }) => {
         <div>
            <label className="text-xs font-bold text-secondary uppercase">Type</label>
            <div className="flex gap-2 mt-1">
-             <button 
+             <OrbitButton
                 onClick={() => updateField(metricSlot, 'type', 'boolean')}
-                className={`btn-liquid flex-1 justify-center ${data.type === 'boolean' ? 'variant-primary' : 'variant-glass border border-separator'}`}
+                variant={data.type === 'boolean' ? 'primary' : 'secondary'}
+                className="flex-1 justify-center"
              >
                 Yes/No
-             </button>
-             <button 
+             </OrbitButton>
+             <OrbitButton
                 onClick={() => updateField(metricSlot, 'type', 'number')}
-                className={`btn-liquid flex-1 justify-center ${data.type === 'number' ? 'variant-primary' : 'variant-glass border border-separator'}`}
+                variant={data.type === 'number' ? 'primary' : 'secondary'}
+                className="flex-1 justify-center"
              >
                 Number
-             </button>
+             </OrbitButton>
            </div>
         </div>
         
@@ -191,24 +194,26 @@ export const OnboardingWizard = ({ onComplete }) => {
         {/* Footer Actions */}
         <div className="flex flex-col gap-3 pt-4 border-t border-separator mt-4">
             <div className="flex justify-between gap-3">
-              <button
+              <OrbitButton
                 onClick={prevStep}
                 disabled={currentStep === 0}
-                className={`btn-liquid variant-glass flex-1 ${currentStep === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                variant="secondary"
+                className={`flex-1 ${currentStep === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 Back
-              </button>
-              <button
+              </OrbitButton>
+              <OrbitButton
                 onClick={nextStep}
-                className="btn-liquid variant-primary flex-1"
+                variant="primary"
+                className="flex-1"
               >
                 {currentStep === steps.length - 1 ? 'Launch ORBIT 🚀' : 'Next'}
-              </button>
+              </OrbitButton>
             </div>
 
-            <button onClick={handleSkip} className="btn-liquid variant-ghost text-xs w-full">
+            <OrbitButton onClick={handleSkip} variant="secondary" className="!w-full !text-xs !bg-transparent text-secondary">
                 Skip Setup
-            </button>
+            </OrbitButton>
         </div>
     </Glass>
   );

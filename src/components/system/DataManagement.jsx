@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect, useMemo } from 'react';
 import { StorageContext } from '../../context/StorageContext';
 import { Glass } from '../ui/Glass';
 import { Icons } from '../ui/Icons';
+import { OrbitButton } from '../ui/OrbitButton';
 import '../../styles/index.css';
 
 export const DataManagement = () => {
@@ -193,13 +194,14 @@ export const DataManagement = () => {
         <p className="text-xs text-secondary leading-relaxed">
           Offload data older than 1 year to a JSON file and remove it from local storage to free up space.
         </p>
-        <button
+        <OrbitButton
           onClick={handleArchiveOldData}
-          className="btn-liquid variant-glass w-full gap-2"
+          variant="secondary"
+          className="w-full"
+          icon={<Icons.Archive size={16} />}
         >
-          <Icons.Archive size={16} />
           Archive Old Data
-        </button>
+        </OrbitButton>
       </div>
 
       <div className="border-t border-separator/50" />
@@ -211,31 +213,32 @@ export const DataManagement = () => {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <button 
+          <OrbitButton
             onClick={handleExportJSON}
-            className="btn-liquid variant-primary gap-2"
+            variant="primary"
+            icon={<Icons.Download size={16} />}
           >
-            <Icons.Download size={16} />
             JSON Backup
-          </button>
+          </OrbitButton>
 
-          <button 
+          <OrbitButton
             onClick={handleExportCSV}
-            className="btn-liquid variant-glass gap-2"
+            variant="secondary"
+            icon={<Icons.Download size={16} />}
           >
-            <Icons.Download size={16} />
             CSV Export
-          </button>
+          </OrbitButton>
         </div>
 
         <div className="flex gap-3 mt-2">
-           <button
+           <OrbitButton
              onClick={handleImportClick}
-             className="btn-liquid variant-glass flex-1 gap-2"
+             variant="secondary"
+             className="flex-1"
+             icon={<Icons.Upload size={16} />}
            >
-             <Icons.Upload size={16} />
              Import JSON
-           </button>
+           </OrbitButton>
 
            {/* Fixed: Hidden input relying on index.css .hidden */}
            <input
@@ -247,13 +250,13 @@ export const DataManagement = () => {
            />
 
            {/* Fixed: Reset All button overflow and styling */}
-           <button
+           <OrbitButton
              onClick={handleNuke}
-             className="btn-liquid variant-glass flex-1"
-             style={{ color: 'var(--red)' }}
+             variant="destructive"
+             className="flex-1"
            >
              Reset All
-           </button>
+           </OrbitButton>
         </div>
       </div>
     </Glass>

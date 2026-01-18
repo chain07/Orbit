@@ -1,7 +1,8 @@
 import React, { useState, useContext } from 'react';
 import { StorageContext } from '../../context/StorageContext';
 import { Icons } from '../../components/ui/Icons';
-import { Glass } from '../../components/ui/Glass'; // L-03: Wrap in Glass for background
+import { Glass } from '../../components/ui/Glass';
+import { OrbitButton } from '../ui/OrbitButton';
 
 export const EditLayoutModal = ({ onClose, isOpen }) => {
   const { metrics, updateMetric } = useContext(StorageContext);
@@ -50,12 +51,12 @@ export const EditLayoutModal = ({ onClose, isOpen }) => {
         {/* Header */}
         <div className="p-4 border-b border-separator flex justify-between items-center bg-transparent">
           <h2 className="text-lg font-bold">Edit Layout</h2>
-          <button
+          <OrbitButton
             onClick={onClose}
-            className="btn-liquid variant-ghost w-10 h-10 p-0 flex items-center justify-center"
-          >
-            <Icons.X size={18} />
-          </button>
+            variant="secondary"
+            className="!w-10 !h-10 !p-0 !bg-transparent"
+            icon={<Icons.X size={18} />}
+          />
         </div>
 
         {/* Widget List */}
@@ -77,20 +78,20 @@ export const EditLayoutModal = ({ onClose, isOpen }) => {
                 >
                   {/* Drag Handle */}
                   <div className="flex flex-col gap-1">
-                    <button
+                    <OrbitButton
                       onClick={() => moveUp(index)}
                       disabled={index === 0}
-                      className="btn-liquid variant-ghost w-6 h-6 p-0 flex items-center justify-center text-secondary disabled:opacity-30"
-                    >
-                      <Icons.ChevronUp size={16} />
-                    </button>
-                    <button
+                      variant="secondary"
+                      className="!w-6 !h-6 !p-0 !bg-transparent !text-secondary"
+                      icon={<Icons.ChevronUp size={16} />}
+                    />
+                    <OrbitButton
                       onClick={() => moveDown(index)}
                       disabled={index === localMetrics.length - 1}
-                      className="btn-liquid variant-ghost w-6 h-6 p-0 flex items-center justify-center text-secondary disabled:opacity-30"
-                    >
-                      <Icons.ChevronDown size={16} />
-                    </button>
+                      variant="secondary"
+                      className="!w-6 !h-6 !p-0 !bg-transparent !text-secondary"
+                      icon={<Icons.ChevronDown size={16} />}
+                    />
                   </div>
 
                   {/* Color Indicator */}
@@ -110,18 +111,17 @@ export const EditLayoutModal = ({ onClose, isOpen }) => {
                   </div>
 
                   {/* Visibility Toggle */}
-                  {/* Note: This is purely visual for now as dashboard visibility isn't fully implemented in engine, but UI is here */}
-                  <button
+                  <OrbitButton
                     onClick={() => toggleVisibility(metric.id)}
-                    className="btn-liquid variant-ghost w-10 h-10 p-0 flex items-center justify-center"
+                    variant="secondary"
+                    className="!w-10 !h-10 !p-0 !bg-transparent"
                     title="Toggle Visibility"
-                  >
-                    {metric.dashboardVisible !== false ? (
+                    icon={metric.dashboardVisible !== false ? (
                       <Icons.Eye size={20} className="text-blue" />
                     ) : (
                       <Icons.EyeOff size={20} className="text-secondary" />
                     )}
-                  </button>
+                  />
                 </div>
               ))
             )}
@@ -130,18 +130,20 @@ export const EditLayoutModal = ({ onClose, isOpen }) => {
 
         {/* Footer */}
         <div className="p-4 border-t border-separator bg-transparent flex gap-3">
-          <button
+          <OrbitButton
             onClick={onClose}
-            className="btn-liquid variant-glass flex-1"
+            variant="secondary"
+            className="flex-1"
           >
             Cancel
-          </button>
-          <button
+          </OrbitButton>
+          <OrbitButton
             onClick={handleSave}
-            className="btn-liquid variant-primary flex-1"
+            variant="primary"
+            className="flex-1"
           >
             Save Layout
-          </button>
+          </OrbitButton>
         </div>
       </Glass>
     </div>

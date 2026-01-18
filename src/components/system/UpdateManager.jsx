@@ -2,6 +2,7 @@ import React from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { Glass } from '../ui/Glass';
 import { Icons } from '../ui/Icons';
+import { OrbitButton } from '../ui/OrbitButton';
 
 export default function UpdateManager() {
   const {
@@ -68,13 +69,14 @@ export default function UpdateManager() {
           </div>
         </div>
 
-        <button
+        <OrbitButton
           onClick={() => updateServiceWorker(true)}
-          className="btn-liquid variant-primary h-10 px-4 text-xs gap-2"
+          variant="primary"
+          className="!h-10 !px-4 !text-xs !w-auto"
+          icon={<Icons.RotateCcw size={14} strokeWidth={2.5} />}
         >
-          <Icons.RotateCcw size={14} strokeWidth={2.5} />
-          <span>Refresh</span>
-        </button>
+          Refresh
+        </OrbitButton>
       </Glass>
     </div>
   );

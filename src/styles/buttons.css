@@ -1,0 +1,69 @@
+/* src/styles/buttons.css */
+
+/* --- TOKENS (Scoped Mapping) --- */
+:root {
+    --radius-btn: 14px;
+    --scale-press: 0.95;
+
+    /* Mapping to existing Orbit system tokens */
+    --color-primary: var(--blue);
+    --color-text-main: var(--text-primary);
+    --color-negative: var(--red);
+}
+
+/* --- COMPONENT STYLES --- */
+.btn-orbit {
+    position: relative;
+    width: 100%;
+    height: 48px; /* Fixed Height Compliance */
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    touch-action: manipulation;
+    padding: 0; /* Reset default padding */
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn-core {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius-btn);
+    gap: 8px;
+    font-weight: 600;
+    /* Physics: Release (Spring Back) */
+    transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1), background-color 0.2s ease;
+}
+
+/* PRESSED STATE */
+.btn-orbit.is-pressed .btn-core {
+    transform: scale(var(--scale-press));
+    /* Physics: Press (Instant Squish) */
+    transition: transform 0.1s cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* VARIANTS */
+.btn-primary .btn-core {
+    background: var(--color-primary);
+    color: white;
+    box-shadow: inset 0 1px 0.5px rgba(255,255,255,0.25);
+}
+
+.btn-secondary .btn-core {
+    background: rgba(0, 0, 0, 0.08);
+    color: var(--color-text-main);
+}
+
+.btn-destructive .btn-core {
+    background: rgba(255, 59, 48, 0.1);
+    color: var(--color-negative);
+}
+
+/* Dark Mode Adjustments for Secondary/Destructive */
+@media (prefers-color-scheme: dark) {
+    .btn-secondary .btn-core {
+        background: rgba(255, 255, 255, 0.1);
+    }
+}

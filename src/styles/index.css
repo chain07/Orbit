@@ -3,6 +3,7 @@
 @import "./motion.css";
 @import "./layout.css";
 @import "./segmented.css";
+@import "./buttons.css";
 
 *,
 *::before,
@@ -107,103 +108,7 @@ html, body {
   gap: 16px;
 }
 
-/* Global Button Styles */
-.btn-primary {
-  background-color: var(--blue);
-  color: white;
-  height: 44px;
-  min-height: 44px;
-  border-radius: 12px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 16px;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.1s ease, opacity 0.2s ease;
-}
-.btn-primary:active {
-  transform: scale(0.97);
-}
-
-.btn-secondary {
-  background-color: rgba(0,0,0,0.05); /* Light Gray */
-  color: var(--blue);
-  height: 44px;
-  min-height: 44px;
-  border-radius: 12px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 16px;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.1s ease, background-color 0.2s ease;
-}
-.btn-secondary:active {
-  transform: scale(0.97);
-}
-
-@media (prefers-color-scheme: dark) {
-  .btn-secondary {
-    background-color: rgba(255,255,255,0.1); /* Dark Mode Adjustment */
-  }
-}
-
-/* --- ORBIT Liquid Native Button System --- */
-.btn-liquid {
-  height: 42px; /* Revised to 42px per specs */
-  border-radius: 9999px;
-  padding-left: 20px;
-  padding-right: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px; /* Standardize icon gap */
-  font-family: inherit; /* Geist */
-  font-size: 14px; /* Explicit size */
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  border: none;
-  cursor: pointer;
-
-  /* Mandatory Physics */
-  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s;
-}
-
-.btn-liquid:active {
-  transform: scale(0.95);
-}
-
-/* Variant: Primary (Orbit Blue) */
-.btn-liquid.variant-primary {
-  background: linear-gradient(135deg, #007AFF 0%, #0056B3 100%);
-  color: white;
-  /* Premium Shadow: Subtle depth + Inner highlight */
-  box-shadow: 0 1px 2px rgba(0,0,0,0.1), inset 0 1px 0.5px rgba(255,255,255,0.2);
-}
-
-/* Variant: Glass (Translucent) */
-.btn-liquid.variant-glass {
-  background-color: rgba(0, 0, 0, 0.04); /* Dark tint for visibility on light/white cards */
-  border: 1px solid rgba(0,0,0,0.1); /* Explicit separator color */
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  color: var(--text-primary);
-}
-
-/* Variant: Ghost (Transparent) */
-.btn-liquid.variant-ghost {
-  background-color: transparent;
-  color: var(--text-secondary);
-}
-
-.btn-liquid.variant-ghost:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-  color: var(--text-primary);
-}
+/* Global Button Styles: REMOVED - Replaced by buttons.css */
 
 /* --- Form Toggles (Checkbox) --- */
 .toggle-checkbox {
