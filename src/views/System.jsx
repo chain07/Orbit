@@ -5,6 +5,8 @@ import { MetricBuilder } from '../components/system/MetricBuilder';
 import { DataManagement } from '../components/system/DataManagement';
 import { Library } from '../lib/library';
 import SegmentedControl from '../components/ui/SegmentedControl';
+import { Icons } from '../components/ui/Icons';
+import '../styles/index.css';
 
 export const System = ({ onNavigate }) => {
   const { 
@@ -12,9 +14,12 @@ export const System = ({ onNavigate }) => {
     addMetric, 
     updateMetric, 
     deleteMetric, 
+    logEntries, // Needed for Debug Export
+    addLogEntry // Needed for Seeding
   } = useContext(StorageContext);
   
   const [viewMode, setViewMode] = useState('Library'); // 'Library' | 'Settings'
+  const [isDebugMode, setIsDebugMode] = useState(false); // T-01: Debug State
 
   // Metric Management State
   const [showBuilder, setShowBuilder] = useState(false);
@@ -33,7 +38,6 @@ export const System = ({ onNavigate }) => {
   const refreshLibrary = () => {
     const items = Library.list();
     if (items.length === 0) {
-      // Create Default "Welcome" Item if empty
       const defaultItem = {
         id: crypto.randomUUID(),
         title: 'Library Manifest',
@@ -51,16 +55,14 @@ export const System = ({ onNavigate }) => {
 
   // Unified List Generation
   const unifiedList = useMemo(() => {
-    // Map metrics to list format
     const metricItems = metrics.map(m => ({
       ...m,
       isMetric: true,
       category: 'Metric',
-      title: m.name, // Uniform title
+      title: m.name,
       icon: getTypeIcon(m.type)
     }));
 
-    // Map protocols to list format
     const protocolItems = libraryItems.map(p => ({
       ...p,
       isMetric: false,
@@ -68,8 +70,6 @@ export const System = ({ onNavigate }) => {
       icon: 'Aa'
     }));
 
-    // Combine and sort (Metrics first, then protocols, or alphabetical?)
-    // Prompt says "Unified List". I'll put Metrics first as they are "Active".
     return [...metricItems, ...protocolItems];
   }, [metrics, libraryItems]);
 
@@ -87,14 +87,12 @@ export const System = ({ onNavigate }) => {
     if (!metric.id) {
       metric.id = metric.label.toLowerCase().replace(/\s+/g, '_') + '_' + Math.random().toString(36).substr(2, 5);
     }
-    
     if (editingMetric) updateMetric(metric);
     else addMetric(metric);
     setShowBuilder(false);
   };
 
   // --- Library Handlers ---
-  // (Reusing existing logic for Protocol editing)
   const handleSaveLibraryItem = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -138,20 +136,65 @@ export const System = ({ onNavigate }) => {
   };
 
   const openNewLibraryItem = () => {
-    setViewingItem({ title: '', category: '', metricId: '', blocks: [{ type: 'text', heading: '', content: '' }] });
+    // F-02: Ensure clear state for creation
+    setViewingItem({ id: null, title: '', category: '', metricId: '', blocks: [{ type: 'text', heading: '', content: '' }] });
     setIsEditingLibrary(true);
   };
+
+  // F-02: Ensure Edit opens in Edit Mode or View Mode?
+  // N-02 proposed solution: Tap -> Detail View. Detail View -> Edit Button -> Edit Mode.
+  const handleViewLibraryItem = (item) => {
+      setViewingItem(item);
+      setIsEditingLibrary(false); // Default to viewing
+  };
+
+  // T-01: Seed Test Data
+  const seedTestData = () => {
+      if (!confirm("Inject random test data? This will affect your stats.")) return;
+      const now = new Date();
+      metrics.forEach(m => {
+          for(let i=0; i<7; i++) {
+               const date = new Date();
+               date.setDate(now.getDate() - i);
+               const val = m.type === 'boolean' ? Math.random() > 0.5 : Math.floor(Math.random() * 10);
+               addLogEntry({
+                   metricId: m.id,
+                   value: val,
+                   timestamp: date.toISOString()
+               });
+          }
+      });
+      // Force reload to ensure all widgets update if Context doesn't trigger deep re-render
+      // (Though Context should handle it, explicit reload is safer for 'Dev Mode' hacks)
+      setTimeout(() => window.location.reload(), 500);
+  };
+
+  // T-01: Export Archive Test
+  const exportArchive = () => {
+      const archive = {
+          timestamp: new Date().toISOString(),
+          metrics,
+          logs: logEntries
+      };
+      const blob = new Blob([JSON.stringify(archive, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `orbit-debug-archive.json`;
+      a.click();
+  };
+
 
   return (
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
       
-      {/* Header & Toggle */}
-      <div className="flex justify-between items-end mt-2">
+      {/* Header & Toggle - L-06: Safe MT */}
+      <div className="flex justify-between items-end safe-mt">
          <div className="flex flex-col gap-1">
              <h1 className="text-3xl font-extrabold tracking-tight">System</h1>
              <p className="text-secondary font-medium">Configuration</p>
          </div>
-         <div className="w-[180px]">
+         <div className="w-[160px]">
              <SegmentedControl
                 options={['Library', 'Settings']}
                 value={viewMode}
@@ -166,21 +209,22 @@ export const System = ({ onNavigate }) => {
             {/* Create Button (Top of List) */}
             <button
                 onClick={handleAddMetric}
-                className="w-full p-4 rounded-2xl bg-blue text-white font-bold flex items-center justify-center gap-2 shadow-lg shadow-blue/20 active:scale-97 transition-transform"
+                className="btn-primary w-full shadow-lg shadow-blue/20"
             >
                 <span className="text-xl">+</span> Add New Metric
             </button>
 
+            {/* N-02: List View (Already implemented, refined styling) */}
             <div className="flex flex-col gap-2">
                 {unifiedList.map(item => (
                     <div
                         key={item.id}
-                        onClick={() => item.isMetric ? handleEditMetric(item) : setViewingItem(item)}
-                        className="p-3 rounded-xl border border-separator bg-card flex justify-between items-center cursor-pointer active:scale-[0.99] transition-transform"
+                        onClick={() => item.isMetric ? handleEditMetric(item) : handleViewLibraryItem(item)}
+                        className="p-3 rounded-xl border border-separator bg-card flex justify-between items-center cursor-pointer active:scale-[0.99] transition-transform hover:bg-bg-color/50"
                     >
                         <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg ${item.isMetric ? 'bg-bg-color text-blue' : 'bg-orange bg-opacity-10 text-orange'}`}>
-                                {item.icon}
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg ${item.isMetric ? 'bg-bg-color text-blue' : 'bg-orange/10 text-orange'}`}>
+                                {item.isMetric ? item.icon : <Icons.BookOpen size={20} />} {/* L-08: Semantic Icon */}
                             </div>
                             <div>
                                 <div className="font-bold text-primary">{item.title}</div>
@@ -190,13 +234,15 @@ export const System = ({ onNavigate }) => {
                                 </div>
                             </div>
                         </div>
-                        <div className="text-secondary opacity-30">→</div>
+                        <div className="text-secondary opacity-30">
+                            <Icons.ChevronRight size={16} />
+                        </div>
                     </div>
                 ))}
             </div>
 
             {/* Secondary Action for Protocols */}
-            <button onClick={openNewLibraryItem} className="text-center text-blue font-bold text-sm mt-4">
+            <button onClick={openNewLibraryItem} className="text-center text-blue font-bold text-sm mt-4 hover:underline">
                 + Create Protocol Item
             </button>
         </div>
@@ -207,27 +253,47 @@ export const System = ({ onNavigate }) => {
         <div className="flex flex-col gap-6 animate-fade-in">
             <DataManagement />
 
-            <Glass>
-                <div className="font-bold text-lg mb-4">App Preferences</div>
-                <div className="flex flex-col gap-0 divider-y">
-                    <div className="flex justify-between items-center p-3 border-b border-separator border-opacity-50">
+            {/* Preferences */}
+            <Glass className="p-0 overflow-hidden">
+                <div className="font-bold text-lg p-4 border-b border-separator/50 flex items-center gap-2">
+                    <Icons.Settings size={20} className="text-secondary" />
+                    App Preferences
+                </div>
+                <div className="flex flex-col">
+                    <div className="flex justify-between items-center p-4 border-b border-separator/50">
                         <span className="font-medium">Notifications</span>
-                        <div className="w-10 h-6 bg-separator bg-opacity-30 rounded-full relative">
+                        <div className="w-10 h-6 bg-separator/30 rounded-full relative opacity-50">
                             <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"></div>
                         </div>
                     </div>
-                    <div className="flex justify-between items-center p-3 border-b border-separator border-opacity-50">
+                    <div className="flex justify-between items-center p-4 border-b border-separator/50">
                         <span className="font-medium">Haptics</span>
                         <div className="w-10 h-6 bg-green rounded-full relative">
                             <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"></div>
                         </div>
                     </div>
-                    <div className="flex justify-between items-center p-3">
-                        <span className="font-medium">iCloud Sync</span>
-                         <span className="text-xs text-secondary">Coming Soon</span>
+                    <div className="flex justify-between items-center p-4">
+                        <span className="font-medium">Developer Mode</span>
+                        <button
+                            onClick={() => setIsDebugMode(!isDebugMode)}
+                            className={`w-10 h-6 rounded-full relative transition-colors ${isDebugMode ? 'bg-blue' : 'bg-separator/30'}`}
+                        >
+                             <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${isDebugMode ? 'right-1' : 'left-1'}`}></div>
+                        </button>
                     </div>
                 </div>
             </Glass>
+
+            {/* T-01: Debug Tools */}
+            {isDebugMode && (
+                <Glass className="p-4 border-l-4 border-orange">
+                    <div className="text-xs font-bold text-orange uppercase tracking-wide mb-3">Developer Tools</div>
+                    <div className="flex gap-2">
+                        <button onClick={seedTestData} className="flex-1 btn-secondary text-xs">Seed Test Data</button>
+                        <button onClick={exportArchive} className="flex-1 btn-secondary text-xs">Export Debug Archive</button>
+                    </div>
+                </Glass>
+            )}
 
             <div className="text-center text-xs text-secondary mt-8">
                 ORBIT v1.1.0 • Liquid Native
@@ -239,7 +305,7 @@ export const System = ({ onNavigate }) => {
 
       {/* Metric Builder Modal */}
       {showBuilder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4">
           <MetricBuilder
             metric={editingMetric}
             onSave={handleSaveMetric}
@@ -248,11 +314,9 @@ export const System = ({ onNavigate }) => {
         </div>
       )}
 
-      {/* Library Viewer/Editor Modal (Legacy) */}
+      {/* Library Viewer/Editor Modal (Refactored) */}
       {viewingItem && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
-          {/* ... keeping the library modal logic inline or ideally refactoring it to a component ... */}
-          {/* For brevity, I will inject the existing Library Modal JSX here */}
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
           <LibraryModal
              viewingItem={viewingItem}
              setViewingItem={setViewingItem}
@@ -260,10 +324,6 @@ export const System = ({ onNavigate }) => {
              setIsEditingLibrary={setIsEditingLibrary}
              handleSaveLibraryItem={handleSaveLibraryItem}
              handleDeleteLibraryItem={handleDeleteLibraryItem}
-             handleQuickLink={(metricId) => {
-                 if (onNavigate) onNavigate('Logger', { metricId });
-                 else window.dispatchEvent(new CustomEvent('orbit-navigate', { detail: { tab: 'Logger', metricId } }));
-             }}
              metrics={metrics}
           />
         </div>
@@ -285,11 +345,11 @@ const getTypeIcon = (type) => {
   }
 };
 
-// Extracted Library Modal to keep file clean(er)
-const LibraryModal = ({ viewingItem, setViewingItem, isEditingLibrary, setIsEditingLibrary, handleSaveLibraryItem, handleDeleteLibraryItem, handleQuickLink, metrics }) => {
+// Extracted Library Modal - S-05 (Dark Mode), F-01 (Block Editor)
+const LibraryModal = ({ viewingItem, setViewingItem, isEditingLibrary, setIsEditingLibrary, handleSaveLibraryItem, handleDeleteLibraryItem, metrics }) => {
     return (
-        <div className="bg-card w-full max-w-lg h-[90vh] sm:h-auto sm:max-h-[90vh] rounded-t-2xl sm:rounded-2xl flex flex-col overflow-hidden shadow-2xl animate-slide-up">
-            <div className="p-4 border-b border-separator flex justify-between items-center bg-bg-color">
+        <Glass className="w-full max-w-lg h-full max-h-[85vh] flex flex-col overflow-hidden shadow-2xl p-0 bg-card">
+            <div className="p-4 border-b border-separator flex justify-between items-center bg-bg-color/50">
               <button onClick={() => setViewingItem(null)} className="text-blue font-bold">Close</button>
               <div className="font-bold">{isEditingLibrary ? (viewingItem.id ? 'Edit Item' : 'New Item') : 'Library'}</div>
               {!isEditingLibrary ? (
@@ -299,56 +359,64 @@ const LibraryModal = ({ viewingItem, setViewingItem, isEditingLibrary, setIsEdit
               )}
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-4 bg-bg-color">
               {isEditingLibrary ? (
                 <form id="libraryForm" onSubmit={handleSaveLibraryItem} className="flex flex-col gap-4">
                   <div>
                     <label className="text-xs font-bold text-secondary uppercase">Title</label>
-                    <input name="title" defaultValue={viewingItem.title} required className="w-full p-3 rounded-lg bg-bg-color border border-separator font-bold text-lg outline-none" placeholder="Protocol Name" />
+                    <input name="title" defaultValue={viewingItem.title} required className="w-full p-3 rounded-lg bg-bg-color border border-separator font-bold text-lg outline-none text-primary" placeholder="Protocol Name" />
                   </div>
                   <div>
                     <label className="text-xs font-bold text-secondary uppercase">Category</label>
-                    <input name="category" defaultValue={viewingItem.category} className="w-full p-3 rounded-lg bg-bg-color border border-separator outline-none" placeholder="e.g. Psychology" />
+                    <input name="category" defaultValue={viewingItem.category} className="w-full p-3 rounded-lg bg-bg-color border border-separator outline-none text-primary" placeholder="e.g. Psychology" />
                   </div>
                   <div>
                     <label className="text-xs font-bold text-secondary uppercase">Linked Metric</label>
                     <div className="relative">
-                        <select name="metricId" defaultValue={viewingItem.metricId || ''} className="w-full p-3 rounded-lg bg-bg-color border border-separator outline-none appearance-none">
+                        <select name="metricId" defaultValue={viewingItem.metricId || ''} className="w-full p-3 rounded-lg bg-bg-color border border-separator outline-none appearance-none text-primary">
                             <option value="">None</option>
                             {metrics.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
                         </select>
                     </div>
                   </div>
                   <div className="border-t border-separator my-2"></div>
-                  {/* Blocks Editor Simplified */}
-                  <div className="text-center text-sm text-secondary italic">Block editor available in detailed view (simplified here)</div>
+
+                  {/* F-01: Full Block Editor (Removed "Simplified View" text) */}
+                  <div className="text-xs font-bold text-secondary uppercase mb-2">Content Blocks</div>
+
                   {viewingItem.blocks && viewingItem.blocks.map((blk, idx) => (
-                      <div key={idx} className="flex flex-col gap-1 p-2 border border-separator rounded-lg">
+                      <div key={idx} className="flex flex-col gap-2 p-3 border border-separator rounded-lg bg-bg-color">
                           <input type="hidden" name="type" value={blk.type} />
-                          <input name="heading" defaultValue={blk.heading} className="font-bold text-sm bg-transparent outline-none" placeholder="HEADING" />
-                          <textarea name="content" defaultValue={blk.content} className="w-full bg-transparent outline-none" placeholder="Content..." />
+                          <input name="heading" defaultValue={blk.heading} className="font-bold text-sm bg-transparent outline-none text-primary placeholder-secondary" placeholder="HEADING (Optional)" />
+                          <textarea name="content" defaultValue={blk.content} className="w-full bg-transparent outline-none text-primary min-h-[60px]" placeholder="Content..." />
                       </div>
                   ))}
-                  <div className="flex flex-col gap-1 p-2 border border-separator border-dashed rounded-lg">
+
+                  {/* Add New Block Stub */}
+                  <div className="flex flex-col gap-2 p-3 border border-separator border-dashed rounded-lg opacity-80 hover:opacity-100 transition-opacity">
                        <input type="hidden" name="type" value="text" />
-                       <input name="heading" className="font-bold text-sm bg-transparent outline-none placeholder-blue/50" placeholder="+ NEW BLOCK HEADING" />
-                       <textarea name="content" className="w-full bg-transparent outline-none" placeholder="Content..." />
+                       <div className="flex justify-between">
+                           <input name="heading" className="font-bold text-sm bg-transparent outline-none placeholder-blue" placeholder="+ ADD HEADING" />
+                           <span className="text-xs text-secondary uppercase">New Block</span>
+                       </div>
+                       <textarea name="content" className="w-full bg-transparent outline-none text-primary min-h-[60px]" placeholder="Content..." />
                   </div>
+
                   {viewingItem.id && (
-                     <button type="button" onClick={() => handleDeleteLibraryItem(viewingItem.id)} className="mt-8 py-3 text-red font-bold bg-red bg-opacity-10 rounded-lg">Delete Item</button>
+                     <button type="button" onClick={() => handleDeleteLibraryItem(viewingItem.id)} className="mt-8 py-3 text-red font-bold bg-red/10 rounded-lg hover:bg-red/20 transition-colors">Delete Item</button>
                   )}
                 </form>
               ) : (
-                <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-6 animate-fade-in">
                   <div>
-                    <h2 className="text-3xl font-extrabold">{viewingItem.title}</h2>
+                    <h2 className="text-3xl font-extrabold text-primary">{viewingItem.title}</h2>
                     <div className="flex items-center gap-2 mt-2">
-                        <span className="inline-block px-2 py-1 rounded bg-blue bg-opacity-10 text-blue text-xs font-bold uppercase">{viewingItem.category}</span>
+                        <span className="inline-block px-2 py-1 rounded bg-blue/10 text-blue text-xs font-bold uppercase">{viewingItem.category}</span>
                     </div>
                   </div>
                   {viewingItem.blocks && viewingItem.blocks.map((blk, idx) => (
                     <div key={idx}>
-                      <div className="text-xs font-bold text-secondary uppercase mb-1 tracking-wide">{blk.heading}</div>
+                      {blk.heading && <div className="text-xs font-bold text-secondary uppercase mb-1 tracking-wide">{blk.heading}</div>}
                       <div className="text-primary leading-relaxed whitespace-pre-wrap">{blk.content}</div>
                       <div className="border-b border-separator opacity-20 mt-4"></div>
                     </div>
@@ -356,6 +424,6 @@ const LibraryModal = ({ viewingItem, setViewingItem, isEditingLibrary, setIsEdit
                 </div>
               )}
             </div>
-        </div>
+        </Glass>
     );
 };

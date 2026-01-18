@@ -93,8 +93,8 @@ export const Horizon = () => {
   return (
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
       
-      {/* Header */}
-      <div className="flex flex-col gap-1 mt-2">
+      {/* Header - Safe Area Padding Applied */}
+      <div className="flex flex-col gap-1 safe-pt">
         <div className="text-xs font-bold text-secondary uppercase tracking-wide">
           {todayDate}
         </div>
@@ -124,10 +124,10 @@ export const Horizon = () => {
         />
       )}
 
-      {/* PERSISTENT NUDGE */}
+      {/* PERSISTENT NUDGE (Dynamic Positioning) */}
       {showNudge && (
           <Glass
-            className="relative"
+            className="relative mb-6"
             style={{
               background: 'linear-gradient(to right, rgba(0,122,255,0.1), rgba(175,82,222,0.1))',
               borderColor: 'rgba(0,122,255,0.2)'

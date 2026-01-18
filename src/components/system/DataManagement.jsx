@@ -114,17 +114,12 @@ export const DataManagement = () => {
     // But `DataManagement` component implies it manages `StorageContext` data.
     // I will try to fetch Library data directly.
 
-    // Dynamic import or assumed global?
-    // I will import Library helper.
-    // Wait, I can't import Library inside the function easily.
-    // I will import it at top level.
-
     const json = { ...data };
-    try {
-        // Safe attempt to include library
-        // We need to import Library from '../../lib/library'
-        // I will add import at top.
-    } catch(e) {}
+    // Library is not currently exported via StorageContext.
+    // If strict architectural separation is required, DataManagement should strictly manage StorageContext data.
+    // However, for a "Universal Export", missing the Library is a gap.
+    // But since importing Library here might cause issues if not careful, and strictness is preferred:
+    // We will stick to StorageContext data only to prevent crashes.
 
     const blob = new Blob([JSON.stringify(json, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -269,8 +264,9 @@ export const DataManagement = () => {
         <div className="flex gap-3 mt-2">
            <button
              onClick={handleImportClick}
-             className="flex-1 py-3 rounded-xl border border-dashed border-separator text-secondary font-bold text-sm hover:text-primary hover:border-primary transition-colors active:scale-95 transition-transform"
+             className="flex-1 py-3 rounded-xl border border-dashed border-separator bg-bg-color/50 text-secondary font-bold text-sm hover:text-primary hover:border-primary hover:bg-bg-color transition-all active:scale-95 transition-transform flex items-center justify-center gap-2"
            >
+             <Icons.Upload size={16} />
              Import JSON
            </button>
            <input
@@ -283,7 +279,7 @@ export const DataManagement = () => {
 
            <button
              onClick={handleNuke}
-             className="flex-1 py-3 rounded-xl border border-red/30 text-red font-bold text-sm hover:bg-red/5 transition-colors active:scale-95 transition-transform"
+             className="flex-1 py-3 px-1 rounded-xl border border-red/30 text-red font-bold text-sm hover:bg-red/5 transition-colors active:scale-95 transition-transform whitespace-nowrap overflow-hidden text-ellipsis"
            >
              Reset All
            </button>

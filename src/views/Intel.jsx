@@ -2,7 +2,6 @@ import React, { useContext, useState, useMemo } from 'react';
 import { StorageContext } from '../context/StorageContext';
 import { WidgetDataEngine } from '../engine/WidgetDataEngine';
 import { HorizonAgent } from '../lib/horizonAgent';
-import { MetricEngine } from '../engine/MetricEngine';
 import { AnalyticsEngine } from '../engine/AnalyticsEngine';
 import SegmentedControl from '../components/ui/SegmentedControl';
 import Glass from '../components/ui/Glass';
@@ -44,37 +43,41 @@ export const Intel = () => {
   return (
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
       
-      {/* Header */}
-      <div className="flex flex-col gap-1 mt-2">
+      {/* Header - Safe Padding */}
+      <div className="flex flex-col gap-1 safe-pt">
         <h1 className="text-3xl font-extrabold tracking-tight">Intelligence</h1>
         <p className="text-secondary font-medium">Pattern and telemetry analysis.</p>
       </div>
 
-      <SegmentedControl
-        options={segments.map(s => ({ label: s, value: s }))}
-        value={segment}
-        onChange={setSegment}
-      />
+      <div className="mb-6">
+        <SegmentedControl
+          options={segments.map(s => ({ label: s, value: s }))}
+          value={segment}
+          onChange={setSegment}
+        />
+      </div>
 
-      {/* STAT CARDS */}
+      {/* STAT CARDS - S-02: Refined Styling */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* System Health Card */}
-        <Glass className="flex flex-col justify-between min-h-[140px]">
-          <div className="text-xs font-bold text-secondary uppercase tracking-wide">System Health</div>
-          <div className="flex flex-col items-center my-2">
-             <div className="text-4xl font-black text-primary">{stats.reliability}%</div>
-             <div className={`text-xs font-bold mt-1 ${stats.trend.startsWith('-') ? 'text-red' : 'text-green'}`}>
+        <Glass className="flex flex-col justify-between min-h-[140px] relative overflow-hidden">
+          <div className="text-xs font-bold text-secondary uppercase tracking-wide z-10">System Health</div>
+          <div className="flex flex-col items-center my-2 z-10">
+             <div className="text-5xl font-black text-primary tracking-tighter">{stats.reliability}%</div>
+             <div className={`text-sm font-bold mt-1 px-2 py-0.5 rounded-full ${stats.trend.startsWith('-') ? 'bg-red/10 text-red' : 'bg-green/10 text-green'}`}>
                {stats.trend}
              </div>
           </div>
-          <div className="text-xs text-secondary text-center opacity-80">Operational Baseline</div>
+          <div className="text-xs text-secondary text-center opacity-80 z-10">Operational Baseline</div>
+          {/* Subtle Background decoration */}
+          <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-blue opacity-5 rounded-full blur-2xl"></div>
         </Glass>
 
         {/* Intensity Card */}
-        <Glass className="flex flex-col justify-between min-h-[140px]">
-          <div className="text-xs font-bold text-secondary uppercase tracking-wide">Intensity</div>
-          <div className="flex flex-col items-center my-2">
-             <div className={`text-4xl font-black ${
+        <Glass className="flex flex-col justify-between min-h-[140px] relative overflow-hidden">
+          <div className="text-xs font-bold text-secondary uppercase tracking-wide z-10">Intensity</div>
+          <div className="flex flex-col items-center my-2 z-10">
+             <div className={`text-4xl font-black tracking-tight ${
                stats.intensity === 'Peak' ? 'text-red' : 
                stats.intensity === 'High' ? 'text-orange' : 
                stats.intensity === 'Moderate' ? 'text-blue' : 'text-secondary'
@@ -82,11 +85,13 @@ export const Intel = () => {
                {stats.intensity}
              </div>
           </div>
-          <div className="text-xs text-secondary text-center opacity-80">Status: {stats.status}</div>
+          <div className="text-xs text-secondary text-center opacity-80 z-10">Status: {stats.status}</div>
+           {/* Subtle Background decoration */}
+           <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-orange opacity-5 rounded-full blur-2xl"></div>
         </Glass>
       </div>
 
-      {/* REPORT GENERATOR */}
+      {/* REPORT GENERATOR - L-05, S-03, S-04 */}
       <ReportGenerator segment={segment} />
 
       {/* ANALYSIS STREAM */}
@@ -94,7 +99,7 @@ export const Intel = () => {
         <div className="flex flex-col gap-2">
           <div className="section-label px-1 text-secondary font-bold text-xs uppercase">Analysis Stream</div>
           {insights.map((insight, idx) => (
-            <Glass key={idx} className="flex flex-col gap-1 border-l-2 border-purple">
+            <Glass key={idx} className="flex flex-col gap-1 border-l-4 border-purple/50">
               <div className="text-sm font-bold text-primary">{insight.message}</div>
               {insight.value && <div className="text-xs text-secondary font-mono">Delta: {insight.value.toFixed(2)}</div>}
             </Glass>

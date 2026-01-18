@@ -12,13 +12,22 @@
   padding-bottom: calc(var(--safe-area-bottom) + var(--nav-height) + 20px);
 }
 
+/* Safe Area Utilities */
+.safe-pt {
+  padding-top: max(20px, var(--safe-area-top));
+}
+
+.safe-mt {
+  margin-top: max(10px, var(--safe-area-top));
+}
+
 /* Fixed Bottom Navigation Container */
 .tab-bar-container {
   position: fixed;
   bottom: calc(30px + var(--safe-area-bottom));
   left: 50%;
   transform: translateX(-50%);
-  z-index: 9999;
+  z-index: 100; /* High but below Modals (z-50 usually handled by fixed overlay) */
   width: auto;
   display: flex;
   justify-content: center;
@@ -63,7 +72,8 @@
 }
 
 .tab-item.active svg {
-  color: var(--text-primary);
+  color: var(--blue);
+  filter: drop-shadow(0 0 8px rgba(0, 122, 255, 0.4));
 }
 
 /* Sliding Active Indicator */
