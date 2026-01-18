@@ -70,10 +70,10 @@ export const DailyCheckInForm = () => {
         <button 
           type="submit" 
           disabled={status === 'success' || metrics.length === 0}
-          className={`py-3 px-4 rounded-xl font-bold transition-all duration-300 ${
+          className={`btn-liquid w-full ${
             status === 'success' 
-              ? 'bg-green text-white transform scale-100' 
-              : 'bg-blue text-white active:scale-95 shadow-lg shadow-blue/20'
+              ? 'bg-green text-white shadow-none'
+              : 'variant-primary'
           }`}
         >
           {status === 'success' ? 'Check-In Saved ✓' : 'Save Check-In'}

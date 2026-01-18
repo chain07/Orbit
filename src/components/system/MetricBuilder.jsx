@@ -53,7 +53,7 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
       <div className="p-4 border-b border-separator flex justify-between items-center bg-bg-color sticky top-0 z-10">
         <h2 className="text-lg font-bold">{metric ? 'Edit Metric' : 'New Metric'}</h2>
         {/* Fixed: Updated Back/Cancel button color for better visibility */}
-        <button onClick={onCancel} className="text-secondary font-bold active:opacity-50">Cancel</button>
+        <button onClick={onCancel} className="btn-liquid variant-ghost text-secondary font-bold">Cancel</button>
       </div>
 
       <div className="p-4 flex flex-col gap-6 overflow-y-auto">
@@ -248,7 +248,7 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
       </div>
 
       <div className="p-4 border-t border-separator bg-bg-color">
-         <button onClick={handleSave} className="btn-primary w-full shadow-lg shadow-blue/20">
+         <button onClick={handleSave} className="btn-liquid variant-primary w-full shadow-lg shadow-blue/20">
             {metric ? 'Update Metric' : 'Create Metric'}
          </button>
       </div>

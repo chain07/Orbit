@@ -195,7 +195,7 @@ export const DataManagement = () => {
         </p>
         <button
           onClick={handleArchiveOldData}
-          className="w-full py-3 rounded-xl bg-bg-color border border-separator/50 font-bold text-sm text-primary hover:bg-separator/10 transition-colors flex items-center justify-center gap-2 active:scale-95 transition-transform"
+          className="btn-liquid variant-glass w-full gap-2"
         >
           <Icons.Archive size={16} />
           Archive Old Data
@@ -213,7 +213,7 @@ export const DataManagement = () => {
         <div className="grid grid-cols-2 gap-3">
           <button 
             onClick={handleExportJSON}
-            className="py-3 rounded-xl bg-blue text-white font-bold text-sm shadow-lg shadow-blue/20 active:scale-95 transition-transform flex items-center justify-center gap-2"
+            className="btn-liquid variant-primary gap-2"
           >
             <Icons.Download size={16} />
             JSON Backup
@@ -221,7 +221,7 @@ export const DataManagement = () => {
 
           <button 
             onClick={handleExportCSV}
-            className="py-3 rounded-xl bg-green text-white font-bold text-sm shadow-lg shadow-green/20 active:scale-95 transition-transform flex items-center justify-center gap-2"
+            className="btn-liquid variant-glass gap-2"
           >
             <Icons.Download size={16} />
             CSV Export
@@ -231,7 +231,7 @@ export const DataManagement = () => {
         <div className="flex gap-3 mt-2">
            <button
              onClick={handleImportClick}
-             className="flex-1 py-3 rounded-xl border border-dashed border-separator bg-bg-color/50 text-secondary font-bold text-sm hover:text-primary hover:border-primary hover:bg-bg-color transition-all active:scale-95 transition-transform flex items-center justify-center gap-2"
+             className="btn-liquid variant-glass flex-1 gap-2"
            >
              <Icons.Upload size={16} />
              Import JSON
@@ -249,7 +249,8 @@ export const DataManagement = () => {
            {/* Fixed: Reset All button overflow and styling */}
            <button
              onClick={handleNuke}
-             className="flex-1 py-3 px-2 rounded-xl border border-red/30 text-red font-bold text-sm hover:bg-red/5 transition-colors active:scale-95 transition-transform text-center"
+             className="btn-liquid variant-glass flex-1"
+             style={{ color: 'var(--red)' }}
            >
              Reset All
            </button>

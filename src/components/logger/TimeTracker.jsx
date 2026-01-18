@@ -152,7 +152,7 @@ export const TimeTracker = ({ metricId }) => {
               {elapsed === 0 ? (
                 <button 
                   onClick={() => setRunning(true)}
-                  className="flex-1 py-4 bg-green text-white rounded-xl font-bold text-lg btn-ios shadow-lg shadow-green/20"
+                  className="btn-liquid flex-1 bg-green text-white shadow-lg shadow-green/20"
                 >
                   Start
                 </button>
@@ -160,7 +160,7 @@ export const TimeTracker = ({ metricId }) => {
                 <>
                   <button 
                     onClick={() => setRunning(!running)}
-                    className={`flex-1 py-4 rounded-xl font-bold text-lg btn-ios shadow-lg ${
+                    className={`btn-liquid flex-1 shadow-lg ${
                       running ? 'bg-orange text-white shadow-orange/20' : 'bg-green text-white shadow-green/20'
                     }`}
                   >
@@ -170,7 +170,7 @@ export const TimeTracker = ({ metricId }) => {
                   {!running && (
                     <button 
                       onClick={handleSave}
-                      className="flex-1 py-4 bg-blue text-white rounded-xl font-bold text-lg btn-ios shadow-lg shadow-blue/20"
+                      className="btn-liquid variant-primary flex-1"
                     >
                       Save
                     </button>
@@ -179,7 +179,7 @@ export const TimeTracker = ({ metricId }) => {
                   {!running && (
                     <button 
                       onClick={() => { setElapsed(0); setStartTime(null); }}
-                      className="px-4 py-4 border border-separator text-secondary rounded-xl font-bold btn-ios bg-white"
+                      className="btn-liquid variant-glass w-12 !px-0"
                     >
                       <Icons.RotateCcw size={20} />
                     </button>
@@ -217,7 +217,7 @@ export const TimeTracker = ({ metricId }) => {
             
             <button
               onClick={handleSave}
-              className="w-full py-4 bg-blue text-white rounded-xl font-bold text-lg btn-ios shadow-lg shadow-blue/20"
+              className="btn-liquid variant-primary w-full"
             >
               Save Entry
             </button>

@@ -152,6 +152,55 @@ html, body {
   }
 }
 
+/* --- ORBIT Liquid Native Button System --- */
+.btn-liquid {
+  height: 48px;
+  border-radius: 9999px;
+  padding-left: 24px;
+  padding-right: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit; /* Geist */
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  border: none;
+  cursor: pointer;
+
+  /* Mandatory Physics */
+  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s;
+}
+
+.btn-liquid:active {
+  transform: scale(0.95);
+}
+
+/* Variant: Primary (Orbit Blue) */
+.btn-liquid.variant-primary {
+  background-color: var(--blue);
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+}
+
+/* Variant: Glass (Translucent) */
+.btn-liquid.variant-glass {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 0.5px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--text-primary);
+}
+
+/* Variant: Ghost (Transparent) */
+.btn-liquid.variant-ghost {
+  background-color: transparent;
+  color: var(--text-secondary);
+}
+
+.btn-liquid.variant-ghost:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
 /* --- Form Toggles (Checkbox) --- */
 .toggle-checkbox {
   appearance: none;

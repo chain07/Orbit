@@ -194,19 +194,19 @@ export const OnboardingWizard = ({ onComplete }) => {
               <button
                 onClick={prevStep}
                 disabled={currentStep === 0}
-                className={`btn-secondary flex-1 ${currentStep === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`btn-liquid variant-glass flex-1 ${currentStep === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 Back
               </button>
               <button
                 onClick={nextStep}
-                className="btn-primary flex-1"
+                className="btn-liquid variant-primary flex-1"
               >
                 {currentStep === steps.length - 1 ? 'Launch ORBIT 🚀' : 'Next'}
               </button>
             </div>
 
-            <button onClick={handleSkip} className="text-xs text-secondary font-bold hover:text-primary transition-colors py-2 text-center">
+            <button onClick={handleSkip} className="btn-liquid variant-ghost text-xs w-full">
                 Skip Setup
             </button>
         </div>
