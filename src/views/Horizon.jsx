@@ -124,10 +124,10 @@ export const Horizon = () => {
         />
       )}
 
-      {/* PERSISTENT NUDGE */}
+      {/* PERSISTENT NUDGE (Dynamic Positioning) */}
       {showNudge && (
           <Glass
-            className="relative"
+            className="relative mb-6"
             style={{
               background: 'linear-gradient(to right, rgba(0,122,255,0.1), rgba(175,82,222,0.1))',
               borderColor: 'rgba(0,122,255,0.2)'

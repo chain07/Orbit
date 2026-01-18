@@ -49,7 +49,7 @@ export const Intel = () => {
         <p className="text-secondary font-medium">Pattern and telemetry analysis.</p>
       </div>
 
-      <div className="mb-4">
+      <div className="mb-6">
         <SegmentedControl
           options={segments.map(s => ({ label: s, value: s }))}
           value={segment}

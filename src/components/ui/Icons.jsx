@@ -35,8 +35,7 @@ export const Icons = {
   ),
   PenTool: (props) => (
     <IconWrapper {...props}>
-      <path d="M12 19l7-7 3 3-7 7-3-3z" />
-      <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-17" />
+      <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
     </IconWrapper>
   ),
   Radio: (props) => (
@@ -145,6 +144,11 @@ export const Icons = {
       <line x1="18" y1="20" x2="18" y2="10" />
       <line x1="12" y1="20" x2="12" y2="4" />
       <line x1="6" y1="20" x2="6" y2="14" />
+    </IconWrapper>
+  ),
+  Activity: (props) => (
+    <IconWrapper {...props}>
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
     </IconWrapper>
   ),
   Trash: (props) => (

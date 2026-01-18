@@ -88,10 +88,10 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
              </div>
              <button
                 onClick={() => setShowArchive(!showArchive)}
-                className={`p-2 rounded-lg transition-colors ${showArchive ? 'bg-blue text-white' : 'text-secondary hover:bg-bg-color'}`}
-                title="View Saved Reports"
+                className={`p-2 rounded-lg transition-all active:scale-95 ${showArchive ? 'bg-blue text-white shadow-lg shadow-blue/20' : 'text-secondary hover:text-primary hover:bg-bg-color'}`}
+                title="Archived Reports"
              >
-                 <Icons.Archive size={18} />
+                 <Icons.Archive size={20} />
              </button>
           </div>
         </div>
@@ -108,17 +108,16 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
                     {key.replace(/([A-Z])/g, ' $1').trim()}
                   </span>
 
-                  {/* CSS-Only Toggle Switch */}
-                  <div className="relative inline-block w-10 h-6 align-middle select-none transition duration-200 ease-in">
+                  {/* CSS-Only Checkbox (Spring Physics) */}
+                  <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-300 ${value ? 'bg-blue border-blue' : 'border-separator bg-transparent'}`}>
                       <input
                         type="checkbox"
                         name={key}
                         checked={value}
                         onChange={() => toggleSection(key)}
-                        className="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-transform duration-200 ease-in-out left-0.5 top-0.5 checked:translate-x-full"
-                        style={{ border: 'none', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}
+                        className="hidden"
                       />
-                      <div className={`toggle-label block overflow-hidden h-6 rounded-full cursor-pointer transition-colors duration-200 ${value ? 'bg-blue' : 'bg-separator'}`}></div>
+                      <Icons.Check size={14} className={`text-white transition-transform duration-200 ${value ? 'scale-100' : 'scale-0'}`} />
                   </div>
                 </label>
             ))}
