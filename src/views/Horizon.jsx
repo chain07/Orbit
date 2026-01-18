@@ -93,8 +93,8 @@ export const Horizon = () => {
   return (
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
       
-      {/* Header */}
-      <div className="flex flex-col gap-1 mt-2">
+      {/* Header - Safe Area Padding Applied */}
+      <div className="flex flex-col gap-1 safe-pt">
         <div className="text-xs font-bold text-secondary uppercase tracking-wide">
           {todayDate}
         </div>

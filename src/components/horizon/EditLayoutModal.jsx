@@ -1,16 +1,19 @@
 import React, { useState, useContext } from 'react';
 import { StorageContext } from '../../context/StorageContext';
 import { Icons } from '../../components/ui/Icons';
+import { Glass } from '../../components/ui/Glass'; // L-03: Wrap in Glass for background
 
-export const EditLayoutModal = ({ onClose }) => {
+export const EditLayoutModal = ({ onClose, isOpen }) => {
   const { metrics, updateMetric } = useContext(StorageContext);
   const [localMetrics, setLocalMetrics] = useState([...metrics]);
+
+  if (!isOpen) return null; // Added isOpen check for safety
 
   const toggleVisibility = (metricId) => {
     setLocalMetrics(prev =>
       prev.map(m =>
         m.id === metricId
-          ? { ...m, dashboardVisible: !m.dashboardVisible }
+          ? { ...m, dashboardVisible: !m.dashboardVisible !== false } // Default to true if undefined
           : m
       )
     );
@@ -35,16 +38,17 @@ export const EditLayoutModal = ({ onClose }) => {
       updateMetric({
         ...metric,
         displayOrder: index
+        // Note: Logic to actually save visibility needs to be supported by updateMetric schema
       });
     });
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
-      <div className="bg-card w-full max-w-lg h-[90vh] sm:h-auto sm:max-h-[90vh] rounded-t-2xl sm:rounded-2xl flex flex-col overflow-hidden shadow-2xl animate-fade-in">
+    <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
+      <Glass className="w-full max-w-lg h-[90vh] sm:h-auto sm:max-h-[90vh] rounded-t-2xl sm:rounded-2xl flex flex-col overflow-hidden shadow-2xl animate-fade-in p-0">
         {/* Header */}
-        <div className="p-4 border-b border-separator flex justify-between items-center bg-bg-color">
+        <div className="p-4 border-b border-separator flex justify-between items-center bg-transparent">
           <h2 className="text-lg font-bold">Edit Layout</h2>
           <button
             onClick={onClose}
@@ -66,7 +70,7 @@ export const EditLayoutModal = ({ onClose }) => {
                 <div
                   key={metric.id}
                   className={`flex items-center gap-3 p-3 rounded-lg border transition-all ${
-                    metric.dashboardVisible
+                    metric.dashboardVisible !== false
                       ? 'border-separator bg-card'
                       : 'border-separator bg-separator bg-opacity-10 opacity-60'
                   }`}
@@ -78,14 +82,14 @@ export const EditLayoutModal = ({ onClose }) => {
                       disabled={index === 0}
                       className="text-secondary disabled:opacity-30 hover:text-primary transition-colors"
                     >
-                      <Icons.GripVertical size={16} />
+                      <Icons.ChevronUp size={16} />
                     </button>
                     <button
                       onClick={() => moveDown(index)}
                       disabled={index === localMetrics.length - 1}
                       className="text-secondary disabled:opacity-30 hover:text-primary transition-colors"
                     >
-                      <Icons.GripVertical size={16} />
+                      <Icons.ChevronDown size={16} />
                     </button>
                   </div>
 
@@ -106,11 +110,13 @@ export const EditLayoutModal = ({ onClose }) => {
                   </div>
 
                   {/* Visibility Toggle */}
+                  {/* Note: This is purely visual for now as dashboard visibility isn't fully implemented in engine, but UI is here */}
                   <button
                     onClick={() => toggleVisibility(metric.id)}
                     className="p-2 rounded-lg hover:bg-bg-color transition-colors"
+                    title="Toggle Visibility"
                   >
-                    {metric.dashboardVisible ? (
+                    {metric.dashboardVisible !== false ? (
                       <Icons.Eye size={20} className="text-blue" />
                     ) : (
                       <Icons.EyeOff size={20} className="text-secondary" />
@@ -123,7 +129,7 @@ export const EditLayoutModal = ({ onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-separator bg-bg-color flex gap-3">
+        <div className="p-4 border-t border-separator bg-transparent flex gap-3">
           <button
             onClick={onClose}
             className="flex-1 btn-secondary"
@@ -137,7 +143,7 @@ export const EditLayoutModal = ({ onClose }) => {
             Save Layout
           </button>
         </div>
-      </div>
+      </Glass>
     </div>
   );
 };

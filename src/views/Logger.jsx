@@ -23,11 +23,6 @@ export const Logger = ({ initialMetricId = null }) => {
           setActiveMode('tracker');
           setSelectedTrackerMetric(initialMetricId);
         } else {
-           // For non-duration metrics, likely want Check-In form, but we can't pre-select easily in current DailyCheckInForm
-           // So for now, defaulting to 'checkin' is fine, or we could pass it down if DailyCheckInForm supported it.
-           // However, if the user explicitly linked a metric, they might expect to log it.
-           // Given the current architecture, 'tracker' is for duration. 'checkin' lists all.
-           // If it's a number/boolean metric, we just switch to checkin mode.
            setActiveMode('checkin');
         }
       }
@@ -43,7 +38,7 @@ export const Logger = ({ initialMetricId = null }) => {
   if (!hasMetrics) {
     return (
       <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
-        <div className="flex flex-col gap-1 mt-2">
+        <div className="flex flex-col gap-1 safe-pt">
            <h1 className="text-3xl font-extrabold tracking-tight">Logger</h1>
            <p className="text-secondary font-medium">Input engine.</p>
         </div>
@@ -58,13 +53,13 @@ export const Logger = ({ initialMetricId = null }) => {
 
   return (
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
-      {/* Header */}
-      <div className="flex flex-col gap-1 mt-2">
+      {/* Header with Safe Padding */}
+      <div className="flex flex-col gap-1 safe-pt">
         <h1 className="text-3xl font-extrabold tracking-tight">Logger</h1>
         <p className="text-secondary font-medium">Input engine.</p>
       </div>
 
-      {/* Mode Switch */}
+      {/* Mode Switch - N-01: Ensured existence and styling */}
       <SegmentedControl
         options={[
           { label: 'Daily Check-In', value: 'checkin' },

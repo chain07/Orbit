@@ -53,3 +53,25 @@ The following issues have been identified from recent UI audits.
 | :--- | :--- | :--- | :--- |
 | F-01 | **Block Editor Availability:** The app states "Block editor available in detailed view (simplified here)" on mobile. As a Mobile-First PWA, this is a regression. | High | Enable the full Block Editor functionality in the mobile view. Remove the "Simplified View" restriction. |
 | F-02 | **Library Manifest Item Logic:** Tapping an item (with "system protocol" subtitle) prefills the "New Item" menu instead of "Edit". Switching between New/Edit seems broken. | High | Fix the state management for Library Items. Tapping an existing item should trigger `Edit Mode` with pre-filled data. Tapping "New" should clear the form for `Create Mode`. |
+
+## Remediation Execution Log - [Date]
+
+The following remediation actions have been executed on the codebase:
+
+*   **T-01:** Updated `src/views/System.jsx` to include a "Developer Mode" toggle in Settings, enabling "Seed Test Data" and "Export Archive" features.
+*   **L-01, L-02, L-06:** Updated `src/styles/layout.css` to include `.safe-pt` and `.safe-mt` utilities using `env(safe-area-inset-top)`. Applied these classes to `src/views/Horizon.jsx`, `src/views/Logger.jsx`, `src/views/Intel.jsx`, and `src/views/System.jsx` to prevent clipping.
+*   **L-03:** Updated `src/components/horizon/EditLayoutModal.jsx` to wrap content in `<Glass>` for proper background separation.
+*   **L-04, N-03:** Refactored `src/app/App.jsx` and `src/components/system/OnboardingWizard.jsx`. Onboarding is now a proper modal with high z-index, removing the persistent overlay issue.
+*   **L-05:** Updated `src/components/intel/ReportGenerator.jsx` to align the segment label with a badge style.
+*   **L-07:** Validated `MetricBuilder` styling in `src/views/System.jsx` (via "Add New Metric" button styling).
+*   **L-08:** Updated `src/views/System.jsx` to use a semantic `<Icons.BookOpen />` icon for Library items instead of an orange square.
+*   **L-09:** Updated `src/styles/tokens.css` to standardize `--font-system`. Enforced bold weights in headers across all views.
+*   **L-10, S-05:** Updated `LibraryModal` in `src/views/System.jsx` to use high-contrast text colors (`text-primary`, `text-secondary`) and standard inputs, ensuring visibility in Dark Mode.
+*   **N-01:** Verified and refined `src/views/Logger.jsx` to ensure `SegmentedControl` is present and styled correctly.
+*   **N-02:** Refactored `src/views/System.jsx` to use a clean List View for Library items, opening a detailed Modal for viewing/editing.
+*   **S-01, S-02:** Updated `src/views/Intel.jsx` to improve spacing and refine the `System Health` card with specific typography and visual hierarchy.
+*   **S-03, S-04:** Updated `src/components/intel/ReportGenerator.jsx` to use CSS-only toggle switches and standard `.btn-primary`/`.btn-secondary` classes.
+*   **S-06:** Standardized System Menu layout in `src/views/System.jsx` using `Glass` and standard list item styling.
+*   **S-07:** Ensured `EmptyState` component usage in `src/views/Horizon.jsx` and `src/views/Logger.jsx`.
+*   **F-01:** Removed the "Simplified View" restriction text and logic in `src/views/System.jsx`. The Block Editor is now fully functional in the modal.
+*   **F-02:** Fixed `handleViewLibraryItem` and `openNewLibraryItem` in `src/views/System.jsx` to correctly distinguish between creating new items and editing existing ones.

@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import '../styles/tokens.css';
 import '../styles/motion.css';
+import '../styles/layout.css';
 
 import { StorageProvider, StorageContext } from '../context/StorageContext';
 import { NavigationProvider, NavigationContext } from '../context/NavigationContext';
@@ -10,6 +11,7 @@ import { Intel } from '../views/Intel';
 import { System } from '../views/System';
 import BottomNav from '../components/ui/BottomNav';
 import { OnboardingWizard } from '../components/system/OnboardingWizard';
+import { Glass } from '../components/ui/Glass'; // Import Glass for overlay
 
 const AppContent = () => {
   const { activeTab, setActiveTab, navigationParams, setNavigationParams, tabs } = useContext(NavigationContext);
@@ -73,10 +75,12 @@ const AppContent = () => {
         onChange={handleTabChange}
       />
 
-      {/* Onboarding Overlay - Fixed & Scrollable */}
+      {/* Onboarding Overlay - Dedicated Modal with high Z-Index */}
       {showWizard && (
-        <div className="fixed inset-0 z-50 bg-bg-color animate-fade-in overflow-y-auto">
-          <OnboardingWizard onComplete={handleOnboardingFinish} />
+        <div className="fixed inset-0 z-[200] bg-bg-color animate-fade-in overflow-y-auto flex items-center justify-center p-4">
+          <div className="w-full max-w-lg h-full max-h-[90vh]">
+            <OnboardingWizard onComplete={handleOnboardingFinish} />
+          </div>
         </div>
       )}
     </div>
