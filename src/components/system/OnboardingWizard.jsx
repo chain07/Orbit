@@ -101,13 +101,13 @@ export const OnboardingWizard = ({ onComplete }) => {
            <div className="flex gap-2 mt-1">
              <button 
                 onClick={() => updateField(metricSlot, 'type', 'boolean')}
-                className={`flex-1 py-3 rounded-lg font-bold text-sm transition-colors ${data.type === 'boolean' ? 'bg-blue text-white' : 'bg-bg-color border border-separator'}`}
+                className={`btn-liquid flex-1 justify-center ${data.type === 'boolean' ? 'variant-primary' : 'variant-glass border border-separator'}`}
              >
                 Yes/No
              </button>
              <button 
                 onClick={() => updateField(metricSlot, 'type', 'number')}
-                className={`flex-1 py-3 rounded-lg font-bold text-sm transition-colors ${data.type === 'number' ? 'bg-blue text-white' : 'bg-bg-color border border-separator'}`}
+                className={`btn-liquid flex-1 justify-center ${data.type === 'number' ? 'variant-primary' : 'variant-glass border border-separator'}`}
              >
                 Number
              </button>
@@ -123,7 +123,7 @@ export const OnboardingWizard = ({ onComplete }) => {
                  key={c}
                  onClick={() => updateField(metricSlot, 'color', c)}
                  style={{ backgroundColor: c }}
-                 className={`w-10 h-10 rounded-full ${data.color === c ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
+                 className={`w-10 h-10 rounded-full transition-transform active:scale-90 ${data.color === c ? 'ring-2 ring-offset-2 ring-primary scale-110' : ''}`}
                />
              ))}
            </div>

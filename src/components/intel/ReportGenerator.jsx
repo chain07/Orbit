@@ -87,7 +87,7 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
              {/* Fixed: Active state and styling for Archive Box */}
              <button
                 onClick={() => setShowArchive(!showArchive)}
-                className={`p-2 rounded-lg transition-all active:scale-95 ${showArchive ? 'bg-blue text-white shadow-lg shadow-blue/20' : 'text-secondary hover:text-primary hover:bg-bg-color'}`}
+                className={`btn-liquid w-10 h-10 p-0 flex items-center justify-center ${showArchive ? 'variant-primary' : 'variant-ghost'}`}
                 title="Archived Reports"
              >
                  <Icons.Archive size={20} />
@@ -128,7 +128,7 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
         <div className="flex gap-3 pt-4 border-t border-separator">
           <button
             onClick={handleCopy}
-            className="btn-primary flex-1 h-11 flex items-center justify-center gap-2 text-sm"
+            className="btn-liquid variant-primary flex-1 gap-2 text-sm"
           >
             {copied ? (
               <>
@@ -145,7 +145,7 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
 
           <button
             onClick={handleSave}
-            className="btn-secondary flex-1 h-11 flex items-center justify-center gap-2 text-sm"
+            className="btn-liquid variant-glass flex-1 gap-2 text-sm"
           >
              {saved ? <Icons.Check size={16} /> : <Icons.Save size={16} />}
              Save
@@ -153,7 +153,7 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
 
           <button
             onClick={handleDownload}
-            className="btn-secondary w-12 h-11 flex items-center justify-center"
+            className="btn-liquid variant-glass w-12 px-0 flex items-center justify-center"
             title="Download Markdown"
           >
             <Icons.Download size={18} />
@@ -196,7 +196,7 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
                     </div>
                     <button
                         onClick={() => setSelectedReport(null)}
-                        className="p-2 hover:bg-separator/20 rounded-full transition-colors"
+                        className="btn-liquid variant-ghost w-10 h-10 p-0 flex items-center justify-center"
                     >
                         <Icons.X size={20} />
                     </button>
@@ -213,7 +213,7 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
                             setCopied(true);
                             setTimeout(() => setCopied(false), 2000);
                         }}
-                        className="btn-primary flex items-center gap-2 px-4 py-2 text-sm"
+                        className="btn-liquid variant-primary gap-2 px-6"
                     >
                         {copied ? <Icons.Check size={16} /> : <Icons.Copy size={16} />}
                         Copy to Clipboard

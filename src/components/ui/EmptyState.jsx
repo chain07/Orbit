@@ -21,7 +21,7 @@ export const EmptyState = ({
       {actionLabel && onAction && (
         <button 
           onClick={onAction}
-          className="btn-primary mt-4 shadow-lg shadow-blue/20"
+          className="btn-liquid variant-primary mt-4 shadow-lg shadow-blue/20"
         >
           {actionLabel}
         </button>

@@ -196,13 +196,13 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
                         className="flex-1 p-3 rounded-xl border border-separator bg-transparent outline-none"
                         onKeyDown={e => e.key === 'Enter' && handleAddOption()}
                       />
-                      <button onClick={handleAddOption} className="btn-secondary px-4">+</button>
+                      <button onClick={handleAddOption} className="btn-liquid variant-glass w-12 px-0 flex items-center justify-center text-xl">+</button>
                   </div>
                   <div className="flex flex-wrap gap-2">
                       {form.options.map((opt, idx) => (
                           <div key={idx} className="flex items-center gap-2 px-3 py-1 rounded-full bg-separator bg-opacity-20 border border-separator text-sm font-medium">
                               {opt}
-                              <button onClick={() => handleRemoveOption(idx)} className="text-red font-bold">×</button>
+                              <button onClick={() => handleRemoveOption(idx)} className="btn-liquid variant-ghost w-8 h-8 px-0 text-red flex items-center justify-center">×</button>
                           </div>
                       ))}
                       {form.options.length === 0 && <span className="text-secondary italic text-sm">No options added.</span>}

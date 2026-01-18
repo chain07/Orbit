@@ -200,9 +200,9 @@ export const System = ({ onNavigate }) => {
         <div className="flex flex-col gap-4">
             <button
                 onClick={handleAddMetric}
-                className="btn-primary w-full shadow-lg shadow-blue/20"
+                className="btn-liquid variant-primary w-full shadow-lg shadow-blue/20"
             >
-                <span className="text-xl">+</span> Add New Metric
+                <span className="text-xl mr-2">+</span> Add New Metric
             </button>
 
             {/* Wrapped in Glass for better visual containment */}
@@ -234,7 +234,7 @@ export const System = ({ onNavigate }) => {
               </div>
             </Glass>
 
-            <button onClick={openNewLibraryItem} className="text-center text-blue font-bold text-sm mt-4 hover:underline">
+            <button onClick={openNewLibraryItem} className="btn-liquid variant-ghost text-blue font-bold text-sm mt-4 w-full">
                 + Create Protocol Item
             </button>
         </div>
@@ -276,8 +276,8 @@ export const System = ({ onNavigate }) => {
                 <Glass className="p-4 border-l-4 border-orange">
                     <div className="text-xs font-bold text-orange uppercase tracking-wide mb-3">Developer Tools</div>
                     <div className="flex gap-2">
-                        <button onClick={seedTestData} className="flex-1 btn-secondary text-xs">Seed Test Data</button>
-                        <button onClick={exportArchive} className="flex-1 btn-secondary text-xs">Export Debug Archive</button>
+                        <button onClick={seedTestData} className="flex-1 btn-liquid variant-glass text-xs">Seed Test Data</button>
+                        <button onClick={exportArchive} className="flex-1 btn-liquid variant-glass text-xs">Export Debug Archive</button>
                     </div>
                 </Glass>
             )}
@@ -331,12 +331,12 @@ const LibraryModal = ({ viewingItem, setViewingItem, isEditingLibrary, setIsEdit
     return (
         <Glass className="w-full max-w-lg h-full max-h-[85vh] flex flex-col overflow-hidden shadow-2xl p-0 bg-card">
             <div className="p-4 border-b border-separator flex justify-between items-center bg-bg-color/50">
-              <button onClick={() => setViewingItem(null)} className="text-secondary font-bold">Close</button>
+              <button onClick={() => setViewingItem(null)} className="btn-liquid variant-ghost text-secondary font-bold">Close</button>
               <div className="font-bold">{isEditingLibrary ? (viewingItem.id ? 'Edit Item' : 'New Item') : 'Library'}</div>
               {!isEditingLibrary ? (
-                <button onClick={() => setIsEditingLibrary(true)} className="text-blue font-bold">Edit</button>
+                <button onClick={() => setIsEditingLibrary(true)} className="btn-liquid variant-ghost text-blue font-bold">Edit</button>
               ) : (
-                <button form="libraryForm" type="submit" className="text-green font-bold">Save</button>
+                <button form="libraryForm" type="submit" className="btn-liquid variant-primary">Save</button>
               )}
             </div>
 
@@ -382,7 +382,7 @@ const LibraryModal = ({ viewingItem, setViewingItem, isEditingLibrary, setIsEdit
                   </div>
 
                   {viewingItem.id && (
-                     <button type="button" onClick={() => handleDeleteLibraryItem(viewingItem.id)} className="mt-8 py-3 text-red font-bold bg-red/10 rounded-lg hover:bg-red/20 transition-colors">Delete Item</button>
+                     <button type="button" onClick={() => handleDeleteLibraryItem(viewingItem.id)} className="btn-liquid variant-glass text-red w-full mt-8" style={{ color: 'var(--red)' }}>Delete Item</button>
                   )}
                 </form>
               ) : (

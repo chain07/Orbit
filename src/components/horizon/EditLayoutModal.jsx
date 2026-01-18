@@ -52,7 +52,7 @@ export const EditLayoutModal = ({ onClose, isOpen }) => {
           <h2 className="text-lg font-bold">Edit Layout</h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-separator bg-opacity-20 flex items-center justify-center hover:bg-opacity-30 transition-colors"
+            className="btn-liquid variant-ghost w-10 h-10 p-0 flex items-center justify-center"
           >
             <Icons.X size={18} />
           </button>
@@ -80,14 +80,14 @@ export const EditLayoutModal = ({ onClose, isOpen }) => {
                     <button
                       onClick={() => moveUp(index)}
                       disabled={index === 0}
-                      className="text-secondary disabled:opacity-30 hover:text-primary transition-colors"
+                      className="btn-liquid variant-ghost w-6 h-6 p-0 flex items-center justify-center text-secondary disabled:opacity-30"
                     >
                       <Icons.ChevronUp size={16} />
                     </button>
                     <button
                       onClick={() => moveDown(index)}
                       disabled={index === localMetrics.length - 1}
-                      className="text-secondary disabled:opacity-30 hover:text-primary transition-colors"
+                      className="btn-liquid variant-ghost w-6 h-6 p-0 flex items-center justify-center text-secondary disabled:opacity-30"
                     >
                       <Icons.ChevronDown size={16} />
                     </button>
@@ -113,7 +113,7 @@ export const EditLayoutModal = ({ onClose, isOpen }) => {
                   {/* Note: This is purely visual for now as dashboard visibility isn't fully implemented in engine, but UI is here */}
                   <button
                     onClick={() => toggleVisibility(metric.id)}
-                    className="p-2 rounded-lg hover:bg-bg-color transition-colors"
+                    className="btn-liquid variant-ghost w-10 h-10 p-0 flex items-center justify-center"
                     title="Toggle Visibility"
                   >
                     {metric.dashboardVisible !== false ? (
@@ -132,13 +132,13 @@ export const EditLayoutModal = ({ onClose, isOpen }) => {
         <div className="p-4 border-t border-separator bg-transparent flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 btn-secondary"
+            className="btn-liquid variant-glass flex-1"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="flex-1 btn-primary"
+            className="btn-liquid variant-primary flex-1"
           >
             Save Layout
           </button>

@@ -96,7 +96,7 @@ export const Horizon = () => {
           {hasMetrics && (
             <button 
               onClick={() => setIsEditing(true)}
-              className="btn-secondary h-8 min-h-[32px] px-3 text-xs"
+              className="btn-liquid variant-glass h-10 px-4 text-xs"
             >
               Edit Layout
             </button>
@@ -124,7 +124,7 @@ export const Horizon = () => {
           >
               <button
                   onClick={() => setIsNudgeDismissed(true)}
-                  className="absolute top-2 right-2 p-1 text-secondary hover:text-primary transition-colors"
+                  className="btn-liquid variant-ghost absolute top-2 right-2 w-8 h-8 p-0 flex items-center justify-center text-secondary hover:text-primary"
               >
                   <Icons.X size={14} />
               </button>
@@ -135,7 +135,7 @@ export const Horizon = () => {
                   </div>
                   <button
                     onClick={() => setActiveTab('System')}
-                    className="px-3 py-2 bg-blue text-white text-xs font-bold rounded-lg shadow-sm active:scale-95 transition-transform"
+                    className="btn-liquid variant-primary px-4 py-2 text-xs h-8"
                   >
                       Setup
                   </button>
