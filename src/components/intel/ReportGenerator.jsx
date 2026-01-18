@@ -3,7 +3,7 @@ import { StorageContext } from '../../context/StorageContext';
 import { ReportEngine } from '../../engine/ReportEngine';
 import { Glass } from '../ui/Glass';
 import { Icons } from '../ui/Icons';
-import '../../styles/index.css'; // For standard buttons
+import '../../styles/index.css';
 
 export const ReportGenerator = ({ segment = 'Weekly' }) => {
   const { metrics, logEntries } = useContext(StorageContext);
@@ -22,12 +22,10 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
   const [archivedReports, setArchivedReports] = useState([]);
   const [selectedReport, setSelectedReport] = useState(null);
 
-  // Delegate logic to ReportEngine
   const reportData = useMemo(() => {
     return ReportEngine.generateReportData(metrics, logEntries, segment);
   }, [metrics, logEntries, segment]);
 
-  // Load archive on mount
   useEffect(() => {
       setArchivedReports(ReportEngine.getArchivedReports());
   }, []);
@@ -67,7 +65,7 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
       const success = ReportEngine.saveReportSnapshot(text, segment);
       if (success) {
           setSaved(true);
-          setArchivedReports(ReportEngine.getArchivedReports()); // Refresh list
+          setArchivedReports(ReportEngine.getArchivedReports());
           setTimeout(() => setSaved(false), 2000);
       } else {
           alert("Failed to save report. Storage might be full.");
@@ -78,7 +76,7 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
     <div className="flex flex-col gap-4">
     <Glass className="p-4">
       <div className="flex flex-col gap-4">
-        {/* Header - L-05: Aligned Timeframe */}
+        {/* Header - Aligned Timeframe */}
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-bold">Report Generator</h3>
           <div className="flex items-center gap-3">
@@ -86,6 +84,7 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
                  <Icons.BarChart2 size={14} className="text-secondary" />
                  <span className="text-xs font-bold text-secondary uppercase tracking-wide translate-y-[1px]">{segment}</span>
              </div>
+             {/* Fixed: Active state and styling for Archive Box */}
              <button
                 onClick={() => setShowArchive(!showArchive)}
                 className={`p-2 rounded-lg transition-all active:scale-95 ${showArchive ? 'bg-blue text-white shadow-lg shadow-blue/20' : 'text-secondary hover:text-primary hover:bg-bg-color'}`}
@@ -96,7 +95,7 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
           </div>
         </div>
 
-        {/* Section Toggles - S-03: Styled Switches */}
+        {/* Section Toggles - Fixed: Styled Switches */}
         <div className="flex flex-col gap-3 border-t border-separator pt-4">
           <div className="text-xs font-bold text-secondary uppercase tracking-wide">
             Include Sections
@@ -125,7 +124,7 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
           </div>
         </div>
 
-        {/* Action Buttons - S-04: Styled Standard Buttons */}
+        {/* Action Buttons - Styled Standard Buttons */}
         <div className="flex gap-3 pt-4 border-t border-separator">
           <button
             onClick={handleCopy}
@@ -163,7 +162,6 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
       </div>
     </Glass>
 
-    {/* Stored Reports Section */}
     {showArchive && (
         <Glass className="p-4 animate-fade-in">
             <div className="text-sm font-bold text-secondary uppercase mb-3">Stored Reports</div>
@@ -188,7 +186,6 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
         </Glass>
     )}
 
-    {/* Report Viewer Modal */}
     {selectedReport && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
             <Glass className="w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden shadow-2xl p-0">

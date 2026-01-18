@@ -14,12 +14,12 @@ export const System = ({ onNavigate }) => {
     addMetric, 
     updateMetric, 
     deleteMetric, 
-    logEntries, // Needed for Debug Export
-    addLogEntry // Needed for Seeding
+    logEntries,
+    addLogEntry
   } = useContext(StorageContext);
   
   const [viewMode, setViewMode] = useState('Library'); // 'Library' | 'Settings'
-  const [isDebugMode, setIsDebugMode] = useState(false); // T-01: Debug State
+  const [isDebugMode, setIsDebugMode] = useState(false);
 
   // Metric Management State
   const [showBuilder, setShowBuilder] = useState(false);
@@ -30,7 +30,6 @@ export const System = ({ onNavigate }) => {
   const [viewingItem, setViewingItem] = useState(null);
   const [isEditingLibrary, setIsEditingLibrary] = useState(false);
 
-  // Load Library on Mount
   useEffect(() => {
     refreshLibrary();
   }, []);
@@ -53,7 +52,6 @@ export const System = ({ onNavigate }) => {
     }
   };
 
-  // Unified List Generation
   const unifiedList = useMemo(() => {
     const metricItems = metrics.map(m => ({
       ...m,
@@ -92,7 +90,6 @@ export const System = ({ onNavigate }) => {
     setShowBuilder(false);
   };
 
-  // --- Library Handlers ---
   const handleSaveLibraryItem = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -136,19 +133,15 @@ export const System = ({ onNavigate }) => {
   };
 
   const openNewLibraryItem = () => {
-    // F-02: Ensure clear state for creation
     setViewingItem({ id: null, title: '', category: '', metricId: '', blocks: [{ type: 'text', heading: '', content: '' }] });
     setIsEditingLibrary(true);
   };
 
-  // F-02: Ensure Edit opens in Edit Mode or View Mode?
-  // N-02 proposed solution: Tap -> Detail View. Detail View -> Edit Button -> Edit Mode.
   const handleViewLibraryItem = (item) => {
       setViewingItem(item);
-      setIsEditingLibrary(false); // Default to viewing
+      setIsEditingLibrary(false);
   };
 
-  // T-01: Seed Test Data
   const seedTestData = () => {
       if (!confirm("Inject random test data? This will affect your stats.")) return;
       const now = new Date();
@@ -165,9 +158,9 @@ export const System = ({ onNavigate }) => {
           }
       });
       alert("Test data seeded.");
+      // No reload required, context updates state
   };
 
-  // T-01: Export Archive Test
   const exportArchive = () => {
       const archive = {
           timestamp: new Date().toISOString(),
@@ -186,13 +179,14 @@ export const System = ({ onNavigate }) => {
   return (
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
       
-      {/* Header & Toggle - L-06: Safe MT */}
+      {/* Header - Fixed Leading and Overflow */}
       <div className="flex justify-between items-end safe-mt">
-         <div className="flex flex-col gap-1">
+         <div className="flex flex-col">
              <h1 className="text-3xl font-extrabold tracking-tight">System</h1>
              <p className="text-secondary font-medium">Configuration</p>
          </div>
-         <div className="w-[160px]">
+         {/* Fixed: Remove fixed width, allow auto scaling */}
+         <div className="min-w-[160px]">
              <SegmentedControl
                 options={['Library', 'Settings']}
                 value={viewMode}
@@ -204,7 +198,6 @@ export const System = ({ onNavigate }) => {
       {/* --- LIBRARY VIEW --- */}
       {viewMode === 'Library' && (
         <div className="flex flex-col gap-4">
-            {/* Create Button (Top of List) */}
             <button
                 onClick={handleAddMetric}
                 className="btn-primary w-full shadow-lg shadow-blue/20"
@@ -212,34 +205,35 @@ export const System = ({ onNavigate }) => {
                 <span className="text-xl">+</span> Add New Metric
             </button>
 
-            {/* N-02: List View (Already implemented, refined styling) */}
-            <div className="flex flex-col gap-2">
-                {unifiedList.map(item => (
-                    <div
-                        key={item.id}
-                        onClick={() => item.isMetric ? handleEditMetric(item) : handleViewLibraryItem(item)}
-                        className="p-3 rounded-xl border border-separator bg-card flex justify-between items-center cursor-pointer active:scale-[0.99] transition-transform hover:bg-bg-color/50"
-                    >
-                        <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg ${item.isMetric ? 'bg-bg-color text-blue' : 'bg-orange/10 text-orange'}`}>
-                                {item.isMetric ? item.icon : <Icons.BookOpen size={20} />} {/* L-08: Semantic Icon */}
-                            </div>
-                            <div>
-                                <div className="font-bold text-primary">{item.title}</div>
-                                <div className="text-xs text-secondary flex items-center gap-1">
-                                    {item.category}
-                                    {!item.isMetric && <span className="text-[10px] bg-separator bg-opacity-30 px-1 rounded">Protocol</span>}
-                                </div>
-                            </div>
-                        </div>
-                        <div className="text-secondary opacity-30">
-                            <Icons.ChevronRight size={16} />
-                        </div>
-                    </div>
-                ))}
-            </div>
+            {/* Wrapped in Glass for better visual containment */}
+            <Glass className="p-2">
+              <div className="flex flex-col gap-2">
+                  {unifiedList.map(item => (
+                      <div
+                          key={item.id}
+                          onClick={() => item.isMetric ? handleEditMetric(item) : handleViewLibraryItem(item)}
+                          className="p-3 rounded-xl border border-separator bg-card flex justify-between items-center cursor-pointer active:scale-[0.99] transition-transform hover:bg-bg-color/50"
+                      >
+                          <div className="flex items-center gap-3">
+                              <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg ${item.isMetric ? 'bg-bg-color text-blue' : 'bg-orange/10 text-orange'}`}>
+                                  {item.isMetric ? item.icon : <Icons.BookOpen size={20} />}
+                              </div>
+                              <div>
+                                  <div className="font-bold text-primary">{item.title}</div>
+                                  <div className="text-xs text-secondary flex items-center gap-1">
+                                      {item.category}
+                                      {!item.isMetric && <span className="text-[10px] bg-separator bg-opacity-30 px-1 rounded">Protocol</span>}
+                                  </div>
+                              </div>
+                          </div>
+                          <div className="text-secondary opacity-30">
+                              <Icons.ChevronRight size={16} />
+                          </div>
+                      </div>
+                  ))}
+              </div>
+            </Glass>
 
-            {/* Secondary Action for Protocols */}
             <button onClick={openNewLibraryItem} className="text-center text-blue font-bold text-sm mt-4 hover:underline">
                 + Create Protocol Item
             </button>
@@ -251,7 +245,6 @@ export const System = ({ onNavigate }) => {
         <div className="flex flex-col gap-6 animate-fade-in">
             <DataManagement />
 
-            {/* Preferences */}
             <Glass className="p-0 overflow-hidden">
                 <div className="font-bold text-lg p-4 border-b border-separator/50">App Preferences</div>
                 <div className="flex flex-col">
@@ -279,7 +272,6 @@ export const System = ({ onNavigate }) => {
                 </div>
             </Glass>
 
-            {/* T-01: Debug Tools */}
             {isDebugMode && (
                 <Glass className="p-4 border-l-4 border-orange">
                     <div className="text-xs font-bold text-orange uppercase tracking-wide mb-3">Developer Tools</div>
@@ -296,9 +288,6 @@ export const System = ({ onNavigate }) => {
         </div>
       )}
 
-      {/* --- MODALS --- */}
-
-      {/* Metric Builder Modal */}
       {showBuilder && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4">
           <MetricBuilder
@@ -309,7 +298,6 @@ export const System = ({ onNavigate }) => {
         </div>
       )}
 
-      {/* Library Viewer/Editor Modal (Refactored) */}
       {viewingItem && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
           <LibraryModal
@@ -327,7 +315,6 @@ export const System = ({ onNavigate }) => {
   );
 };
 
-// Helper for Icons
 const getTypeIcon = (type) => {
   switch(type) {
     case 'number': return '#';
@@ -340,12 +327,11 @@ const getTypeIcon = (type) => {
   }
 };
 
-// Extracted Library Modal - S-05 (Dark Mode), F-01 (Block Editor)
 const LibraryModal = ({ viewingItem, setViewingItem, isEditingLibrary, setIsEditingLibrary, handleSaveLibraryItem, handleDeleteLibraryItem, metrics }) => {
     return (
         <Glass className="w-full max-w-lg h-full max-h-[85vh] flex flex-col overflow-hidden shadow-2xl p-0 bg-card">
             <div className="p-4 border-b border-separator flex justify-between items-center bg-bg-color/50">
-              <button onClick={() => setViewingItem(null)} className="text-blue font-bold">Close</button>
+              <button onClick={() => setViewingItem(null)} className="text-secondary font-bold">Close</button>
               <div className="font-bold">{isEditingLibrary ? (viewingItem.id ? 'Edit Item' : 'New Item') : 'Library'}</div>
               {!isEditingLibrary ? (
                 <button onClick={() => setIsEditingLibrary(true)} className="text-blue font-bold">Edit</button>
@@ -376,7 +362,6 @@ const LibraryModal = ({ viewingItem, setViewingItem, isEditingLibrary, setIsEdit
                   </div>
                   <div className="border-t border-separator my-2"></div>
 
-                  {/* F-01: Full Block Editor (Removed "Simplified View" text) */}
                   <div className="text-xs font-bold text-secondary uppercase mb-2">Content Blocks</div>
 
                   {viewingItem.blocks && viewingItem.blocks.map((blk, idx) => (
@@ -387,7 +372,6 @@ const LibraryModal = ({ viewingItem, setViewingItem, isEditingLibrary, setIsEdit
                       </div>
                   ))}
 
-                  {/* Add New Block Stub */}
                   <div className="flex flex-col gap-2 p-3 border border-separator border-dashed rounded-lg opacity-80 hover:opacity-100 transition-opacity">
                        <input type="hidden" name="type" value="text" />
                        <div className="flex justify-between">

@@ -75,3 +75,15 @@ The following remediation actions have been executed on the codebase:
 *   **S-07:** Ensured `EmptyState` component usage in `src/views/Horizon.jsx` and `src/views/Logger.jsx`.
 *   **F-01:** Removed the "Simplified View" restriction text and logic in `src/views/System.jsx`. The Block Editor is now fully functional in the modal.
 *   **F-02:** Fixed `handleViewLibraryItem` and `openNewLibraryItem` in `src/views/System.jsx` to correctly distinguish between creating new items and editing existing ones.
+
+### Latest Remediation Cycle
+
+*   **Ghost Sheet Fix:** Modified `src/app/App.jsx` to restrict `OnboardingWizard` to the `Horizon` tab, ensuring it doesn't obscure other views.
+*   **System View Layout:** Updated `src/views/System.jsx` to allow the "Library Settings" segmented control to scale naturally, preventing clipping. Wrapped Library list in `Glass` for consistency.
+*   **Native Element Leak:** Added `.hidden` utility to `src/styles/index.css` and verified usage in `src/components/system/DataManagement.jsx` to hide the raw file input.
+*   **Header Leading & Spacing:** Adjusted vertical spacing in `Horizon.jsx`, `Logger.jsx`, `Intel.jsx`, and `System.jsx` by removing excessive `gap`.
+*   **Intelligence Spacing:** Added margin to the Segmented Control in `src/views/Intel.jsx` to separate it from the System Health card.
+*   **Metric Builder Polish:** Updated "Cancel" button color in `src/components/system/MetricBuilder.jsx` to be legible (High Contrast).
+*   **Icon Refresh:** Updated `PenTool` (Logger) and `Activity` (Intelligence) icons in `src/components/ui/Icons.jsx` with improved SVG paths.
+*   **Data Management Polish:** Fixed "Reset All" button styling and ensured proper overflow handling.
+*   **Empty State Icons:** Fixed `Logger.jsx` empty state icon usage.

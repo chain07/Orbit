@@ -34,6 +34,7 @@ html, body {
 }
 
 /* --- Layout Utils --- */
+.hidden { display: none !important; }
 .flex { display: flex; }
 .flex-col { flex-direction: column; }
 .items-center { align-items: center; }
@@ -149,4 +150,35 @@ html, body {
   .btn-secondary {
     background-color: rgba(255,255,255,0.1); /* Dark Mode Adjustment */
   }
+}
+
+/* --- Form Toggles (Checkbox) --- */
+.toggle-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: white;
+  border-radius: 9999px;
+  cursor: pointer;
+  height: 1.25rem;
+  width: 1.25rem;
+  transition: transform 0.2s ease-in-out;
+  transform: translateX(0);
+}
+
+.toggle-checkbox:checked {
+  transform: translateX(100%);
+  border-color: white;
+}
+
+.toggle-label {
+  width: 2.5rem;
+  height: 1.5rem;
+  background-color: var(--separator);
+  border-radius: 9999px;
+  position: relative;
+  transition: background-color 0.2s ease-in-out;
+}
+
+input:checked + .toggle-label {
+  background-color: var(--blue);
 }
