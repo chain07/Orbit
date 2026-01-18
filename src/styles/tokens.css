@@ -1,29 +1,51 @@
 /* src/styles/tokens.css */
 
 /* =========================
-   DayBook Prime — Design Tokens
-   Refactored for User-Defined Architecture
+   ORBIT Liquid Native — Design Tokens
+   Source of Truth: docs/design-system.md
    ========================= */
 
 :root {
-  /* ---------- System Backgrounds ---------- */
-  --bg-color: #F2F2F7;
+  /* ---------- Liquid Glass Tokens ---------- */
+  /* Defined as per "Liquid Glass" Material Spec */
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(0, 0, 0, 0.1);
+
+  /* ---------- Semantic Signals (Instrument Panel) ---------- */
+  /* Negative (Error/Critical) - System Red */
+  --red: #FF3B30;
+  /* Notice (Warning/Pending) - System Orange */
+  --orange: #FF9500;
+  /* Positive (Success/Complete) - System Green */
+  --green: #34C759;
+  /* Informative (Active/Neutral) - Orbit Blue */
+  --blue: #007AFF;
+
+  /* ---------- Base Palette (Monochrome) ---------- */
+  --bg-color: #F2F2F7; /* System Gray 6 */
   --card-bg: #FFFFFF;
-  --glass-bg: rgba(255, 255, 255, 0.72);
+  --text-primary: #000000; /* Zinc 900 equivalent */
+  --text-secondary: #8E8E93; /* Zinc 500 equivalent */
 
-  /* ---------- Text ---------- */
-  --text-primary: #000000;
-  --text-secondary: #8E8E93;
+  /* ---------- Typography (Geist) ---------- */
+  --font-system: "Geist", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
 
-  /* ---------- Separators & Grid ---------- */
+  /* ---------- Geometry (Inset Grouped) ---------- */
+  --radius-card: 20px;
+  --radius-pill: 35px;
+  --border-width: 0.5px; /* High-density sub-pixel */
+
+  /* ---------- Layout ---------- */
+  --safe-bottom: env(safe-area-inset-bottom);
+  --safe-top: env(safe-area-inset-top);
+
+  /* ---------- Shadows ---------- */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.02);
+  --shadow-glass: 0 10px 40px rgba(0, 0, 0, 0.15);
+
+  /* ---------- Additional Legacy Support (to be deprecated or mapped) ---------- */
   --separator: #C6C6C8;
   --grid-line: #E5E5EA;
-
-  /* ---------- Brand / Palette Colors (Generic) ---------- */
-  --blue: #007AFF;
-  --green: #34C759;
-  --red: #FF3B30;
-  --orange: #FF9500;
   --yellow: #FFCC00;
   --purple: #AF52DE;
   --indigo: #5856D6;
@@ -31,29 +53,6 @@
   --cyan: #38C7F4;
   --sky: #5AC8FA;
   --gray: #8E8E93;
-
-  /* ---------- Radius (Updated for Inset Grouped Geometry) ---------- */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-card: 20px; /* Enforced 20px */
-  --radius-pill: 35px;
-
-  /* ---------- Spacing (Implicit via padding classes, but defining base) ---------- */
-  --padding-card: 20px; /* Enforced 20px */
-
-  /* ---------- Border ---------- */
-  --border-width: 0.5px; /* Enforced 0.5px */
-
-  /* ---------- Typography ---------- */
-  --font-system: -apple-system, "SF Pro Display", "SF Pro Text", sans-serif;
-
-  /* ---------- Shadows ---------- */
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.02);
-  --shadow-glass: 0 10px 40px rgba(0, 0, 0, 0.15);
-
-  /* ---------- Layout ---------- */
-  --safe-bottom: env(safe-area-inset-bottom);
 }
 
 /* =========================
@@ -64,7 +63,10 @@
   :root {
     --bg-color: #000000;
     --card-bg: #1C1C1E;
-    --glass-bg: rgba(28, 28, 30, 0.72);
+
+    /* Dark Mode Glass Adaptation */
+    --glass-bg: rgba(28, 28, 30, 0.75);
+    --glass-border: rgba(255, 255, 255, 0.1);
 
     --text-primary: #FFFFFF;
     --text-secondary: #98989D;
