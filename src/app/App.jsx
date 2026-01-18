@@ -66,7 +66,9 @@ const AppContent = () => {
     <div className="flex flex-col min-h-screen w-full bg-bg-color font-system text-primary relative">
       {/* Main Content Area - Native Scroll */}
       <main className="flex-1 w-full layout-padding">
-        {renderTab()}
+        <ErrorBoundary>
+            {renderTab()}
+        </ErrorBoundary>
       </main>
       
       {/* Update Manager - Floating Prompt */}
@@ -95,7 +97,9 @@ export const App = () => {
   return (
     <StorageProvider>
       <NavigationProvider>
-        <AppContent />
+        <ErrorBoundary>
+            <AppContent />
+        </ErrorBoundary>
       </NavigationProvider>
     </StorageProvider>
   );
