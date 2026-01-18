@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect, useMemo } from 'react';
 import { StorageContext } from '../../context/StorageContext';
 import { Glass } from '../ui/Glass';
 import { Icons } from '../ui/Icons';
+import { OrbitButton } from '../ui/OrbitButton';
 import '../../styles/index.css';
 
 export const DataManagement = () => {
@@ -193,13 +194,14 @@ export const DataManagement = () => {
         <p className="text-xs text-secondary leading-relaxed">
           Offload data older than 1 year to a JSON file and remove it from local storage to free up space.
         </p>
-        <button
+        <OrbitButton
           onClick={handleArchiveOldData}
-          className="w-full py-3 rounded-xl bg-bg-color border border-separator/50 font-bold text-sm text-primary hover:bg-separator/10 transition-colors flex items-center justify-center gap-2 active:scale-95 transition-transform"
+          variant="secondary"
+          className="w-full"
+          icon={<Icons.Archive size={16} />}
         >
-          <Icons.Archive size={16} />
           Archive Old Data
-        </button>
+        </OrbitButton>
       </div>
 
       <div className="border-t border-separator/50" />
@@ -211,31 +213,32 @@ export const DataManagement = () => {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <button 
+          <OrbitButton
             onClick={handleExportJSON}
-            className="py-3 rounded-xl bg-blue text-white font-bold text-sm shadow-lg shadow-blue/20 active:scale-95 transition-transform flex items-center justify-center gap-2"
+            variant="primary"
+            icon={<Icons.Download size={16} />}
           >
-            <Icons.Download size={16} />
             JSON Backup
-          </button>
+          </OrbitButton>
 
-          <button 
+          <OrbitButton
             onClick={handleExportCSV}
-            className="py-3 rounded-xl bg-green text-white font-bold text-sm shadow-lg shadow-green/20 active:scale-95 transition-transform flex items-center justify-center gap-2"
+            variant="secondary"
+            icon={<Icons.Download size={16} />}
           >
-            <Icons.Download size={16} />
             CSV Export
-          </button>
+          </OrbitButton>
         </div>
 
         <div className="flex gap-3 mt-2">
-           <button
+           <OrbitButton
              onClick={handleImportClick}
-             className="flex-1 py-3 rounded-xl border border-dashed border-separator bg-bg-color/50 text-secondary font-bold text-sm hover:text-primary hover:border-primary hover:bg-bg-color transition-all active:scale-95 transition-transform flex items-center justify-center gap-2"
+             variant="secondary"
+             className="flex-1"
+             icon={<Icons.Upload size={16} />}
            >
-             <Icons.Upload size={16} />
              Import JSON
-           </button>
+           </OrbitButton>
 
            {/* Fixed: Hidden input relying on index.css .hidden */}
            <input
@@ -247,12 +250,13 @@ export const DataManagement = () => {
            />
 
            {/* Fixed: Reset All button overflow and styling */}
-           <button
+           <OrbitButton
              onClick={handleNuke}
-             className="flex-1 py-3 px-2 rounded-xl border border-red/30 text-red font-bold text-sm hover:bg-red/5 transition-colors active:scale-95 transition-transform text-center"
+             variant="destructive"
+             className="flex-1"
            >
              Reset All
-           </button>
+           </OrbitButton>
         </div>
       </div>
     </Glass>

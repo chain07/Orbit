@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { StorageContext } from '../../context/StorageContext';
 import { MetricInput } from './MetricInput';
 import { Glass } from '../../components/ui/Glass';
+import { OrbitButton } from '../ui/OrbitButton';
 
 export const DailyCheckInForm = () => {
   const { metrics, addLogEntry } = useContext(StorageContext);
@@ -67,17 +68,14 @@ export const DailyCheckInForm = () => {
           ))
         )}
         
-        <button 
+        <OrbitButton
           type="submit" 
           disabled={status === 'success' || metrics.length === 0}
-          className={`py-3 px-4 rounded-xl font-bold transition-all duration-300 ${
-            status === 'success' 
-              ? 'bg-green text-white transform scale-100' 
-              : 'bg-blue text-white active:scale-95 shadow-lg shadow-blue/20'
-          }`}
+          variant="primary"
+          className={`w-full ${status === 'success' ? '!bg-green !shadow-none !text-white' : ''}`}
         >
           {status === 'success' ? 'Check-In Saved ✓' : 'Save Check-In'}
-        </button>
+        </OrbitButton>
       </form>
     </Glass>
   );

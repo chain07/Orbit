@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { StorageContext } from '../../context/StorageContext';
 import { Glass } from '../../components/ui/Glass';
+import { OrbitButton } from '../ui/OrbitButton';
 import '../../styles/index.css'; // Ensure standard buttons are available
 
 export const OnboardingWizard = ({ onComplete }) => {
@@ -99,18 +100,20 @@ export const OnboardingWizard = ({ onComplete }) => {
         <div>
            <label className="text-xs font-bold text-secondary uppercase">Type</label>
            <div className="flex gap-2 mt-1">
-             <button 
+             <OrbitButton
                 onClick={() => updateField(metricSlot, 'type', 'boolean')}
-                className={`flex-1 py-3 rounded-lg font-bold text-sm transition-colors ${data.type === 'boolean' ? 'bg-blue text-white' : 'bg-bg-color border border-separator'}`}
+                variant={data.type === 'boolean' ? 'primary' : 'secondary'}
+                className="flex-1 justify-center"
              >
                 Yes/No
-             </button>
-             <button 
+             </OrbitButton>
+             <OrbitButton
                 onClick={() => updateField(metricSlot, 'type', 'number')}
-                className={`flex-1 py-3 rounded-lg font-bold text-sm transition-colors ${data.type === 'number' ? 'bg-blue text-white' : 'bg-bg-color border border-separator'}`}
+                variant={data.type === 'number' ? 'primary' : 'secondary'}
+                className="flex-1 justify-center"
              >
                 Number
-             </button>
+             </OrbitButton>
            </div>
         </div>
         
@@ -123,7 +126,7 @@ export const OnboardingWizard = ({ onComplete }) => {
                  key={c}
                  onClick={() => updateField(metricSlot, 'color', c)}
                  style={{ backgroundColor: c }}
-                 className={`w-10 h-10 rounded-full ${data.color === c ? 'ring-2 ring-offset-2 ring-primary' : ''}`}
+                 className={`w-10 h-10 rounded-full transition-transform active:scale-90 ${data.color === c ? 'ring-2 ring-offset-2 ring-primary scale-110' : ''}`}
                />
              ))}
            </div>
@@ -191,24 +194,26 @@ export const OnboardingWizard = ({ onComplete }) => {
         {/* Footer Actions */}
         <div className="flex flex-col gap-3 pt-4 border-t border-separator mt-4">
             <div className="flex justify-between gap-3">
-              <button
+              <OrbitButton
                 onClick={prevStep}
                 disabled={currentStep === 0}
-                className={`btn-secondary flex-1 ${currentStep === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                variant="secondary"
+                className={`flex-1 ${currentStep === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 Back
-              </button>
-              <button
+              </OrbitButton>
+              <OrbitButton
                 onClick={nextStep}
-                className="btn-primary flex-1"
+                variant="primary"
+                className="flex-1"
               >
                 {currentStep === steps.length - 1 ? 'Launch ORBIT 🚀' : 'Next'}
-              </button>
+              </OrbitButton>
             </div>
 
-            <button onClick={handleSkip} className="text-xs text-secondary font-bold hover:text-primary transition-colors py-2 text-center">
+            <OrbitButton onClick={handleSkip} variant="secondary" className="!w-full !text-xs !bg-transparent text-secondary">
                 Skip Setup
-            </button>
+            </OrbitButton>
         </div>
     </Glass>
   );

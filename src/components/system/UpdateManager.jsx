@@ -2,6 +2,7 @@ import React from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { Glass } from '../ui/Glass';
 import { Icons } from '../ui/Icons';
+import { OrbitButton } from '../ui/OrbitButton';
 
 export default function UpdateManager() {
   const {
@@ -68,30 +69,14 @@ export default function UpdateManager() {
           </div>
         </div>
 
-        <button
+        <OrbitButton
           onClick={() => updateServiceWorker(true)}
-          className="flex items-center gap-2"
-          style={{
-            background: 'var(--blue)',
-            color: 'white',
-            border: 'none',
-            borderRadius: '20px',
-            padding: '8px 16px',
-            fontSize: '13px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            transition: 'transform 0.1s ease, opacity 0.2s ease',
-            boxShadow: '0 2px 8px rgba(0, 122, 255, 0.3)'
-          }}
-          onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
-          onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
-          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-          onTouchStart={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
-          onTouchEnd={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          variant="primary"
+          className="!h-10 !px-4 !text-xs !w-auto"
+          icon={<Icons.RotateCcw size={14} strokeWidth={2.5} />}
         >
-          <Icons.RotateCcw size={14} strokeWidth={2.5} />
-          <span>Refresh</span>
-        </button>
+          Refresh
+        </OrbitButton>
       </Glass>
     </div>
   );

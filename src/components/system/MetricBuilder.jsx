@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Glass } from '../ui/Glass';
 import { Icons } from '../ui/Icons';
+import { OrbitButton } from '../ui/OrbitButton';
 
 export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
   const [form, setForm] = useState({
@@ -52,8 +53,7 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
       {/* Header */}
       <div className="p-4 border-b border-separator flex justify-between items-center bg-bg-color sticky top-0 z-10">
         <h2 className="text-lg font-bold">{metric ? 'Edit Metric' : 'New Metric'}</h2>
-        {/* Fixed: Updated Back/Cancel button color for better visibility */}
-        <button onClick={onCancel} className="text-secondary font-bold active:opacity-50">Cancel</button>
+        <OrbitButton onClick={onCancel} variant="secondary" className="!w-auto !px-4">Cancel</OrbitButton>
       </div>
 
       <div className="p-4 flex flex-col gap-6 overflow-y-auto">
@@ -196,13 +196,13 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
                         className="flex-1 p-3 rounded-xl border border-separator bg-transparent outline-none"
                         onKeyDown={e => e.key === 'Enter' && handleAddOption()}
                       />
-                      <button onClick={handleAddOption} className="btn-secondary px-4">+</button>
+                      <OrbitButton onClick={handleAddOption} variant="secondary" className="!w-12 !px-0 !text-xl">+</OrbitButton>
                   </div>
                   <div className="flex flex-wrap gap-2">
                       {form.options.map((opt, idx) => (
                           <div key={idx} className="flex items-center gap-2 px-3 py-1 rounded-full bg-separator bg-opacity-20 border border-separator text-sm font-medium">
                               {opt}
-                              <button onClick={() => handleRemoveOption(idx)} className="text-red font-bold">×</button>
+                              <OrbitButton onClick={() => handleRemoveOption(idx)} variant="destructive" className="!w-8 !h-8 !p-0 !bg-transparent !text-red">×</OrbitButton>
                           </div>
                       ))}
                       {form.options.length === 0 && <span className="text-secondary italic text-sm">No options added.</span>}
@@ -248,9 +248,9 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
       </div>
 
       <div className="p-4 border-t border-separator bg-bg-color">
-         <button onClick={handleSave} className="btn-primary w-full shadow-lg shadow-blue/20">
+         <OrbitButton onClick={handleSave} variant="primary" className="w-full">
             {metric ? 'Update Metric' : 'Create Metric'}
-         </button>
+         </OrbitButton>
       </div>
     </Glass>
   );

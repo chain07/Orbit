@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { StorageContext } from '../../context/StorageContext';
 import SegmentedControl from '../../components/ui/SegmentedControl';
 import { Icons } from '../../components/ui/Icons';
+import { OrbitButton } from '../ui/OrbitButton';
 
 export const TimeTracker = ({ metricId }) => {
   const { metrics, addTimeLog } = useContext(StorageContext);
@@ -150,39 +151,42 @@ export const TimeTracker = ({ metricId }) => {
             {/* Controls */}
             <div className="flex w-full gap-3">
               {elapsed === 0 ? (
-                <button 
+                <OrbitButton
                   onClick={() => setRunning(true)}
-                  className="flex-1 py-4 bg-green text-white rounded-xl font-bold text-lg btn-ios shadow-lg shadow-green/20"
+                  variant="primary"
+                  className="flex-1 !bg-green !shadow-none"
+                  style={{ backgroundColor: 'var(--green)' }}
                 >
                   Start
-                </button>
+                </OrbitButton>
               ) : (
                 <>
-                  <button 
+                  <OrbitButton
                     onClick={() => setRunning(!running)}
-                    className={`flex-1 py-4 rounded-xl font-bold text-lg btn-ios shadow-lg ${
-                      running ? 'bg-orange text-white shadow-orange/20' : 'bg-green text-white shadow-green/20'
-                    }`}
+                    variant="primary"
+                    className="flex-1 !text-white !shadow-none"
+                    style={{ backgroundColor: running ? 'var(--orange)' : 'var(--green)' }}
                   >
                     {running ? 'Pause' : 'Resume'}
-                  </button>
+                  </OrbitButton>
                   
                   {!running && (
-                    <button 
+                    <OrbitButton
                       onClick={handleSave}
-                      className="flex-1 py-4 bg-blue text-white rounded-xl font-bold text-lg btn-ios shadow-lg shadow-blue/20"
+                      variant="primary"
+                      className="flex-1"
                     >
                       Save
-                    </button>
+                    </OrbitButton>
                   )}
                   
                   {!running && (
-                    <button 
+                    <OrbitButton
                       onClick={() => { setElapsed(0); setStartTime(null); }}
-                      className="px-4 py-4 border border-separator text-secondary rounded-xl font-bold btn-ios bg-white"
-                    >
-                      <Icons.RotateCcw size={20} />
-                    </button>
+                      variant="secondary"
+                      className="!w-12 !px-0"
+                      icon={<Icons.RotateCcw size={20} />}
+                    />
                   )}
                 </>
               )}
@@ -215,12 +219,13 @@ export const TimeTracker = ({ metricId }) => {
               </div>
             </div>
             
-            <button
+            <OrbitButton
               onClick={handleSave}
-              className="w-full py-4 bg-blue text-white rounded-xl font-bold text-lg btn-ios shadow-lg shadow-blue/20"
+              variant="primary"
+              className="w-full"
             >
               Save Entry
-            </button>
+            </OrbitButton>
           </div>
         )}
       </div>

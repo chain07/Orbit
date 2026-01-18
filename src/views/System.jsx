@@ -6,6 +6,7 @@ import { DataManagement } from '../components/system/DataManagement';
 import { Library } from '../lib/library';
 import SegmentedControl from '../components/ui/SegmentedControl';
 import { Icons } from '../components/ui/Icons';
+import { OrbitButton } from '../components/ui/OrbitButton';
 import '../styles/index.css';
 
 export const System = ({ onNavigate }) => {
@@ -198,12 +199,14 @@ export const System = ({ onNavigate }) => {
       {/* --- LIBRARY VIEW --- */}
       {viewMode === 'Library' && (
         <div className="flex flex-col gap-4">
-            <button
+            <OrbitButton
                 onClick={handleAddMetric}
-                className="btn-primary w-full shadow-lg shadow-blue/20"
+                variant="primary"
+                className="w-full"
+                icon={<span className="text-xl leading-none">+</span>}
             >
-                <span className="text-xl">+</span> Add New Metric
-            </button>
+                Add New Metric
+            </OrbitButton>
 
             {/* Wrapped in Glass for better visual containment */}
             <Glass className="p-2">
@@ -234,9 +237,9 @@ export const System = ({ onNavigate }) => {
               </div>
             </Glass>
 
-            <button onClick={openNewLibraryItem} className="text-center text-blue font-bold text-sm mt-4 hover:underline">
+            <OrbitButton onClick={openNewLibraryItem} variant="secondary" className="mt-4 w-full !text-blue">
                 + Create Protocol Item
-            </button>
+            </OrbitButton>
         </div>
       )}
 
@@ -276,8 +279,8 @@ export const System = ({ onNavigate }) => {
                 <Glass className="p-4 border-l-4 border-orange">
                     <div className="text-xs font-bold text-orange uppercase tracking-wide mb-3">Developer Tools</div>
                     <div className="flex gap-2">
-                        <button onClick={seedTestData} className="flex-1 btn-secondary text-xs">Seed Test Data</button>
-                        <button onClick={exportArchive} className="flex-1 btn-secondary text-xs">Export Debug Archive</button>
+                        <OrbitButton onClick={seedTestData} variant="secondary" className="flex-1 !text-xs">Seed Test Data</OrbitButton>
+                        <OrbitButton onClick={exportArchive} variant="secondary" className="flex-1 !text-xs">Export Debug Archive</OrbitButton>
                     </div>
                 </Glass>
             )}
@@ -331,12 +334,12 @@ const LibraryModal = ({ viewingItem, setViewingItem, isEditingLibrary, setIsEdit
     return (
         <Glass className="w-full max-w-lg h-full max-h-[85vh] flex flex-col overflow-hidden shadow-2xl p-0 bg-card">
             <div className="p-4 border-b border-separator flex justify-between items-center bg-bg-color/50">
-              <button onClick={() => setViewingItem(null)} className="text-secondary font-bold">Close</button>
+              <OrbitButton onClick={() => setViewingItem(null)} variant="secondary" className="!w-auto !px-4">Close</OrbitButton>
               <div className="font-bold">{isEditingLibrary ? (viewingItem.id ? 'Edit Item' : 'New Item') : 'Library'}</div>
               {!isEditingLibrary ? (
-                <button onClick={() => setIsEditingLibrary(true)} className="text-blue font-bold">Edit</button>
+                <OrbitButton onClick={() => setIsEditingLibrary(true)} variant="secondary" className="!w-auto !px-4 !text-blue">Edit</OrbitButton>
               ) : (
-                <button form="libraryForm" type="submit" className="text-green font-bold">Save</button>
+                <OrbitButton form="libraryForm" type="submit" variant="primary" className="!w-auto !px-4">Save</OrbitButton>
               )}
             </div>
 
@@ -382,7 +385,7 @@ const LibraryModal = ({ viewingItem, setViewingItem, isEditingLibrary, setIsEdit
                   </div>
 
                   {viewingItem.id && (
-                     <button type="button" onClick={() => handleDeleteLibraryItem(viewingItem.id)} className="mt-8 py-3 text-red font-bold bg-red/10 rounded-lg hover:bg-red/20 transition-colors">Delete Item</button>
+                     <OrbitButton type="button" onClick={() => handleDeleteLibraryItem(viewingItem.id)} variant="destructive" className="w-full mt-8">Delete Item</OrbitButton>
                   )}
                 </form>
               ) : (

@@ -3,6 +3,7 @@ import { StorageContext } from '../../context/StorageContext';
 import { ReportEngine } from '../../engine/ReportEngine';
 import { Glass } from '../ui/Glass';
 import { Icons } from '../ui/Icons';
+import { OrbitButton } from '../ui/OrbitButton';
 import '../../styles/index.css';
 
 export const ReportGenerator = ({ segment = 'Weekly' }) => {
@@ -85,13 +86,13 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
                  <span className="text-xs font-bold text-secondary uppercase tracking-wide translate-y-[1px]">{segment}</span>
              </div>
              {/* Fixed: Active state and styling for Archive Box */}
-             <button
+             <OrbitButton
                 onClick={() => setShowArchive(!showArchive)}
-                className={`p-2 rounded-lg transition-all active:scale-95 ${showArchive ? 'bg-blue text-white shadow-lg shadow-blue/20' : 'text-secondary hover:text-primary hover:bg-bg-color'}`}
+                variant={showArchive ? 'primary' : 'secondary'}
+                className={`!w-10 !h-10 !p-0 ${!showArchive ? '!bg-transparent' : ''}`}
                 title="Archived Reports"
-             >
-                 <Icons.Archive size={20} />
-             </button>
+                icon={<Icons.Archive size={20} />}
+             />
           </div>
         </div>
 
@@ -126,38 +127,31 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
 
         {/* Action Buttons - Styled Standard Buttons */}
         <div className="flex gap-3 pt-4 border-t border-separator">
-          <button
+          <OrbitButton
             onClick={handleCopy}
-            className="btn-primary flex-1 h-11 flex items-center justify-center gap-2 text-sm"
+            variant="primary"
+            className="flex-1 !text-sm"
+            icon={copied ? <Icons.Check size={16} /> : <Icons.Copy size={16} />}
           >
-            {copied ? (
-              <>
-                <Icons.Check size={16} />
-                Copied
-              </>
-            ) : (
-              <>
-                <Icons.Copy size={16} />
-                Copy
-              </>
-            )}
-          </button>
+            {copied ? 'Copied' : 'Copy'}
+          </OrbitButton>
 
-          <button
+          <OrbitButton
             onClick={handleSave}
-            className="btn-secondary flex-1 h-11 flex items-center justify-center gap-2 text-sm"
+            variant="secondary"
+            className="flex-1 !text-sm"
+            icon={saved ? <Icons.Check size={16} /> : <Icons.Save size={16} />}
           >
-             {saved ? <Icons.Check size={16} /> : <Icons.Save size={16} />}
              Save
-          </button>
+          </OrbitButton>
 
-          <button
+          <OrbitButton
             onClick={handleDownload}
-            className="btn-secondary w-12 h-11 flex items-center justify-center"
+            variant="secondary"
+            className="!w-12 !px-0"
             title="Download Markdown"
-          >
-            <Icons.Download size={18} />
-          </button>
+            icon={<Icons.Download size={18} />}
+          />
         </div>
       </div>
     </Glass>
@@ -194,12 +188,12 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
                         <div className="text-sm font-bold text-blue uppercase">{selectedReport.segment} Report</div>
                         <div className="text-xs text-secondary">{new Date(selectedReport.timestamp).toLocaleString()}</div>
                     </div>
-                    <button
+                    <OrbitButton
                         onClick={() => setSelectedReport(null)}
-                        className="p-2 hover:bg-separator/20 rounded-full transition-colors"
-                    >
-                        <Icons.X size={20} />
-                    </button>
+                        variant="secondary"
+                        className="!w-10 !h-10 !p-0 !bg-transparent"
+                        icon={<Icons.X size={20} />}
+                    />
                 </div>
                 <div className="flex-1 overflow-y-auto p-4 bg-bg-color">
                     <pre className="text-xs sm:text-sm font-mono whitespace-pre-wrap text-primary leading-relaxed">
@@ -207,17 +201,18 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
                     </pre>
                 </div>
                 <div className="p-4 border-t border-separator bg-bg-color flex justify-end">
-                    <button
+                    <OrbitButton
                         onClick={() => {
                             navigator.clipboard.writeText(selectedReport.content);
                             setCopied(true);
                             setTimeout(() => setCopied(false), 2000);
                         }}
-                        className="btn-primary flex items-center gap-2 px-4 py-2 text-sm"
+                        variant="primary"
+                        className="!px-6"
+                        icon={copied ? <Icons.Check size={16} /> : <Icons.Copy size={16} />}
                     >
-                        {copied ? <Icons.Check size={16} /> : <Icons.Copy size={16} />}
                         Copy to Clipboard
-                    </button>
+                    </OrbitButton>
                 </div>
             </Glass>
         </div>

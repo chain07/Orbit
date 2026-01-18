@@ -3,6 +3,7 @@
 @import "./motion.css";
 @import "./layout.css";
 @import "./segmented.css";
+@import "./buttons.css";
 
 *,
 *::before,
@@ -107,50 +108,7 @@ html, body {
   gap: 16px;
 }
 
-/* Global Button Styles */
-.btn-primary {
-  background-color: var(--blue);
-  color: white;
-  height: 44px;
-  min-height: 44px;
-  border-radius: 12px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 16px;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.1s ease, opacity 0.2s ease;
-}
-.btn-primary:active {
-  transform: scale(0.97);
-}
-
-.btn-secondary {
-  background-color: rgba(0,0,0,0.05); /* Light Gray */
-  color: var(--blue);
-  height: 44px;
-  min-height: 44px;
-  border-radius: 12px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 16px;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.1s ease, background-color 0.2s ease;
-}
-.btn-secondary:active {
-  transform: scale(0.97);
-}
-
-@media (prefers-color-scheme: dark) {
-  .btn-secondary {
-    background-color: rgba(255,255,255,0.1); /* Dark Mode Adjustment */
-  }
-}
+/* Global Button Styles: REMOVED - Replaced by buttons.css */
 
 /* --- Form Toggles (Checkbox) --- */
 .toggle-checkbox {

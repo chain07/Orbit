@@ -1,5 +1,6 @@
 import React from 'react';
 import { Glass } from './Glass';
+import { OrbitButton } from './OrbitButton';
 
 export const EmptyState = ({ 
   icon = "⊕", 
@@ -19,12 +20,13 @@ export const EmptyState = ({
       </div>
       
       {actionLabel && onAction && (
-        <button 
+        <OrbitButton
           onClick={onAction}
-          className="btn-primary mt-4 shadow-lg shadow-blue/20"
+          variant="primary"
+          className="mt-4"
         >
           {actionLabel}
-        </button>
+        </OrbitButton>
       )}
     </Glass>
   );
