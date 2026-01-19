@@ -79,7 +79,7 @@ export const System = ({ onNavigate }) => {
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
       
       {/* Header */}
-      <div className="flex justify-between items-center safe-mt">
+      <div className="flex justify-between items-end safe-mt">
          <div className="flex flex-col">
              <h1 className="text-3xl font-extrabold tracking-tight">System</h1>
              <p className="text-secondary font-medium">Configuration</p>
@@ -111,7 +111,7 @@ export const System = ({ onNavigate }) => {
                     <div className="w-12 h-12 rounded-full bg-separator/20 flex items-center justify-center mb-1">
                         <Icons.Activity size={24} className="text-secondary" />
                     </div>
-                    <div>
+                    <div className="w-full text-center">
                         <div className="font-bold text-lg">No Metrics</div>
                         <div className="text-secondary text-sm max-w-[200px] mx-auto leading-relaxed">
                             Create your first metric to start tracking your data.

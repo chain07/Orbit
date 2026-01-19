@@ -152,6 +152,7 @@ export const DataManagement = () => {
   };
 
   const percent = storageStats.percent.toFixed(1);
+  const percentNum = Number(storageStats.percent);
 
   return (
     <div className="card">
@@ -162,12 +163,12 @@ export const DataManagement = () => {
           <span>Local Storage</span>
           <span>{percent}%</span>
         </div>
-        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden dark:bg-gray-800">
+        <div className="w-full h-2 bg-separator/20 rounded-full overflow-hidden">
           <div
-            className={`h-full transition-all duration-500 ${percent > 80 ? 'bg-red-500' : 'bg-blue-500'}`}
+            className={`h-full transition-all duration-500 ${percentNum > 80 ? 'bg-red-500' : 'bg-blue-500'}`}
             style={{
               width: `${percent}%`,
-              backgroundColor: percent > 80 ? 'var(--red)' : 'var(--blue)'
+              backgroundColor: percentNum > 80 ? 'var(--red)' : 'var(--blue)'
             }}
           />
         </div>
