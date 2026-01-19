@@ -155,28 +155,20 @@ export const DataManagement = () => {
 
   return (
     <div className="card">
-      <div className="flex items-center gap-2 mb-4">
-          <Icons.Database size={20} className="text-blue" />
-          <div className="font-bold text-lg">Storage</div>
-      </div>
-
+      <div className="section-label">Storage</div>
       {/* Storage Meter */}
       <div className="flex flex-col gap-2 mb-6">
         <div className="flex justify-between text-sm text-secondary font-medium">
           <span>Local Storage</span>
           <span>{percent}%</span>
         </div>
-        <div
-          className="w-full"
-          style={{ height: '8px', backgroundColor: 'var(--grid-line)', borderRadius: '999px', overflow: 'hidden' }}
-        >
+        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden dark:bg-gray-800">
           <div
-          className="h-full"
-          style={{
-            width: `${percent}%`,
-            backgroundColor: percent > 80 ? 'var(--red)' : 'var(--blue)',
-            transition: 'width 0.5s ease, background-color 0.5s ease'
-          }}
+            className={`h-full transition-all duration-500 ${percent > 80 ? 'bg-red-500' : 'bg-blue-500'}`}
+            style={{
+              width: `${percent}%`,
+              backgroundColor: percent > 80 ? 'var(--red)' : 'var(--blue)'
+            }}
           />
         </div>
         <div className="text-xs text-secondary text-right">
@@ -184,12 +176,7 @@ export const DataManagement = () => {
         </div>
       </div>
 
-      <div className="border-t border-separator/50 mb-6" />
-
-      <div className="font-bold text-md text-primary mb-1 flex items-center gap-2">
-         <Icons.Archive size={16} className="text-purple" />
-         Archival Engine
-      </div>
+      <div className="section-label">Archival Engine</div>
       <p className="text-secondary text-sm mb-6 mt-1 leading-relaxed">
         Offload data older than 1 year to a JSON file and remove it from local storage to free up space.
       </p>
@@ -203,12 +190,7 @@ export const DataManagement = () => {
         Archive Old Data
       </OrbitButton>
 
-      <div className="border-t border-separator/50 mb-6" />
-
-      <div className="font-bold text-md text-primary mb-3 mt-6 flex items-center gap-2">
-         <Icons.Download size={16} className="text-green" />
-         Universal Export
-      </div>
+      <div className="section-label mt-6">Universal Export</div>
       <div className="flex flex-col gap-3">
          <OrbitButton
             onClick={handleExportJSON}
@@ -238,7 +220,7 @@ export const DataManagement = () => {
              className="flex-1"
              icon={<Icons.Upload size={16} />}
            >
-             Import JSON
+             Import
            </OrbitButton>
 
            <input
@@ -254,7 +236,7 @@ export const DataManagement = () => {
              variant="destructive"
              className="flex-1"
            >
-             Reset All
+             Reset
            </OrbitButton>
       </div>
     </div>

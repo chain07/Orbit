@@ -107,10 +107,17 @@ export const System = ({ onNavigate }) => {
             </OrbitButton>
 
             {metrics.length === 0 ? (
-                <div className="p-8 text-center text-secondary opacity-60 bg-card rounded-xl border border-dashed border-separator">
-                    <Icons.Activity size={32} className="mx-auto mb-2" />
-                    <div>No metrics configured.</div>
-                </div>
+                <Glass className="flex flex-col items-center justify-center p-8 text-center gap-3 opacity-80">
+                    <div className="w-12 h-12 rounded-full bg-separator/20 flex items-center justify-center mb-1">
+                        <Icons.Activity size={24} className="text-secondary" />
+                    </div>
+                    <div>
+                        <div className="font-bold text-lg">No Metrics</div>
+                        <div className="text-secondary text-sm max-w-[200px] mx-auto leading-relaxed">
+                            Create your first metric to start tracking your data.
+                        </div>
+                    </div>
+                </Glass>
             ) : (
                 <Glass className="p-2">
                   <div className="flex flex-col gap-2">
