@@ -163,9 +163,9 @@ export const DataManagement = () => {
           <span>Local Storage</span>
           <span>{percent}%</span>
         </div>
-        <div className="w-full h-2 bg-separator/20 rounded-full overflow-hidden">
+        <div className="storage-track-container">
           <div
-            className={`h-full transition-all duration-500 ${percentNum > 80 ? 'bg-red-500' : 'bg-blue-500'}`}
+            className={`h-full transition-all duration-500`}
             style={{
               width: `${percent}%`,
               backgroundColor: percentNum > 80 ? 'var(--red)' : 'var(--blue)'
@@ -177,8 +177,8 @@ export const DataManagement = () => {
         </div>
       </div>
 
-      <div className="section-label">Archival Engine</div>
-      <p className="text-secondary text-sm mb-6 mt-1 leading-relaxed">
+      <div className="section-label section-archival">Archival Engine</div>
+      <p className="text-secondary text-sm archival-description leading-relaxed">
         Offload data older than 1 year to a JSON file and remove it from local storage to free up space.
       </p>
 
@@ -191,7 +191,7 @@ export const DataManagement = () => {
         Archive Old Data
       </OrbitButton>
 
-      <div className="section-label mt-6">Universal Export</div>
+      <div className="section-label section-export">Universal Export</div>
       <div className="flex flex-col gap-3">
          <OrbitButton
             onClick={handleExportJSON}
@@ -214,7 +214,7 @@ export const DataManagement = () => {
 
       <div className="border-t border-separator/50 my-6" />
 
-      <div className="flex gap-3">
+      <div className="button-row">
            <OrbitButton
              onClick={handleImportClick}
              variant="secondary"
