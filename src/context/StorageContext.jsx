@@ -8,9 +8,7 @@ import {
   createLog,
   createMetric,
   createTimeLog,
-  validateMetrics,
   validateMetricValue,
-  validateLogEntries,
   migrateData
 } from '../types/schemas';
 
@@ -89,7 +87,7 @@ export const StorageProvider = ({ children }) => {
       }
     };
 
-    const handler = setTimeout(saveToStorage, 1000); // Debounce for 1 second
+    const handler = setTimeout(saveToStorage, 2000); // Debounce for 2 seconds
 
     return () => {
       clearTimeout(handler);
@@ -170,17 +168,27 @@ export const StorageProvider = ({ children }) => {
   const importData = useCallback((jsonData) => {
     if (!jsonData) return;
     
-    // Apply migration to imported data
-    const migrated = migrateData(jsonData);
+    try {
+      // Apply migration to imported data
+      const migrated = migrateData(jsonData);
 
-    if (Array.isArray(migrated.metrics)) {
-      const validMetrics = migrated.metrics.filter(m => 
-        m && typeof m === 'object' && m.id && m.name
-      );
-      setMetrics(validMetrics);
-    }
+      // STRICT VALIDATION
+      if (migrated.metrics) {
+        validateMetrics(migrated.metrics);
+      }
+      if (migrated.logEntries) {
+        validateLogEntries(migrated.logEntries, migrated.metrics || []);
+      }
 
-    if (Array.isArray(migrated.logEntries)) {
+      // State Update
+      if (Array.isArray(migrated.metrics)) {
+        const validMetrics = migrated.metrics.filter(m =>
+          m && typeof m === 'object' && m.id && m.name
+        );
+        setMetrics(validMetrics);
+      }
+
+      if (Array.isArray(migrated.logEntries)) {
       const validLogs = migrated.logEntries.filter(l => 
         l && typeof l === 'object' && l.metricId && (l.value !== undefined)
       );
@@ -191,12 +199,16 @@ export const StorageProvider = ({ children }) => {
         setTimeLogs(migrated.timeLogs);
     }
 
-    if (migrated.widgetLayout && typeof migrated.widgetLayout === 'object') {
-      setWidgetLayout(migrated.widgetLayout);
-    }
+      if (migrated.widgetLayout && typeof migrated.widgetLayout === 'object') {
+        setWidgetLayout(migrated.widgetLayout);
+      }
 
-    if (typeof migrated.onboardingComplete !== 'undefined') {
-        setOnboardingComplete(migrated.onboardingComplete);
+      if (typeof migrated.onboardingComplete !== 'undefined') {
+          setOnboardingComplete(migrated.onboardingComplete);
+      }
+    } catch (error) {
+      console.error("Import failed: Schema validation error", error);
+      alert(`Import failed: ${error.message}`);
     }
   }, []);
 
@@ -260,3 +272,22 @@ export const StorageProvider = ({ children }) => {
     </StorageContext.Provider>
   );
 };
+
+// HELPER FUNCTIONS
+function validateMetrics(metrics) {
+  if (!Array.isArray(metrics)) {
+    throw new Error("Invalid import: 'metrics' must be an array.");
+  }
+  // Optional: Check if the first item has an ID to verify structure
+  if (metrics.length > 0 && !metrics[0].id) {
+     console.warn("Import warning: Metrics missing ID fields");
+  }
+  return true;
+}
+
+function validateLogEntries(logs) {
+  if (!Array.isArray(logs)) {
+    throw new Error("Invalid import: 'logs' must be an array.");
+  }
+  return true;
+}
