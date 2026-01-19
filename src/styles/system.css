@@ -1,15 +1,14 @@
 /* src/styles/system.css */
 
-/* System Header - Fixes Alignment */
-.system-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center; /* Fixes vertical alignment */
+/* System Header */
+.system-toggle-wrapper {
+  margin-top: 16px;
+  width: 100%;
 }
 
-.system-header h1,
-.system-header p {
-  margin: 0; /* Reset browser defaults for tight alignment */
+.system-subheader {
+  margin-top: 24px;
+  margin-bottom: 16px;
 }
 
 /* Data Management Spacing Fixes */

@@ -79,19 +79,18 @@ export const System = ({ onNavigate }) => {
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
       
       {/* Header */}
-      <div className="system-header safe-mt">
-         <div className="flex flex-col">
-             <h1 className="text-3xl font-extrabold tracking-tight">System</h1>
-             <p className="text-secondary font-medium">Configuration</p>
-         </div>
-         {/* Segmented Control with sufficient width */}
-        <div style={{ width: '240px' }}>
+      <div className="safe-mt">
+         <h1 className="text-3xl font-extrabold tracking-tight">System</h1>
+
+         <div className="system-toggle-wrapper">
              <SegmentedControl
                 options={['Metrics', 'Settings']}
                 value={viewMode}
                 onChange={setViewMode}
              />
          </div>
+
+         <p className="text-secondary font-medium system-subheader">Configuration</p>
       </div>
 
       {/* --- METRICS VIEW --- */}
