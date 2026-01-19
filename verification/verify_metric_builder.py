@@ -22,14 +22,11 @@ def verify_metric_builder():
         # Assuming we are on Metrics view (default)
         page.get_by_text("Add New Metric").click()
 
-        # Wait for modal header
-        page.wait_for_selector("text=New Metric")
+        print("Waiting for modal...")
+        page.wait_for_timeout(2000)
 
-        # 2. Screenshot Modal
-        print("Taking Metric Builder screenshot...")
-        # Wait for fade-in
-        page.wait_for_timeout(300)
-        page.screenshot(path="verification/metric_builder_redesign.png")
+        print("Taking debug screenshot...")
+        page.screenshot(path="verification/debug_modal_open.png")
 
         browser.close()
 

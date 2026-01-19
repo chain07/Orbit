@@ -24,6 +24,18 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
   const updateConfig = (key, val) => setForm(prev => ({ ...prev, config: { ...prev.config, [key]: val } }));
   const updateRange = (key, val) => setForm(prev => ({ ...prev, range: { ...prev.range, [key]: parseFloat(val) } }));
 
+  const handleTypeChange = (newType) => {
+    let defaultWidget = 'history';
+    switch (newType) {
+      case 'number': defaultWidget = 'ring'; break;
+      case 'boolean': defaultWidget = 'heatmap'; break;
+      case 'range': defaultWidget = 'sparkline'; break;
+      case 'duration': defaultWidget = 'number'; break;
+      default: defaultWidget = 'history';
+    }
+    setForm(prev => ({ ...prev, type: newType, widgetType: defaultWidget }));
+  };
+
   const handleAddOption = () => {
     if (newOption.trim()) {
       updateForm('options', [...form.options, newOption.trim()]);
@@ -52,7 +64,7 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
     <Glass className="w-full max-w-lg flex flex-col bg-bg-color max-h-[90vh] overflow-hidden !p-0">
       {/* Header */}
       <div className="metric-modal-header">
-        <h2 className="text-lg font-bold">{metric ? 'Edit Metric' : 'New Metric'}</h2>
+        <h2 className="metric-modal-title">{metric ? 'Edit Metric' : 'New Metric'}</h2>
         <button onClick={onCancel} className="btn-cancel-text">Cancel</button>
       </div>
 
@@ -76,7 +88,7 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
                 <label className="label-standard block">Type</label>
                 <select
                   value={form.type}
-                  onChange={e => updateForm('type', e.target.value)}
+                  onChange={e => handleTypeChange(e.target.value)}
                   className="input-standard"
                 >
                   <option value="number">Number</option>
@@ -239,6 +251,9 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
                 <option value="streak">Streak Counter</option>
                 <option value="history">History Log</option>
               </select>
+              <div className="widget-helper-text">
+                {WIDGET_DESCRIPTIONS[form.widgetType]}
+              </div>
             </div>
         </div>
 
