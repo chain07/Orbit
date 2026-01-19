@@ -31,12 +31,16 @@ export const OrbitButton = ({
   // Map variant prop to CSS class
   const variantClass = `btn-${variant}`;
 
+  // Accessibility: derive label if not provided
+  const ariaLabel = props['aria-label'] || (typeof children === 'string' ? children : 'Button');
+
   return (
     <button
       type={type}
       className={`btn-orbit ${variantClass} ${isPressed ? 'is-pressed' : ''} ${className}`}
       onClick={onClick}
       disabled={disabled}
+      aria-label={ariaLabel}
       onPointerDown={() => setIsPressed(true)}
       onPointerUp={() => setIsPressed(false)}
       onPointerLeave={() => setIsPressed(false)}

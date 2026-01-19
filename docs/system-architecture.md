@@ -100,8 +100,9 @@ The application structure is fixed.
 
 ### 5.1 The Stack
 * **Runtime:** React 19 + Vite.
-* **Styling:** TailwindCSS with Apple HIG tokens.
-* **Icons:** Lucide React.
+* **Architecture:** Zero Dependency.
+* **Styling:** CSS Modules / Tokens with Apple HIG tokens.
+* **Icons:** Custom SVG Icons.
 * **Motion:** CSS Transitions + Web Animations API (No Framer Motion).
 * **Charting:** Custom SVG primitives only (No Recharts/Chart.js).
 

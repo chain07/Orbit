@@ -43,6 +43,9 @@ export default function BottomNav({ tabs, activeIndex, onChange }) {
               ref={el => itemsRef.current[i] = el}
               className={`tab-item ${isActive ? "active" : ""}`}
               onClick={() => onChange(i)}
+              role="button"
+              aria-label={tab.label || tab.id || `Tab ${i + 1}`}
+              aria-selected={isActive}
             >
               <div className="relative z-10 active:scale-95 transition-transform duration-200">
                 {tab.icon}

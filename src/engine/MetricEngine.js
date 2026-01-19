@@ -12,7 +12,7 @@ export const MetricEngine = {
   currentStreak: (logs = [], metricId) => {
     const metricLogs = logs
       .filter(l => l.metricId === metricId)
-      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      .sort((a, b) => (b.timestamp > a.timestamp ? 1 : -1));
 
     if (metricLogs.length === 0) return 0;
     
@@ -212,7 +212,7 @@ export const MetricEngine = {
   rollingAverage: (logs = [], metricId, windowDays = 7) => {
     const metricLogs = logs
       .filter(l => l.metricId === metricId)
-      .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      .sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
 
     if (metricLogs.length === 0) return 0;
 
