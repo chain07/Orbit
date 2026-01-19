@@ -49,7 +49,7 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
   };
 
   return (
-    <Glass className="w-full max-w-lg flex flex-col bg-bg-color max-h-[90vh] overflow-hidden">
+    <Glass className="w-full max-w-lg flex flex-col bg-bg-color max-h-[90vh] overflow-hidden !p-0">
       {/* Header */}
       <div className="metric-modal-header">
         <h2 className="text-lg font-bold">{metric ? 'Edit Metric' : 'New Metric'}</h2>
@@ -220,24 +220,26 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
             )}
         </div>
 
-        <div className="section-divider">Visualization</div>
+        <div className="visualization-section">
+            <div className="section-divider">Visualization</div>
 
-        {/* Widget Style Select */}
-        <div>
-          <label className="label-standard block">Dashboard Widget</label>
-          <select
-            value={form.widgetType}
-            onChange={e => updateForm('widgetType', e.target.value)}
-            className="input-standard"
-          >
-            <option value="ring">Ring Progress</option>
-            <option value="sparkline">Sparkline Trend</option>
-            <option value="heatmap">Consistency Grid</option>
-            <option value="stackedbar">Stacked Bar</option>
-            <option value="number">Simple Number</option>
-            <option value="streak">Streak Counter</option>
-            <option value="history">History Log</option>
-          </select>
+            {/* Widget Style Select */}
+            <div>
+              <label className="label-standard block">Dashboard Widget</label>
+              <select
+                value={form.widgetType}
+                onChange={e => updateForm('widgetType', e.target.value)}
+                className="input-standard"
+              >
+                <option value="ring">Ring Progress</option>
+                <option value="sparkline">Sparkline Trend</option>
+                <option value="heatmap">Consistency Grid</option>
+                <option value="stackedbar">Stacked Bar</option>
+                <option value="number">Simple Number</option>
+                <option value="streak">Streak Counter</option>
+                <option value="history">History Log</option>
+              </select>
+            </div>
         </div>
 
       </div>

@@ -11,6 +11,9 @@
   position: sticky;
   top: 0;
   z-index: 10;
+  /* Match Main Card Radius */
+  border-top-left-radius: var(--radius-card);
+  border-top-right-radius: var(--radius-card);
 }
 
 .btn-cancel-text {
@@ -97,7 +100,7 @@
 /* --- Divider Section --- */
 .section-divider {
   margin-top: 24px;
-  margin-bottom: 16px;
+  margin-bottom: 8px; /* Tighter gap */
   padding-bottom: 8px;
   border-bottom: 1px solid rgba(0,0,0,0.05); /* Subtle line */
   font-size: 11px;
@@ -128,4 +131,13 @@
   padding: 16px;
   border-top: 1px solid var(--separator);
   background-color: var(--bg-color);
+  /* Match Main Card Radius */
+  border-bottom-left-radius: var(--radius-card);
+  border-bottom-right-radius: var(--radius-card);
+}
+
+.visualization-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* Tight gap */
 }
