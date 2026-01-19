@@ -79,13 +79,13 @@ export const System = ({ onNavigate }) => {
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
       
       {/* Header */}
-      <div className="flex justify-between items-end safe-mt">
+      <div className="flex justify-between items-center safe-mt">
          <div className="flex flex-col">
              <h1 className="text-3xl font-extrabold tracking-tight">System</h1>
              <p className="text-secondary font-medium">Configuration</p>
          </div>
          {/* Segmented Control with sufficient width */}
-         <div className="w-[240px]">
+        <div style={{ width: '240px' }}>
              <SegmentedControl
                 options={['Metrics', 'Settings']}
                 value={viewMode}

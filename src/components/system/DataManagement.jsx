@@ -166,10 +166,17 @@ export const DataManagement = () => {
           <span>Local Storage</span>
           <span>{percent}%</span>
         </div>
-        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden dark:bg-gray-800 bg-separator/20">
+        <div
+          className="w-full"
+          style={{ height: '8px', backgroundColor: 'var(--grid-line)', borderRadius: '999px', overflow: 'hidden' }}
+        >
           <div
-            className={`h-full transition-all duration-500 ${percent > 80 ? 'bg-red' : 'bg-blue'}`}
-            style={{ width: `${percent}%` }}
+          className="h-full"
+          style={{
+            width: `${percent}%`,
+            backgroundColor: percent > 80 ? 'var(--red)' : 'var(--blue)',
+            transition: 'width 0.5s ease, background-color 0.5s ease'
+          }}
           />
         </div>
         <div className="text-xs text-secondary text-right">
