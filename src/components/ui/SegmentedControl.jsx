@@ -21,7 +21,7 @@ export default function SegmentedControl({
   );
 
   return (
-    <div className="segmented-control-wrapper" data-count={normalizedOptions.length}>
+    <div className="segmented-control-wrapper w-full" data-count={normalizedOptions.length}>
        {normalizedOptions.map((opt) => (
          <React.Fragment key={opt.value}>
            <input

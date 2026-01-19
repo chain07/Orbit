@@ -1,6 +1,5 @@
-import React, { useContext, useState, useEffect, useMemo } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { StorageContext } from '../../context/StorageContext';
-import { Glass } from '../ui/Glass';
 import { Icons } from '../ui/Icons';
 import { OrbitButton } from '../ui/OrbitButton';
 import '../../styles/index.css';
@@ -40,12 +39,6 @@ export const DataManagement = () => {
     const interval = setInterval(calculateUsage, 2000);
     return () => clearInterval(interval);
   }, [logEntries, timeLogs]);
-
-  const getMeterColor = (p) => {
-    if (p >= 80) return 'bg-red';
-    if (p >= 60) return 'bg-orange';
-    return 'bg-green';
-  };
 
   const handleArchiveOldData = () => {
     const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
@@ -158,64 +151,52 @@ export const DataManagement = () => {
     }
   };
 
-  return (
-    <Glass className="flex flex-col gap-6 p-5">
-      <div className="flex items-center gap-2">
-        <Icons.Database size={24} className="text-blue" />
-        <h2 className="text-xl font-bold">Data Management</h2>
-      </div>
+  const percent = storageStats.percent.toFixed(1);
+  const percentNum = Number(storageStats.percent);
 
-      <div className="flex flex-col gap-2">
-        <div className="flex justify-between text-xs font-bold text-secondary uppercase tracking-wide">
+  return (
+    <div className="card" style={{ transform: 'none', transition: 'none' }}>
+      <div className="section-label">Storage</div>
+      {/* Storage Meter */}
+      <div className="flex flex-col gap-2 mb-6">
+        <div className="flex justify-between text-sm text-secondary font-medium">
           <span>Local Storage</span>
-          <span>{storageStats.mb} / 5.00 MB ({storageStats.percent.toFixed(1)}%)</span>
+          <span>{percent}%</span>
         </div>
-        <div className="w-full h-3 bg-separator/20 rounded-full overflow-hidden relative">
+        <div className="storage-track-container">
           <div
-            className={`h-full transition-all duration-500 ${getMeterColor(storageStats.percent)}`}
-            style={{ width: `${storageStats.percent}%` }}
+            className={`h-full transition-all duration-500`}
+            style={{
+              width: `${percent}%`,
+              backgroundColor: percentNum > 80 ? 'var(--red)' : 'var(--blue)'
+            }}
           />
         </div>
-        {storageStats.percent >= 80 && (
-          <div className="text-xs text-red font-bold flex items-center gap-1 mt-1">
-            <Icons.Database size={12} />
-            Storage approaching capacity. Please archive old data.
-          </div>
-        )}
+        <div className="text-xs text-secondary text-right">
+          {storageStats.mb} MB / 5.00 MB
+        </div>
       </div>
 
-      <div className="border-t border-separator/50" />
+      <div className="section-label section-archival">Archival Engine</div>
+      <p className="text-secondary text-sm archival-description leading-relaxed">
+        Offload data older than 1 year to a JSON file and remove it from local storage to free up space.
+      </p>
 
+      <OrbitButton
+        onClick={handleArchiveOldData}
+        variant="secondary"
+        className="w-full mb-6"
+        icon={<Icons.Archive size={16} />}
+      >
+        Archive Old Data
+      </OrbitButton>
+
+      <div className="section-label section-export">Universal Export</div>
       <div className="flex flex-col gap-3">
-        <div className="flex items-center gap-2 text-primary font-bold">
-          <Icons.Archive size={18} className="text-purple" />
-          <h3>Archival Engine</h3>
-        </div>
-        <p className="text-xs text-secondary leading-relaxed">
-          Offload data older than 1 year to a JSON file and remove it from local storage to free up space.
-        </p>
-        <OrbitButton
-          onClick={handleArchiveOldData}
-          variant="secondary"
-          className="w-full"
-          icon={<Icons.Archive size={16} />}
-        >
-          Archive Old Data
-        </OrbitButton>
-      </div>
-
-      <div className="border-t border-separator/50" />
-
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center gap-2 text-primary font-bold">
-          <Icons.Save size={18} className="text-green" />
-          <h3>Universal Export</h3>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <OrbitButton
+         <OrbitButton
             onClick={handleExportJSON}
             variant="primary"
+            className="w-full"
             icon={<Icons.Download size={16} />}
           >
             JSON Backup
@@ -224,23 +205,25 @@ export const DataManagement = () => {
           <OrbitButton
             onClick={handleExportCSV}
             variant="secondary"
+            className="w-full"
             icon={<Icons.Download size={16} />}
           >
             CSV Export
           </OrbitButton>
-        </div>
+      </div>
 
-        <div className="flex gap-3 mt-2">
+      <div className="border-t border-separator/50 my-6" />
+
+      <div className="button-row">
            <OrbitButton
              onClick={handleImportClick}
              variant="secondary"
              className="flex-1"
              icon={<Icons.Upload size={16} />}
            >
-             Import JSON
+             Import
            </OrbitButton>
 
-           {/* Fixed: Hidden input relying on index.css .hidden */}
            <input
              type="file"
              id="import-file"
@@ -249,16 +232,14 @@ export const DataManagement = () => {
              onChange={handleImportFile}
            />
 
-           {/* Fixed: Reset All button overflow and styling */}
            <OrbitButton
              onClick={handleNuke}
              variant="destructive"
              className="flex-1"
            >
-             Reset All
+             Reset
            </OrbitButton>
-        </div>
       </div>
-    </Glass>
+    </div>
   );
 };

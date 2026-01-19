@@ -3,6 +3,16 @@ import { Glass } from '../ui/Glass';
 import { Icons } from '../ui/Icons';
 import { OrbitButton } from '../ui/OrbitButton';
 
+const WIDGET_DESCRIPTIONS = {
+  ring: "Visualizes progress towards a daily numeric goal.",
+  sparkline: "Shows the trajectory of values over the last 7 days.",
+  heatmap: "Heatmap tracking for daily habits and completion.",
+  stackedbar: "Breaks down total activity by category.",
+  number: "Displays the raw total or latest value.",
+  streak: "Highlights consecutive days of activity.",
+  history: "A chronological list of all entries."
+};
+
 export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
   const [form, setForm] = useState({
     id: metric?.id,
@@ -23,6 +33,18 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
   const updateForm = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
   const updateConfig = (key, val) => setForm(prev => ({ ...prev, config: { ...prev.config, [key]: val } }));
   const updateRange = (key, val) => setForm(prev => ({ ...prev, range: { ...prev.range, [key]: parseFloat(val) } }));
+
+  const handleTypeChange = (newType) => {
+    let defaultWidget = 'history';
+    switch (newType) {
+      case 'number': defaultWidget = 'ring'; break;
+      case 'boolean': defaultWidget = 'heatmap'; break;
+      case 'range': defaultWidget = 'sparkline'; break;
+      case 'duration': defaultWidget = 'number'; break;
+      default: defaultWidget = 'history';
+    }
+    setForm(prev => ({ ...prev, type: newType, widgetType: defaultWidget }));
+  };
 
   const handleAddOption = () => {
     if (newOption.trim()) {
@@ -49,35 +71,35 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
   };
 
   return (
-    <Glass className="w-full max-w-lg flex flex-col bg-bg-color max-h-[90vh] overflow-hidden">
+    <Glass className="w-full max-w-lg flex flex-col bg-bg-color max-h-[90vh] overflow-hidden !p-0">
       {/* Header */}
-      <div className="p-4 border-b border-separator flex justify-between items-center bg-bg-color sticky top-0 z-10">
-        <h2 className="text-lg font-bold">{metric ? 'Edit Metric' : 'New Metric'}</h2>
-        <OrbitButton onClick={onCancel} variant="secondary" className="!w-auto !px-4">Cancel</OrbitButton>
+      <div className="metric-modal-header">
+        <h2 className="metric-modal-title">{metric ? 'Edit Metric' : 'New Metric'}</h2>
+        <button onClick={onCancel} className="btn-cancel-text">Cancel</button>
       </div>
 
-      <div className="p-4 flex flex-col gap-6 overflow-y-auto">
+      <div className="modal-content-scroll">
 
         {/* Core Identity */}
-        <div className="flex flex-col gap-3">
-          <div>
-            <label className="text-xs font-bold text-secondary uppercase mb-1 block">Name</label>
+        <div>
+            <label className="label-standard block">Name</label>
             <input
               type="text"
               value={form.name}
               onChange={e => updateForm('name', e.target.value)}
               placeholder="e.g. Water Intake"
-              className="w-full p-3 rounded-xl border border-separator bg-transparent text-lg font-bold outline-none focus:border-blue"
+              className="input-standard"
             />
-          </div>
+        </div>
 
-          <div className="flex gap-3">
-             <div className="flex-1">
-                <label className="text-xs font-bold text-secondary uppercase mb-1 block">Type</label>
+        {/* Grid Row: Type + Color */}
+        <div className="form-row">
+             <div className="form-group">
+                <label className="label-standard block">Type</label>
                 <select
                   value={form.type}
-                  onChange={e => updateForm('type', e.target.value)}
-                  className="w-full p-3 rounded-xl border border-separator bg-transparent outline-none font-medium appearance-none"
+                  onChange={e => handleTypeChange(e.target.value)}
+                  className="input-standard"
                 >
                   <option value="number">Number</option>
                   <option value="boolean">Boolean</option>
@@ -87,50 +109,45 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
                   <option value="text">Text</option>
                 </select>
              </div>
-             <div>
-                <label className="text-xs font-bold text-secondary uppercase mb-1 block">Color</label>
+             <div className="form-group-color">
+                <label className="label-standard block">Color</label>
                 <input
                   type="color"
                   value={form.color}
                   onChange={e => updateForm('color', e.target.value)}
-                  className="h-[46px] w-[50px] p-1 rounded-xl border border-separator bg-transparent cursor-pointer"
+                  className="input-color"
                 />
              </div>
-          </div>
         </div>
 
-        <div className="h-px bg-separator opacity-50" />
-
         {/* Dynamic Type Configuration */}
-        <div className="flex flex-col gap-4 animate-fade-in">
-            <label className="text-xs font-bold text-secondary uppercase">Configuration</label>
+        <div className="animate-fade-in">
+            <div className="section-divider">Configuration</div>
 
             {/* NUMBER */}
             {form.type === 'number' && (
-               <>
-                 <div className="flex gap-3">
-                    <div className="flex-1">
-                        <label className="text-xs text-secondary mb-1 block">Target Goal</label>
-                        <input type="number" value={form.goal} onChange={e => updateForm('goal', e.target.value)} className="w-full p-3 rounded-xl border border-separator bg-transparent" />
+               <div className="form-row">
+                    <div className="form-group">
+                        <label className="label-standard block">Target Goal</label>
+                        <input type="number" value={form.goal} onChange={e => updateForm('goal', e.target.value)} className="input-standard" />
                     </div>
-                    <div className="w-1/3">
-                        <label className="text-xs text-secondary mb-1 block">Unit</label>
-                        <input type="text" value={form.unit} onChange={e => updateForm('unit', e.target.value)} placeholder="kg" className="w-full p-3 rounded-xl border border-separator bg-transparent" />
+                    <div className="form-group">
+                        <label className="label-standard block">Unit</label>
+                        <input type="text" value={form.unit} onChange={e => updateForm('unit', e.target.value)} placeholder="kg" className="input-standard" />
                     </div>
-                 </div>
-               </>
+               </div>
             )}
 
             {/* BOOLEAN */}
             {form.type === 'boolean' && (
-               <div className="flex gap-3">
-                  <div className="flex-1">
-                      <label className="text-xs text-secondary mb-1 block">"True" Label</label>
-                      <input type="text" value={form.config?.trueLabel || 'Yes'} onChange={e => updateConfig('trueLabel', e.target.value)} className="w-full p-3 rounded-xl border border-separator bg-transparent" />
+               <div className="form-row">
+                  <div className="form-group">
+                      <label className="label-standard block">"True" Label</label>
+                      <input type="text" value={form.config?.trueLabel || 'Yes'} onChange={e => updateConfig('trueLabel', e.target.value)} className="input-standard" />
                   </div>
-                  <div className="flex-1">
-                      <label className="text-xs text-secondary mb-1 block">"False" Label</label>
-                      <input type="text" value={form.config?.falseLabel || 'No'} onChange={e => updateConfig('falseLabel', e.target.value)} className="w-full p-3 rounded-xl border border-separator bg-transparent" />
+                  <div className="form-group">
+                      <label className="label-standard block">"False" Label</label>
+                      <input type="text" value={form.config?.falseLabel || 'No'} onChange={e => updateConfig('falseLabel', e.target.value)} className="input-standard" />
                   </div>
                </div>
             )}
@@ -139,8 +156,8 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
             {form.type === 'duration' && (
                <div className="flex flex-col gap-3">
                   <div>
-                      <label className="text-xs text-secondary mb-1 block">Daily Goal (Hours)</label>
-                      <input type="number" value={form.goal} onChange={e => updateForm('goal', e.target.value)} className="w-full p-3 rounded-xl border border-separator bg-transparent" />
+                      <label className="label-standard block">Daily Goal (Hours)</label>
+                      <input type="number" value={form.goal} onChange={e => updateForm('goal', e.target.value)} className="input-standard" />
                   </div>
                   <div className="flex items-center gap-3 p-3 rounded-xl border border-separator">
                       <input
@@ -156,29 +173,29 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
 
             {/* RANGE */}
             {form.type === 'range' && (
-               <div className="flex flex-col gap-3">
-                  <div className="flex gap-3">
-                      <div className="flex-1">
-                          <label className="text-xs text-secondary mb-1 block">Min Value</label>
-                          <input type="number" value={form.range.min} onChange={e => updateRange('min', e.target.value)} className="w-full p-3 rounded-xl border border-separator bg-transparent" />
+               <div className="flex flex-col gap-4">
+                  <div className="form-row">
+                      <div className="form-group">
+                          <label className="label-standard block">Min Value</label>
+                          <input type="number" value={form.range.min} onChange={e => updateRange('min', e.target.value)} className="input-standard" />
                       </div>
-                      <div className="flex-1">
-                          <label className="text-xs text-secondary mb-1 block">Max Value</label>
-                          <input type="number" value={form.range.max} onChange={e => updateRange('max', e.target.value)} className="w-full p-3 rounded-xl border border-separator bg-transparent" />
+                      <div className="form-group">
+                          <label className="label-standard block">Max Value</label>
+                          <input type="number" value={form.range.max} onChange={e => updateRange('max', e.target.value)} className="input-standard" />
                       </div>
-                      <div className="w-1/4">
-                          <label className="text-xs text-secondary mb-1 block">Step</label>
-                          <input type="number" value={form.range.step} onChange={e => updateRange('step', e.target.value)} className="w-full p-3 rounded-xl border border-separator bg-transparent" />
+                      <div className="form-group" style={{ flex: 0.5 }}>
+                          <label className="label-standard block">Step</label>
+                          <input type="number" value={form.range.step} onChange={e => updateRange('step', e.target.value)} className="input-standard" />
                       </div>
                   </div>
-                  <div className="flex gap-3">
-                      <div className="flex-1">
-                          <label className="text-xs text-secondary mb-1 block">Min Label (Optional)</label>
-                          <input type="text" value={form.config?.minLabel || ''} onChange={e => updateConfig('minLabel', e.target.value)} placeholder="Low" className="w-full p-3 rounded-xl border border-separator bg-transparent" />
+                  <div className="form-row">
+                      <div className="form-group">
+                          <label className="label-standard block">Min Label (Optional)</label>
+                          <input type="text" value={form.config?.minLabel || ''} onChange={e => updateConfig('minLabel', e.target.value)} placeholder="Low" className="input-standard" />
                       </div>
-                      <div className="flex-1">
-                          <label className="text-xs text-secondary mb-1 block">Max Label (Optional)</label>
-                          <input type="text" value={form.config?.maxLabel || ''} onChange={e => updateConfig('maxLabel', e.target.value)} placeholder="High" className="w-full p-3 rounded-xl border border-separator bg-transparent" />
+                      <div className="form-group">
+                          <label className="label-standard block">Max Label (Optional)</label>
+                          <input type="text" value={form.config?.maxLabel || ''} onChange={e => updateConfig('maxLabel', e.target.value)} placeholder="High" className="input-standard" />
                       </div>
                   </div>
                </div>
@@ -193,7 +210,7 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
                         value={newOption}
                         onChange={e => setNewOption(e.target.value)}
                         placeholder="Add option..."
-                        className="flex-1 p-3 rounded-xl border border-separator bg-transparent outline-none"
+                        className="input-standard flex-1"
                         onKeyDown={e => e.key === 'Enter' && handleAddOption()}
                       />
                       <OrbitButton onClick={handleAddOption} variant="secondary" className="!w-12 !px-0 !text-xl">+</OrbitButton>
@@ -214,40 +231,45 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
             {form.type === 'text' && (
                <div className="flex flex-col gap-3">
                   <div>
-                      <label className="text-xs text-secondary mb-1 block">Placeholder Prompt</label>
-                      <input type="text" value={form.config?.placeholder || ''} onChange={e => updateConfig('placeholder', e.target.value)} placeholder="e.g. How are you feeling?" className="w-full p-3 rounded-xl border border-separator bg-transparent" />
+                      <label className="label-standard block">Placeholder Prompt</label>
+                      <input type="text" value={form.config?.placeholder || ''} onChange={e => updateConfig('placeholder', e.target.value)} placeholder="e.g. How are you feeling?" className="input-standard" />
                   </div>
                   <div>
-                      <label className="text-xs text-secondary mb-1 block">Max Length (Optional)</label>
-                      <input type="number" value={form.config?.maxLength || ''} onChange={e => updateConfig('maxLength', e.target.value)} placeholder="140" className="w-full p-3 rounded-xl border border-separator bg-transparent" />
+                      <label className="label-standard block">Max Length (Optional)</label>
+                      <input type="number" value={form.config?.maxLength || ''} onChange={e => updateConfig('maxLength', e.target.value)} placeholder="140" className="input-standard" />
                   </div>
                </div>
             )}
         </div>
 
-        <div className="h-px bg-separator opacity-50" />
+        <div className="visualization-section">
+            <div className="section-divider">Visualization</div>
 
-        {/* Widget Style Select */}
-        <div>
-          <label className="text-xs font-bold text-secondary uppercase mb-1 block">Dashboard Widget</label>
-          <select
-            value={form.widgetType}
-            onChange={e => updateForm('widgetType', e.target.value)}
-            className="w-full p-3 rounded-xl border border-separator bg-transparent outline-none font-medium appearance-none"
-          >
-            <option value="ring">Ring Progress</option>
-            <option value="sparkline">Sparkline Trend</option>
-            <option value="heatmap">Consistency Grid</option>
-            <option value="stackedbar">Stacked Bar</option>
-            <option value="number">Simple Number</option>
-            <option value="streak">Streak Counter</option>
-            <option value="history">History Log</option>
-          </select>
+            {/* Widget Style Select */}
+            <div>
+              <label className="label-standard block">Dashboard Widget</label>
+              <select
+                value={form.widgetType}
+                onChange={e => updateForm('widgetType', e.target.value)}
+                className="input-standard"
+              >
+                <option value="ring">Ring Progress</option>
+                <option value="sparkline">Sparkline Trend</option>
+                <option value="heatmap">Consistency Grid</option>
+                <option value="stackedbar">Stacked Bar</option>
+                <option value="number">Simple Number</option>
+                <option value="streak">Streak Counter</option>
+                <option value="history">History Log</option>
+              </select>
+              <div className="widget-helper-text">
+                {WIDGET_DESCRIPTIONS[form.widgetType]}
+              </div>
+            </div>
         </div>
 
       </div>
 
-      <div className="p-4 border-t border-separator bg-bg-color">
+      <div className="modal-footer">
          <OrbitButton onClick={handleSave} variant="primary" className="w-full">
             {metric ? 'Update Metric' : 'Create Metric'}
          </OrbitButton>
