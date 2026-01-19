@@ -8,9 +8,7 @@ import {
   createLog,
   createMetric,
   createTimeLog,
-  validateMetrics,
   validateMetricValue,
-  validateLogEntries,
   migrateData
 } from '../types/schemas';
 
@@ -274,3 +272,22 @@ export const StorageProvider = ({ children }) => {
     </StorageContext.Provider>
   );
 };
+
+// HELPER FUNCTIONS
+function validateMetrics(metrics) {
+  if (!Array.isArray(metrics)) {
+    throw new Error("Invalid import: 'metrics' must be an array.");
+  }
+  // Optional: Check if the first item has an ID to verify structure
+  if (metrics.length > 0 && !metrics[0].id) {
+     console.warn("Import warning: Metrics missing ID fields");
+  }
+  return true;
+}
+
+function validateLogEntries(logs) {
+  if (!Array.isArray(logs)) {
+    throw new Error("Invalid import: 'logs' must be an array.");
+  }
+  return true;
+}
