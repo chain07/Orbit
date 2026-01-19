@@ -19,10 +19,18 @@ export const WidgetDataEngine = {
     // 1. Filter out hidden metrics
     const visibleMetrics = metrics.filter(m => m.dashboardVisible !== false);
 
+    // OPTIMIZATION: O(N) Pre-group logs by metricId
+    // Avoids O(M * N) complexity in the map loop below
+    const logsByMetric = new Map();
+    logs.forEach(l => {
+      if (!logsByMetric.has(l.metricId)) logsByMetric.set(l.metricId, []);
+      logsByMetric.get(l.metricId).push(l);
+    });
+
     // 2. Map each metric to a widget configuration
     return visibleMetrics.map(metric => {
-      // ENFORCEMENT: Strictly filter logs by metricId (UUID)
-      const metricLogs = logs.filter(l => l.metricId === metric.id);
+      // ENFORCEMENT: Strictly retrieve logs by metricId (UUID) from Map
+      const metricLogs = logsByMetric.get(metric.id) || [];
       let data = null;
 
       if (!metric.type) {

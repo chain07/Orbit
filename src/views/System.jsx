@@ -181,7 +181,7 @@ export const System = ({ onNavigate }) => {
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
       
       {/* Header - Fixed Leading and Overflow */}
-      <div className="flex justify-between items-end safe-mt">
+      <div className="flex justify-between items-center safe-mt">
          <div className="flex flex-col">
              <h1 className="text-3xl font-extrabold tracking-tight">System</h1>
              <p className="text-secondary font-medium">Configuration</p>
@@ -210,31 +210,35 @@ export const System = ({ onNavigate }) => {
 
             {/* Wrapped in Glass for better visual containment */}
             <Glass className="p-2">
-              <div className="flex flex-col gap-2">
-                  {unifiedList.map(item => (
-                      <div
-                          key={item.id}
-                          onClick={() => item.isMetric ? handleEditMetric(item) : handleViewLibraryItem(item)}
-                          className="p-3 rounded-xl border border-separator bg-card flex justify-between items-center cursor-pointer active:scale-[0.99] transition-transform hover:bg-bg-color/50"
-                      >
-                          <div className="flex items-center gap-3">
-                              <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg ${item.isMetric ? 'bg-bg-color text-blue' : 'bg-orange/10 text-orange'}`}>
-                                  {item.isMetric ? item.icon : <Icons.BookOpen size={20} />}
-                              </div>
-                              <div>
-                                  <div className="font-bold text-primary">{item.title}</div>
-                                  <div className="text-xs text-secondary flex items-center gap-1">
-                                      {item.category}
-                                      {!item.isMetric && <span className="text-[10px] bg-separator bg-opacity-30 px-1 rounded">Protocol</span>}
+              {unifiedList.length === 0 ? (
+                  <div className="p-8 text-center text-secondary font-medium">No metrics configured</div>
+              ) : (
+                  <div className="flex flex-col gap-2">
+                      {unifiedList.map(item => (
+                          <div
+                              key={item.id}
+                              onClick={() => item.isMetric ? handleEditMetric(item) : handleViewLibraryItem(item)}
+                              className="p-3 rounded-xl border border-separator bg-card flex justify-between items-center cursor-pointer active:scale-[0.99] transition-transform hover:bg-bg-color/50"
+                          >
+                              <div className="flex items-center gap-3">
+                                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg ${item.isMetric ? 'bg-bg-color text-blue' : 'bg-orange/10 text-orange'}`}>
+                                      {item.isMetric ? item.icon : <Icons.BookOpen size={20} />}
+                                  </div>
+                                  <div>
+                                      <div className="font-bold text-primary">{item.title}</div>
+                                      <div className="text-xs text-secondary flex items-center gap-1">
+                                          {item.category}
+                                          {!item.isMetric && <span className="text-[10px] bg-separator bg-opacity-30 px-1 rounded">Protocol</span>}
+                                      </div>
                                   </div>
                               </div>
+                              <div className="text-secondary opacity-30">
+                                  <Icons.ChevronRight size={16} />
+                              </div>
                           </div>
-                          <div className="text-secondary opacity-30">
-                              <Icons.ChevronRight size={16} />
-                          </div>
-                      </div>
-                  ))}
-              </div>
+                      ))}
+                  </div>
+              )}
             </Glass>
 
             <OrbitButton onClick={openNewLibraryItem} variant="secondary" className="mt-4 w-full !text-blue">

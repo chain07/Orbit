@@ -169,6 +169,19 @@ export const StorageProvider = ({ children }) => {
 
   const importData = useCallback((jsonData) => {
     if (!jsonData) return;
+
+    // SCHEMA VALIDATION (Security Critical)
+    const isValidSchema = (data) => {
+        if (!data || typeof data !== 'object') return false;
+        // Basic array check is minimum requirement
+        if (!Array.isArray(data.metrics) && !Array.isArray(data.logEntries)) return false;
+        return true;
+    };
+
+    if (!isValidSchema(jsonData)) {
+        alert("Invalid Orbit Data File");
+        return;
+    }
     
     // Apply migration to imported data
     const migrated = migrateData(jsonData);

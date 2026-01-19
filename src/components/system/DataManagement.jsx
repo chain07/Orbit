@@ -24,7 +24,8 @@ export const DataManagement = () => {
         const archive = localStorage.getItem('orbit_archive') || '';
         const totalBytes = (db.length + archive.length) * 2;
         const limitBytes = 5242880; // 5MB limit
-        const percent = Math.min((totalBytes / limitBytes) * 100, 100);
+        const rawPercent = (totalBytes / limitBytes) * 100;
+        const percent = isNaN(rawPercent) ? 0 : Math.min(rawPercent, 100);
 
         setStorageStats({
           usedBytes: totalBytes,
@@ -186,12 +187,14 @@ export const DataManagement = () => {
 
       <div className="border-t border-separator/50" />
 
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center gap-2 text-primary font-bold">
+      {/* Increased spacing between sections (4B) */}
+      <div className="flex flex-col gap-1 mt-2">
+        {/* Tightened header grouping (4A) */}
+        <div className="flex items-center gap-2 text-primary font-bold mb-1">
           <Icons.Archive size={18} className="text-purple" />
           <h3>Archival Engine</h3>
         </div>
-        <p className="text-xs text-secondary leading-relaxed">
+        <p className="text-xs text-secondary leading-relaxed mb-2">
           Offload data older than 1 year to a JSON file and remove it from local storage to free up space.
         </p>
         <OrbitButton
@@ -206,7 +209,8 @@ export const DataManagement = () => {
 
       <div className="border-t border-separator/50" />
 
-      <div className="flex flex-col gap-3">
+      {/* Increased spacing above Universal Export (4C) */}
+      <div className="flex flex-col gap-3 mt-2">
         <div className="flex items-center gap-2 text-primary font-bold">
           <Icons.Save size={18} className="text-green" />
           <h3>Universal Export</h3>
@@ -230,6 +234,7 @@ export const DataManagement = () => {
           </OrbitButton>
         </div>
 
+        {/* Applied gap-3 to button container (4D) */}
         <div className="flex gap-3 mt-2">
            <OrbitButton
              onClick={handleImportClick}

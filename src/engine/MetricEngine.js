@@ -163,11 +163,14 @@ export const MetricEngine = {
     const cutoffTime = cutoffDate.getTime();
 
     logs.forEach(l => {
-      const d = new Date(l.timestamp);
+      // OPTIMIZED: Avoid new Date(l.timestamp) if possible, but we need date parts.
+      // However, we can use timestamp for quick cutoff check first
+      const ts = new Date(l.timestamp).getTime();
 
       // Optimization: Skip logs older than the window
-      if (d.getTime() < cutoffTime) return;
+      if (ts < cutoffTime) return;
 
+      const d = new Date(ts);
       // Construct key manually to avoid slow string formatting
       const key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
       buckets[key] = (buckets[key] || 0) + (parseFloat(l.value) || 0);
@@ -175,10 +178,14 @@ export const MetricEngine = {
 
     // 2. Generate result array from buckets
     const values = [];
+    // Optimization: Avoid new Date() inside loop for key generation
+    // Start from 'now' and subtract
     for (let i = days - 1; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      const key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+      // Reset target to Today - i
+      const target = new Date(now);
+      target.setDate(target.getDate() - i);
+
+      const key = `${target.getFullYear()}-${target.getMonth() + 1}-${target.getDate()}`;
       values.push(buckets[key] || 0);
     }
     return values;
