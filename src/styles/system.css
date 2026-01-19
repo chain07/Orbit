@@ -7,6 +7,11 @@
   align-items: center; /* Fixes vertical alignment */
 }
 
+.system-header h1,
+.system-header p {
+  margin: 0; /* Reset browser defaults for tight alignment */
+}
+
 /* Data Management Spacing Fixes */
 .section-label {
   font-size: 15px; /* text-md equivalent */
@@ -23,7 +28,7 @@
 
 .archival-description {
   margin-top: 0;      /* Remove default p margin if any */
-  margin-bottom: 24px;
+  margin-bottom: 12px; /* Tighten to button */
 }
 
 /* Universal Export Crowding */
@@ -36,6 +41,7 @@
   display: flex;
   gap: 12px; /* 12px gap between buttons */
   width: 100%;
+  margin-top: 16px; /* Prevent collision with Export section */
 }
 
 /* Storage Meter Track Override */
