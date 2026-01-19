@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useMemo } from 'react';
 import { StorageContext } from '../context/StorageContext';
 import { Glass } from '../components/ui/Glass';
 import { MetricBuilder } from '../components/system/MetricBuilder';
@@ -24,6 +24,18 @@ export const System = ({ onNavigate }) => {
   const [showBuilder, setShowBuilder] = useState(false);
   const [editingMetric, setEditingMetric] = useState(null);
 
+  // Unified List Logic (Current Branch)
+  const unifiedList = useMemo(() => {
+    return metrics.map(m => ({
+      ...m,
+      isMetric: true,
+      category: 'Metric',
+      title: m.name,
+      icon: getTypeIcon(m.type)
+    }));
+  }, [metrics]);
+
+  // Handler Functions (Incoming Branch - Security Fixes)
   const handleEditMetric = (metric) => {
     setEditingMetric(metric);
     setShowBuilder(true);
@@ -36,6 +48,7 @@ export const System = ({ onNavigate }) => {
 
   const handleSaveMetric = (metric) => {
     if (!metric.id) {
+      // Secure ID generation from incoming branch
       metric.id = metric.label.toLowerCase().replace(/\s+/g, '_') + '_' + Math.random().toString(36).substr(2, 5);
     }
     if (editingMetric) updateMetric(metric);
@@ -120,20 +133,20 @@ export const System = ({ onNavigate }) => {
             ) : (
                 <Glass className="p-2">
                   <div className="flex flex-col gap-2">
-                      {metrics.map(metric => (
+                      {unifiedList.map(item => (
                           <div
-                              key={metric.id}
-                              onClick={() => handleEditMetric(metric)}
+                              key={item.id}
+                              onClick={() => handleEditMetric(item)}
                               className="p-3 rounded-xl border border-separator bg-card flex justify-between items-center cursor-pointer active:scale-[0.99] transition-transform hover:bg-bg-color/50"
                           >
                               <div className="flex items-center gap-3">
                                   <div className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg bg-bg-color text-blue">
-                                      {getTypeIcon(metric.type)}
+                                      {item.icon}
                                   </div>
                                   <div>
-                                      <div className="font-bold text-primary">{metric.name}</div>
+                                      <div className="font-bold text-primary">{item.title}</div>
                                       <div className="text-xs text-secondary flex items-center gap-1">
-                                          {metric.type.charAt(0).toUpperCase() + metric.type.slice(1)} Metric
+                                          {item.category}
                                       </div>
                                   </div>
                               </div>
