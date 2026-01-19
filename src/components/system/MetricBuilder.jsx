@@ -3,6 +3,16 @@ import { Glass } from '../ui/Glass';
 import { Icons } from '../ui/Icons';
 import { OrbitButton } from '../ui/OrbitButton';
 
+const WIDGET_DESCRIPTIONS = {
+  ring: "Visualizes progress towards a daily numeric goal.",
+  sparkline: "Shows the trajectory of values over the last 7 days.",
+  heatmap: "Heatmap tracking for daily habits and completion.",
+  stackedbar: "Breaks down total activity by category.",
+  number: "Displays the raw total or latest value.",
+  streak: "Highlights consecutive days of activity.",
+  history: "A chronological list of all entries."
+};
+
 export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
   const [form, setForm] = useState({
     id: metric?.id,

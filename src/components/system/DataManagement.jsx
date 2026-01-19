@@ -155,7 +155,7 @@ export const DataManagement = () => {
   const percentNum = Number(storageStats.percent);
 
   return (
-    <div className="card">
+    <div className="card" style={{ transform: 'none', transition: 'none' }}>
       <div className="section-label">Storage</div>
       {/* Storage Meter */}
       <div className="flex flex-col gap-2 mb-6">
