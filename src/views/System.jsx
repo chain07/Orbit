@@ -8,15 +8,26 @@ import { Icons } from '../components/ui/Icons';
 import { OrbitButton } from '../components/ui/OrbitButton';
 import '../styles/index.css';
 
+// Widget descriptions for Helper Text
+const WIDGET_DESCRIPTIONS = {
+  "Ring Progress": "Visualizes progress towards a daily numeric goal.",
+  "Sparkline Trend": "Shows the trajectory of values over the last 7 days.",
+  "Consistency Grid": "Heatmap tracking for daily habits and completion.",
+  "Stacked Bar": "Breaks down total activity by category.",
+  "Simple Number": "Displays the raw total or latest value.",
+  "Streak Counter": "Highlights consecutive days of activity.",
+  "History Log": "A chronological list of all entries."
+};
+
 export const System = ({ onNavigate }) => {
-  const { 
-    metrics, 
-    addMetric, 
-    updateMetric, 
+  const {
+    metrics,
+    addMetric,
+    updateMetric,
     logEntries,
     addLogEntry
   } = useContext(StorageContext);
-  
+
   const [viewMode, setViewMode] = useState('Metrics'); // 'Metrics' | 'Settings'
   const [isDebugMode, setIsDebugMode] = useState(false);
 
@@ -24,7 +35,7 @@ export const System = ({ onNavigate }) => {
   const [showBuilder, setShowBuilder] = useState(false);
   const [editingMetric, setEditingMetric] = useState(null);
 
-  // Unified List Logic (Current Branch)
+  // Unified List Logic (From Remediation Branch - UI Polish)
   const unifiedList = useMemo(() => {
     return metrics.map(m => ({
       ...m,
@@ -35,7 +46,7 @@ export const System = ({ onNavigate }) => {
     }));
   }, [metrics]);
 
-  // Handler Functions (Incoming Branch - Security Fixes)
+  // Handler Functions (From Main Branch - Security Fixes)
   const handleEditMetric = (metric) => {
     setEditingMetric(metric);
     setShowBuilder(true);
@@ -51,41 +62,44 @@ export const System = ({ onNavigate }) => {
       // Secure ID generation from incoming branch
       metric.id = metric.label.toLowerCase().replace(/\s+/g, '_') + '_' + Math.random().toString(36).substr(2, 5);
     }
+    
     if (editingMetric) updateMetric(metric);
     else addMetric(metric);
     setShowBuilder(false);
   };
 
   const seedTestData = () => {
-      if (!confirm("Inject random test data? This will affect your stats.")) return;
-      const now = new Date();
-      metrics.forEach(m => {
-          for(let i=0; i<7; i++) {
-               const date = new Date();
-               date.setDate(now.getDate() - i);
-               const val = m.type === 'boolean' ? Math.random() > 0.5 : Math.floor(Math.random() * 10);
-               addLogEntry({
-                   metricId: m.id,
-                   value: val,
-                   timestamp: date.toISOString()
-               });
-          }
-      });
-      alert("Test data seeded.");
+    if (!confirm("Inject random test data? This will affect your stats.")) return;
+    
+    const now = new Date();
+    metrics.forEach(m => {
+      for(let i=0; i<7; i++) {
+        const date = new Date();
+        date.setDate(now.getDate() - i);
+        const val = m.type === 'boolean' ? Math.random() > 0.5 : Math.floor(Math.random() * 10);
+        
+        addLogEntry({
+          metricId: m.id,
+          value: val,
+          timestamp: date.toISOString()
+        });
+      }
+    });
+    alert("Test data seeded.");
   };
 
   const exportArchive = () => {
-      const archive = {
-          timestamp: new Date().toISOString(),
-          metrics,
-          logs: logEntries
-      };
-      const blob = new Blob([JSON.stringify(archive, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `orbit-debug-archive.json`;
-      a.click();
+    const archive = {
+      timestamp: new Date().toISOString(),
+      metrics,
+      logs: logEntries
+    };
+    const blob = new Blob([JSON.stringify(archive, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'orbit-debug-archive.json';
+    a.click();
   };
 
   return (
@@ -93,71 +107,71 @@ export const System = ({ onNavigate }) => {
       
       {/* Header */}
       <div className="safe-mt">
-         <h1 className="text-3xl font-extrabold tracking-tight">System</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight">System</h1>
+        
+        <div className="system-toggle-wrapper">
+          <SegmentedControl
+            options={['Metrics', 'Settings']}
+            value={viewMode}
+            onChange={setViewMode}
+          />
+        </div>
 
-         <div className="system-toggle-wrapper">
-             <SegmentedControl
-                options={['Metrics', 'Settings']}
-                value={viewMode}
-                onChange={setViewMode}
-             />
-         </div>
-
-         <p className="text-secondary font-medium system-subheader">Configuration</p>
+        <p className="text-secondary font-medium system-subheader">Configuration</p>
       </div>
 
       {/* --- METRICS VIEW --- */}
       {viewMode === 'Metrics' && (
         <div className="flex flex-col gap-4">
-            <OrbitButton
-                onClick={handleAddMetric}
-                variant="primary"
-                className="w-full"
-                icon={<span className="text-xl leading-none">+</span>}
-            >
-                Add New Metric
-            </OrbitButton>
+          <OrbitButton 
+            onClick={handleAddMetric}
+            variant="primary"
+            className="w-full"
+            icon={<span className="text-xl leading-none">+</span>}
+          >
+            Add New Metric
+          </OrbitButton>
 
-            {metrics.length === 0 ? (
-                <Glass className="flex flex-col items-center justify-center p-8 text-center gap-3 opacity-80">
-                    <div className="w-12 h-12 rounded-full bg-separator/20 flex items-center justify-center mb-1">
-                        <Icons.Activity size={24} className="text-secondary" />
-                    </div>
-                    <div className="w-full text-center">
-                        <div className="font-bold text-lg">No Metrics</div>
-                        <div className="text-secondary text-sm max-w-[200px] mx-auto leading-relaxed">
-                            Create your first metric to start tracking your data.
+          {metrics.length === 0 ? (
+            <Glass className="flex flex-col items-center justify-center p-8 text-center gap-3 opacity-80">
+              <div className="w-12 h-12 rounded-full bg-separator/20 flex items-center justify-center mb-1">
+                <Icons.Activity size={24} className="text-secondary" />
+              </div>
+              <div className="w-full text-center">
+                <div className="font-bold text-lg">No Metrics</div>
+                <div className="text-secondary text-sm max-w-[200px] mx-auto leading-relaxed">
+                  Create your first metric to start tracking your data.
+                </div>
+              </div>
+            </Glass>
+          ) : (
+            <Glass className="p-2">
+              <div className="flex flex-col gap-2">
+                {unifiedList.map((item) => (
+                  <div 
+                    key={item.id}
+                    onClick={() => handleEditMetric(item)}
+                    className="p-3 rounded-xl border border-separator bg-card flex justify-between items-center cursor-pointer active:scale-[0.99] transition-transform hover:bg-bg-color/50"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg bg-bg-color text-blue">
+                         {item.icon}
+                      </div>
+                      <div>
+                        <div className="font-bold text-primary">{item.title}</div>
+                        <div className="text-xs text-secondary flex items-center gap-1">
+                          {item.category}
                         </div>
+                      </div>
                     </div>
-                </Glass>
-            ) : (
-                <Glass className="p-2">
-                  <div className="flex flex-col gap-2">
-                      {unifiedList.map(item => (
-                          <div
-                              key={item.id}
-                              onClick={() => handleEditMetric(item)}
-                              className="p-3 rounded-xl border border-separator bg-card flex justify-between items-center cursor-pointer active:scale-[0.99] transition-transform hover:bg-bg-color/50"
-                          >
-                              <div className="flex items-center gap-3">
-                                  <div className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg bg-bg-color text-blue">
-                                      {item.icon}
-                                  </div>
-                                  <div>
-                                      <div className="font-bold text-primary">{item.title}</div>
-                                      <div className="text-xs text-secondary flex items-center gap-1">
-                                          {item.category}
-                                      </div>
-                                  </div>
-                              </div>
-                              <div className="text-secondary opacity-30">
-                                  <Icons.ChevronRight size={16} />
-                              </div>
-                          </div>
-                      ))}
+                    <div className="text-secondary opacity-30">
+                      <Icons.ChevronRight size={16} />
+                    </div>
                   </div>
-                </Glass>
-            )}
+                ))}
+              </div>
+            </Glass>
+          )}
         </div>
       )}
 
@@ -183,7 +197,7 @@ export const System = ({ onNavigate }) => {
                     </div>
                     <div className="flex justify-between items-center p-4">
                         <span className="font-medium">Developer Mode</span>
-                        <button
+                        <button 
                             onClick={() => setIsDebugMode(!isDebugMode)}
                             className={`w-10 h-6 rounded-full relative transition-colors ${isDebugMode ? 'bg-blue' : 'bg-separator/30'}`}
                         >
@@ -211,10 +225,10 @@ export const System = ({ onNavigate }) => {
 
       {showBuilder && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4">
-          <MetricBuilder
-            metric={editingMetric}
-            onSave={handleSaveMetric}
-            onCancel={() => setShowBuilder(false)}
+          <MetricBuilder 
+            metric={editingMetric} 
+            onSave={handleSaveMetric} 
+            onCancel={() => setShowBuilder(false)} 
           />
         </div>
       )}
