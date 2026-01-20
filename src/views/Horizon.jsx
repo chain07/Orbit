@@ -1,4 +1,4 @@
-import React, { useContext, useState, useMemo } from 'react';
+import React, { useContext, useState, useMemo, useRef } from 'react';
 import { StorageContext } from '../context/StorageContext';
 import { NavigationContext } from '../context/NavigationContext';
 import { WidgetDataEngine } from '../engine/WidgetDataEngine';
@@ -36,7 +36,7 @@ class WidgetErrorBoundary extends React.Component {
 }
 
 export const Horizon = () => {
-  const { metrics, logEntries, resetOnboarding } = useContext(StorageContext);
+  const { metrics, logEntries, resetOnboarding, onboardingComplete } = useContext(StorageContext);
   const { setActiveTab } = useContext(NavigationContext);
   const [segment, setSegment] = useState('Weekly');
   const [isEditing, setIsEditing] = useState(false);
@@ -85,7 +85,7 @@ export const Horizon = () => {
     const isColdStart = !hasMetrics || (logEntries && logEntries.length === 0);
 
     if (isColdStart) {
-      return [{ message: "I am your Horizon Agent. I work privately on your device to uncover patterns in your habits. Once you start logging, I'll reveal trends, momentum shifts, and correlations to help you optimize your routine." }];
+      return [{ message: "I’m your Horizon Agent. I analyze your data to find trends, correlations, and momentum." }];
     }
     return topInsights;
   }, [hasMetrics, logEntries, topInsights]);
@@ -145,7 +145,7 @@ export const Horizon = () => {
          <AgentCard />
       )}
 
-      {!hasMetrics && (
+      {!hasMetrics && !onboardingComplete && (
         <EmptyState 
           icon="🚀"
           title="Welcome to ORBIT"

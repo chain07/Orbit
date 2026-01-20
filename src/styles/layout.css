@@ -27,7 +27,7 @@
   padding-bottom: 24px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 4px;
 }
 
 /* Fixed Bottom Navigation Container */

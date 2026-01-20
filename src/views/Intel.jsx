@@ -58,17 +58,16 @@ export const Intel = () => {
         <Glass className="flex flex-col justify-between min-h-[140px] relative overflow-hidden">
           <div className="text-xs font-bold text-secondary uppercase tracking-wide z-10">System Health</div>
           {hasData ? (
-             <div className="flex flex-col items-center my-2 z-10">
-               <div className="text-5xl font-black text-primary tracking-tighter">{stats.reliability}%</div>
+             <div className="flex flex-col items-center my-2 z-10 gap-2">
+               <div className="text-6xl font-black text-primary tracking-tighter">{stats.reliability}%</div>
                <div className={`text-sm font-bold mt-1 px-2 py-0.5 rounded-full ${stats.trend.startsWith('-') ? 'bg-red/10 text-red' : 'bg-green/10 text-green'}`}>
                  {stats.trend}
                </div>
              </div>
           ) : (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="relative flex items-center justify-center">
-                 <RingChart value={100} size={100} strokeWidth={10} color="rgba(255,255,255,0.1)" bgColor="rgba(0,0,0,0.05)" />
-                 <div className="absolute font-bold text-secondary text-xs uppercase tracking-wider opacity-50">0%</div>
+              <div className="relative flex items-center justify-center opacity-40 grayscale">
+                 <div className="text-6xl font-black text-secondary opacity-30 tracking-tighter">0%</div>
               </div>
             </div>
           )}
@@ -78,9 +77,22 @@ export const Intel = () => {
           <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-blue opacity-5 rounded-full blur-2xl"></div>
         </Glass>
 
-        <Glass className="flex flex-col justify-between min-h-[140px] relative overflow-hidden">
+        <Glass className="flex flex-col justify-between min-h-[140px] relative overflow-hidden gap-4">
           <div className="text-xs font-bold text-secondary uppercase tracking-wide z-10">Momentum</div>
-          {hasData ? (
+
+          {/* Background Grid - Always Visible */}
+          <div className="absolute inset-x-4 top-10 bottom-0 flex items-center justify-center opacity-20 pointer-events-none">
+               <svg viewBox="0 0 100 60" className="w-full h-full text-secondary" preserveAspectRatio="none">
+                  <line x1="0" y1="0" x2="100" y2="0" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2,2" vectorEffect="non-scaling-stroke" />
+                  <line x1="0" y1="30" x2="100" y2="30" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2,2" vectorEffect="non-scaling-stroke" />
+                  <line x1="0" y1="60" x2="100" y2="60" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2,2" vectorEffect="non-scaling-stroke" />
+                  {[0, 16.6, 33.3, 50, 66.6, 83.3, 100].map(x => (
+                     <line key={x} x1={x} y1="0" x2={x} y2="60" stroke="currentColor" strokeWidth="0.5" strokeOpacity="0.5" vectorEffect="non-scaling-stroke" />
+                  ))}
+               </svg>
+          </div>
+
+          {hasData && (
             <div className="flex flex-col items-center my-2 z-10">
                <div className={`text-4xl font-black tracking-tight ${
                  stats.intensity === 'Peak' ? 'text-red' :
@@ -90,18 +102,17 @@ export const Intel = () => {
                  {stats.intensity}
                </div>
             </div>
-          ) : (
-             <div className="absolute inset-x-4 top-10 bottom-0 flex items-center justify-center opacity-30 pointer-events-none">
-                <Sparkline
-                  data={[0, 0, 0, 0, 0, 0, 0]}
-                  lineColor="var(--neutral-graph)"
-                  fillColor="transparent"
-                  height={60}
-                  showDots={false}
-                />
+          )}
+
+          {hasData && (
+             <div className="absolute right-2 top-0 bottom-0 flex flex-col justify-between text-[8px] font-mono text-secondary py-4 pointer-events-none">
+                 <span>10</span>
+                 <span>5</span>
+                 <span>0</span>
              </div>
           )}
-          <div className="text-xs text-secondary text-center opacity-80 z-10 relative">Status: {hasData ? stats.status : 'Offline'}</div>
+
+          <div className="text-xs text-secondary text-center opacity-80 z-10 relative mt-auto pb-1">Status: {hasData ? stats.status : 'Offline'}</div>
            <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-orange opacity-5 rounded-full blur-2xl"></div>
         </Glass>
       </div>

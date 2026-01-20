@@ -93,7 +93,7 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
         </div>
 
         {/* Grid Row: Type + Color */}
-        <div className="form-row">
+        <div className="form-row mb-6">
              <div className="form-group">
                 <label className="label-standard block">Type</label>
                 <select

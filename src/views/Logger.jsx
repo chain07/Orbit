@@ -5,14 +5,17 @@ import { DailyCheckInForm } from '../components/logger/DailyCheckInForm';
 import { TimeTracker } from '../components/logger/TimeTracker';
 import { Timeline } from '../components/logger/Timeline';
 import { StorageContext } from '../context/StorageContext';
+import { MetricBuilder } from '../components/system/MetricBuilder';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Icons } from '../components/ui/Icons';
+import { OrbitButton } from '../components/ui/OrbitButton';
 import '../styles/motion.css';
 
 export const Logger = ({ initialMetricId = null }) => {
-  const { metrics } = useContext(StorageContext);
+  const { metrics, addMetric, updateMetric } = useContext(StorageContext);
   const [activeMode, setActiveMode] = useState('checkin');
   const [selectedTrackerMetric, setSelectedTrackerMetric] = useState('');
+  const [showBuilder, setShowBuilder] = useState(false);
 
   useEffect(() => {
     if (initialMetricId) {
@@ -31,12 +34,22 @@ export const Logger = ({ initialMetricId = null }) => {
   const hasMetrics = metrics && metrics.length > 0;
   const timeMetrics = metrics.filter(m => m.type === 'number' || m.type === 'duration');
 
+  const handleSaveMetric = (metric) => {
+    if (!metric.id) {
+       metric.id = metric.label.toLowerCase().replace(/\s+/g, '_') + '_' + Math.random().toString(36).substr(2, 5);
+       addMetric(metric);
+    } else {
+       updateMetric(metric);
+    }
+    setShowBuilder(false);
+  };
+
   return (
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
       <div className="view-header-stack">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight">Logger</h1>
-          <p className="text-secondary font-medium leading-tight">Input engine.</p>
+          <p className="text-secondary font-medium system-subheader">Input engine.</p>
         </div>
 
         <SegmentedControl
@@ -49,14 +62,39 @@ export const Logger = ({ initialMetricId = null }) => {
         />
       </div>
 
+      {/* Persistent Create Activity Action */}
+      {hasMetrics && (
+        <div className="flex justify-end -mt-4">
+             <button
+                onClick={() => setShowBuilder(true)}
+                className="text-xs font-bold text-blue flex items-center gap-1 bg-blue/10 px-3 py-1.5 rounded-full hover:bg-blue/20 transition-colors"
+             >
+                 <span className="text-lg leading-none">+</span> New Activity
+             </button>
+        </div>
+      )}
+
       <div className="fade-in">
         {activeMode === 'checkin' ? (
           !hasMetrics ? (
-            <EmptyState
-              icon={<Icons.Edit3 size={48} className="text-secondary opacity-50" />}
-              title="No Metrics Configured"
-              message="You need to define what to track before you can log data."
-            />
+            <Glass className="p-8 flex flex-col items-center justify-center text-center gap-4">
+                <div className="w-16 h-16 rounded-full bg-blue/10 flex items-center justify-center text-blue">
+                    <Icons.Activity size={32} />
+                </div>
+                <div>
+                    <h3 className="font-bold text-xl text-primary">Start Tracking</h3>
+                    <p className="text-secondary text-sm mt-1 max-w-[240px] mx-auto">
+                        Create your first activity to begin logging your progress.
+                    </p>
+                </div>
+                <OrbitButton
+                    onClick={() => setShowBuilder(true)}
+                    variant="primary"
+                    className="!w-auto px-8"
+                >
+                    Create Activity
+                </OrbitButton>
+            </Glass>
           ) : (
             <DailyCheckInForm />
           )
@@ -106,6 +144,15 @@ export const Logger = ({ initialMetricId = null }) => {
         </div>
         <Timeline />
       </div>
+
+      {showBuilder && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4 animate-fade-in">
+          <MetricBuilder
+            onSave={handleSaveMetric}
+            onCancel={() => setShowBuilder(false)}
+          />
+        </div>
+      )}
     </div>
   );
 };
