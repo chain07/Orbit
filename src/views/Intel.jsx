@@ -39,14 +39,12 @@ export const Intel = () => {
   return (
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
       
-      {/* Header - Fixed Gap */}
-      <div className="flex flex-col gap-0 safe-pt">
-        <h1 className="text-3xl font-extrabold tracking-tight">Intelligence</h1>
-        <p className="text-secondary font-medium">Pattern and telemetry analysis.</p>
-      </div>
+      <div className="view-header-stack">
+        <div className="flex flex-col gap-0">
+          <h1 className="text-3xl font-extrabold tracking-tight">Intelligence</h1>
+          <p className="text-secondary font-medium">Pattern and telemetry analysis.</p>
+        </div>
 
-      {/* Added Margin Bottom */}
-      <div className="mb-4">
         <SegmentedControl
           options={segments.map(s => ({ label: s, value: s }))}
           value={segment}
@@ -68,7 +66,7 @@ export const Intel = () => {
         </Glass>
 
         <Glass className="flex flex-col justify-between min-h-[140px] relative overflow-hidden">
-          <div className="text-xs font-bold text-secondary uppercase tracking-wide z-10">Intensity</div>
+          <div className="text-xs font-bold text-secondary uppercase tracking-wide z-10">Momentum</div>
           <div className="flex flex-col items-center my-2 z-10">
              <div className={`text-4xl font-black tracking-tight ${
                stats.intensity === 'Peak' ? 'text-red' : 

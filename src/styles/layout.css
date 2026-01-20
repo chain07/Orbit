@@ -94,3 +94,12 @@
     background: rgba(255,255,255,0.15); /* Dark mode */
   }
 }
+
+/* Consolidated Header Stack */
+.view-header-stack {
+  padding-top: max(20px, env(safe-area-inset-top));
+  padding-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}

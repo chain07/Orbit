@@ -106,18 +106,17 @@ export const System = ({ onNavigate }) => {
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
       
       {/* Header */}
-      <div className="safe-mt">
-        <h1 className="text-3xl font-extrabold tracking-tight">System</h1>
-        
-        <div className="system-toggle-wrapper">
-          <SegmentedControl
-            options={['Metrics', 'Settings']}
-            value={viewMode}
-            onChange={setViewMode}
-          />
+      <div className="view-header-stack">
+        <div className="flex flex-col gap-0">
+          <h1 className="text-3xl font-extrabold tracking-tight">System</h1>
+          <p className="text-secondary font-medium system-subheader">Configuration</p>
         </div>
 
-        <p className="text-secondary font-medium system-subheader">Configuration</p>
+        <SegmentedControl
+          options={['Metrics', 'Settings']}
+          value={viewMode}
+          onChange={setViewMode}
+        />
       </div>
 
       {/* --- METRICS VIEW --- */}
