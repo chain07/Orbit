@@ -121,14 +121,12 @@ export const OnboardingWizard = ({ onComplete }) => {
         <div>
           <label className="text-xs font-bold text-secondary uppercase">Color</label>
            <div className="flex gap-3 mt-1">
-             {['#007AFF', '#34C759', '#FF9500', '#FF3B30', '#AF52DE'].map(c => (
-               <button
-                 key={c}
-                 onClick={() => updateField(metricSlot, 'color', c)}
-                 style={{ backgroundColor: c }}
-                 className={`w-10 h-10 rounded-full transition-transform active:scale-90 ${data.color === c ? 'ring-2 ring-offset-2 ring-primary scale-110' : ''}`}
+               <input
+                  type="color"
+                  value={data.color}
+                  onChange={(e) => updateField(metricSlot, 'color', e.target.value)}
+                  className="input-color"
                />
-             ))}
            </div>
         </div>
       </div>

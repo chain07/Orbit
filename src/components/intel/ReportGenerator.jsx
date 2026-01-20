@@ -17,6 +17,7 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
     streaks: true,
     completion: true
   });
+  const [showSections, setShowSections] = useState(false); // New State
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
@@ -98,31 +99,40 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
 
         {/* Section Toggles - Fixed: Styled Switches */}
         <div className="flex flex-col gap-3 border-t border-separator pt-4">
-          <div className="text-xs font-bold text-secondary uppercase tracking-wide">
-            Include Sections
+          <div
+             className="flex justify-between items-center cursor-pointer"
+             onClick={() => setShowSections(!showSections)}
+          >
+             <div className="text-xs font-bold text-secondary uppercase tracking-wide">Include Sections</div>
+             <div className="text-secondary opacity-50">
+               {showSections ? <Icons.ChevronUp size={14} /> : <Icons.ChevronDown size={14} />}
+             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            {Object.entries(selectedSections).map(([key, value]) => (
-                <label key={key} className="flex items-center justify-between p-2 rounded-lg hover:bg-bg-color/50 transition-colors cursor-pointer group">
-                  <span className="text-sm font-medium capitalize text-primary/80 group-hover:text-primary transition-colors">
-                    {key.replace(/([A-Z])/g, ' $1').trim()}
-                  </span>
 
-                  {/* CSS-Only Toggle Switch */}
-                  <div className="relative inline-block w-10 h-6 align-middle select-none transition duration-200 ease-in">
-                      <input
-                        type="checkbox"
-                        name={key}
-                        checked={value}
-                        onChange={() => toggleSection(key)}
-                        className="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-transform duration-200 ease-in-out left-0.5 top-0.5 checked:translate-x-full"
-                        style={{ border: 'none', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}
-                      />
-                      <div className={`toggle-label block overflow-hidden h-6 rounded-full cursor-pointer transition-colors duration-200 ${value ? 'bg-blue' : 'bg-separator'}`}></div>
-                  </div>
-                </label>
-            ))}
-          </div>
+          {showSections && (
+            <div className="grid grid-cols-2 gap-3 animate-fade-in">
+              {Object.entries(selectedSections).map(([key, value]) => (
+                  <label key={key} className="flex items-center justify-between p-2 rounded-lg hover:bg-bg-color/50 transition-colors cursor-pointer group">
+                    <span className="text-sm font-medium capitalize text-primary/80 group-hover:text-primary transition-colors">
+                      {key.replace(/([A-Z])/g, ' $1').trim()}
+                    </span>
+
+                    {/* CSS-Only Toggle Switch */}
+                    <div className="relative inline-block w-10 h-6 align-middle select-none">
+                        <input
+                          type="checkbox"
+                          name={key}
+                          checked={value}
+                          onChange={() => toggleSection(key)}
+                          className="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-transform duration-200 ease-in-out left-0.5 top-0.5 checked:translate-x-full z-10"
+                          style={{ border: 'none', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}
+                        />
+                        <div className={`toggle-label block overflow-hidden h-6 rounded-full transition-colors duration-200 ${value ? 'bg-blue' : 'bg-separator'}`}></div>
+                    </div>
+                  </label>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Action Buttons - Styled Standard Buttons */}

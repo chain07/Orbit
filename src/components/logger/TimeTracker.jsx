@@ -5,11 +5,13 @@ import { Icons } from '../../components/ui/Icons';
 import { OrbitButton } from '../ui/OrbitButton';
 
 export const TimeTracker = ({ metricId }) => {
-  const { metrics, addTimeLog } = useContext(StorageContext);
+  const { metrics, addTimeLog, addMetric } = useContext(StorageContext);
   
   // State
   const [mode, setMode] = useState('timer'); // 'timer' | 'manual'
   const [selectedMetricId, setSelectedMetricId] = useState(metricId || '');
+  const [isCreating, setIsCreating] = useState(false);
+  const [newActivityName, setNewActivityName] = useState('');
   
   // Timer State
   const [running, setRunning] = useState(false);
@@ -51,9 +53,37 @@ export const TimeTracker = ({ metricId }) => {
     metrics.filter(m => m.type === 'duration' || m.type === 'number'), 
   [metrics]);
 
+  // Auto-switch to creation mode if no metrics exist
+  useEffect(() => {
+    if (trackableMetrics.length === 0 && !isCreating) {
+       setIsCreating(true);
+    }
+  }, [trackableMetrics, isCreating]);
+
   const getSelectedMetricLabel = () => {
       const m = metrics.find(metric => metric.id === selectedMetricId);
       return m ? (m.label || m.name) : 'Unknown Activity';
+  };
+
+  const handleCreateActivity = () => {
+    if (!newActivityName.trim()) return;
+
+    const id = newActivityName.toLowerCase().replace(/\s+/g, '_') + '_' + Math.random().toString(36).substr(2, 5);
+    const newMetric = {
+      id,
+      name: newActivityName,
+      label: newActivityName,
+      type: 'duration',
+      dashboardVisible: false,
+      goal: 0,
+      color: '#007AFF', // Default Blue
+      widgetType: 'number'
+    };
+
+    addMetric(newMetric);
+    setSelectedMetricId(id);
+    setIsCreating(false);
+    setNewActivityName('');
   };
 
   const handleSave = () => {
@@ -121,21 +151,60 @@ export const TimeTracker = ({ metricId }) => {
       {/* 2. Activity Selector */}
       <div className="flex flex-col gap-1">
         <label className="text-xs font-bold text-secondary uppercase ml-1">Activity</label>
-        <div className="relative">
-          <select
-            value={selectedMetricId}
-            onChange={(e) => setSelectedMetricId(e.target.value)}
-            className="w-full p-3 bg-bg-color border border-separator rounded-xl font-bold text-lg outline-none focus:border-blue appearance-none"
-          >
-            <option value="">Select Activity...</option>
-            {trackableMetrics.map(m => (
-              <option key={m.id} value={m.id}>{m.label || m.name}</option>
-            ))}
-          </select>
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-secondary text-xs">
-            ▼
+        {isCreating ? (
+           <div className="flex flex-col gap-2 p-4 bg-bg-color border border-separator rounded-xl animate-fade-in">
+              <input
+                type="text"
+                value={newActivityName}
+                onChange={(e) => setNewActivityName(e.target.value)}
+                placeholder="New Activity Name..."
+                className="w-full p-2 bg-transparent border-b border-separator font-bold text-lg outline-none focus:border-blue placeholder:text-secondary/30"
+                autoFocus
+                onKeyDown={(e) => e.key === 'Enter' && handleCreateActivity()}
+              />
+              <div className="flex gap-2 mt-1">
+                <OrbitButton
+                  onClick={() => setIsCreating(false)}
+                  variant="secondary"
+                  className="flex-1 !text-xs !h-8"
+                  disabled={trackableMetrics.length === 0} // Can't cancel if no other options exist
+                >
+                  Cancel
+                </OrbitButton>
+                <OrbitButton
+                  onClick={handleCreateActivity}
+                  variant="primary"
+                  className="flex-1 !text-xs !h-8"
+                >
+                  Add Activity
+                </OrbitButton>
+              </div>
+           </div>
+        ) : (
+          <div className="relative">
+            <select
+              value={selectedMetricId}
+              onChange={(e) => {
+                 if (e.target.value === 'new_activity') {
+                   setIsCreating(true);
+                   setSelectedMetricId('');
+                 } else {
+                   setSelectedMetricId(e.target.value);
+                 }
+              }}
+              className="w-full p-3 bg-bg-color border border-separator rounded-xl font-bold text-lg outline-none focus:border-blue appearance-none"
+            >
+              <option value="">Select Activity...</option>
+              {trackableMetrics.map(m => (
+                <option key={m.id} value={m.id}>{m.label || m.name}</option>
+              ))}
+              <option value="new_activity" className="font-bold text-blue">+ Create New Activity...</option>
+            </select>
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-secondary text-xs">
+              ▼
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* 3. Main Interface */}
