@@ -16,7 +16,7 @@ These rules are absolute. Any implementation violating these is considered archi
 
 ## 3. Technology Mandates
 - **Runtime:** React 19 + Vite.
-- **Styling:** TailwindCSS only.
+- **Styling:** Stsndard CSS only. NO TAILWIND!
 - **Iconography:** Must use `src/components/ui/Icons.jsx`. **No external icon dependencies (lucide-react, etc) allowed.**
 - **Motion:** CSS Transitions or Web Animations API only. **No Framer Motion**.
 - **Charts:** Custom SVG primitives only. **No external charting libraries (Recharts, Chart.js, etc).**
