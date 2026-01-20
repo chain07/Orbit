@@ -165,6 +165,10 @@ export const StorageProvider = ({ children }) => {
     setOnboardingComplete(true);
   }, []);
 
+  const resetOnboarding = useCallback(() => {
+    setOnboardingComplete(false);
+  }, []);
+
   const importData = useCallback((jsonData) => {
     if (!jsonData) return;
     
@@ -244,6 +248,7 @@ export const StorageProvider = ({ children }) => {
     addLogEntry,
     addTimeLog,
     completeOnboarding,
+    resetOnboarding,
     importData,
     importJSON: importData,
     exportData,

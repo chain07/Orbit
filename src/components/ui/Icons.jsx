@@ -154,6 +154,13 @@ export const Icons = {
       <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
     </IconWrapper>
   ),
+  Sparkles: (props) => (
+    <IconWrapper {...props}>
+      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+      <path d="M5 3v4" />
+      <path d="M7 5H3" />
+    </IconWrapper>
+  ),
   Trash: (props) => (
     <IconWrapper {...props}>
       <polyline points="3 6 5 6 21 6" />

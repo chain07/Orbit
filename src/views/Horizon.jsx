@@ -36,7 +36,7 @@ class WidgetErrorBoundary extends React.Component {
 }
 
 export const Horizon = () => {
-  const { metrics, logEntries, onboardingComplete } = useContext(StorageContext);
+  const { metrics, logEntries, onboardingComplete, resetOnboarding } = useContext(StorageContext);
   const { setActiveTab } = useContext(NavigationContext);
   const [segment, setSegment] = useState('Weekly');
   const [isEditing, setIsEditing] = useState(false);
@@ -92,7 +92,7 @@ export const Horizon = () => {
         </div>
         <div className="flex justify-between items-end">
           <h1 className="text-3xl font-extrabold tracking-tight text-primary">
-            Hi, Captain.
+            {new Date().getHours() < 12 ? 'Good Morning,' : new Date().getHours() < 18 ? 'Good Afternoon,' : 'Good Evening,'}
           </h1>
           {hasMetrics && (
             <OrbitButton
@@ -107,13 +107,29 @@ export const Horizon = () => {
       </div>
 
       {!hasMetrics && (
-        <EmptyState 
-          icon="🚀"
-          title="Welcome to ORBIT"
-          message="Your dashboard is empty. Configure your first metric to start tracking."
-          actionLabel="Launch Setup"
-          onAction={() => setActiveTab('System')}
-        />
+        <div className="flex flex-col gap-4">
+          <Glass className="p-4 border-l-4 border-purple/50">
+             <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 text-purple/70">
+                   <Icons.Sparkles size={16} />
+                   <span className="text-xs font-bold uppercase tracking-wider">Horizon Agent</span>
+                </div>
+                <p className="text-secondary text-sm leading-relaxed">
+                  I am your Horizon Agent. I work privately on your device to uncover patterns in your habits. Once you start logging, I'll reveal trends, momentum shifts, and correlations to help you optimize your routine.
+                </p>
+             </div>
+          </Glass>
+
+          {!onboardingComplete && (
+            <OrbitButton
+              onClick={resetOnboarding}
+              variant="primary"
+              className="w-full"
+            >
+              Launch Setup
+            </OrbitButton>
+          )}
+        </div>
       )}
 
       {showNudge && (
