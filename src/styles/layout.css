@@ -12,6 +12,12 @@
   padding-bottom: calc(var(--safe-area-bottom) + var(--nav-height) + 20px);
 }
 
+/* Standard Content Alignment (Matches Header) */
+.layout-content {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
 /* Safe Area Utilities */
 .safe-pt {
   padding-top: max(20px, var(--safe-area-top));
@@ -19,6 +25,35 @@
 
 .safe-mt {
   margin-top: max(10px, var(--safe-area-top));
+}
+
+/* Universal Header Container */
+.view-header-stack {
+  display: flex;
+  flex-direction: column;
+  /* Safe area top padding + small buffer */
+  padding-top: calc(env(safe-area-inset-top) + 10px);
+  padding-bottom: 24px;
+  padding-left: 20px;
+  padding-right: 20px;
+  /* Strict gap between Title and Subtitle/Controls */
+  gap: 4px;
+}
+
+/* Force override browser defaults */
+.view-header-stack h1 {
+  margin: 0;
+  line-height: 1;
+}
+
+.view-header-stack p {
+  margin-top: 4px;
+  margin-bottom: 16px; /* Space before toggle */
+}
+
+/* Toggle Wrapper for consistency */
+.system-toggle-wrapper {
+  width: 100%;
 }
 
 /* Fixed Bottom Navigation Container */
