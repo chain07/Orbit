@@ -68,13 +68,13 @@ export const Intel = () => {
                   strokeWidth={8}
                   label={<span className="text-secondary opacity-50 text-xs">0%</span>}
                />
-               <div className="text-xs text-secondary opacity-70 mt-2">Log data to initialize.</div>
+               <div className="text-xs text-secondary opacity-70 mt-4">Log data to initialize.</div>
             </div>
             <div className="text-xs text-secondary text-center opacity-80 z-10">Operational Baseline</div>
           </Glass>
 
           {/* Ghost Momentum */}
-          <Glass className="flex flex-col justify-between min-h-[140px] relative overflow-hidden">
+          <Glass className="flex flex-col justify-between min-h-[140px] relative overflow-hidden pb-4">
             <div className="text-xs font-bold text-secondary uppercase tracking-wide z-10">Momentum</div>
             <div className="flex flex-col items-center justify-center my-4 z-10 w-full px-4">
                <Sparkline

@@ -7,6 +7,7 @@ export const EmptyState = ({
   title = "No Data Found", 
   message = "Add items to get started.", 
   actionLabel, 
+  actionIcon,
   onAction 
 }) => {
   return (
@@ -24,6 +25,7 @@ export const EmptyState = ({
           onClick={onAction}
           variant="primary"
           className="mt-4"
+          icon={actionIcon}
         >
           {actionLabel}
         </OrbitButton>

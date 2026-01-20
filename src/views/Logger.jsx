@@ -5,6 +5,7 @@ import { DailyCheckInForm } from '../components/logger/DailyCheckInForm';
 import { TimeTracker } from '../components/logger/TimeTracker';
 import { Timeline } from '../components/logger/Timeline';
 import { StorageContext } from '../context/StorageContext';
+import { NavigationContext } from '../context/NavigationContext';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Icons } from '../components/ui/Icons';
 import { OrbitButton } from '../components/ui/OrbitButton';
@@ -12,6 +13,7 @@ import '../styles/motion.css';
 
 export const Logger = ({ initialMetricId = null }) => {
   const { metrics, addMetric } = useContext(StorageContext);
+  const { setActiveTab } = useContext(NavigationContext);
   const [activeMode, setActiveMode] = useState('checkin');
   const [selectedTrackerMetric, setSelectedTrackerMetric] = useState('');
   const [newActivityName, setNewActivityName] = useState('');
@@ -73,6 +75,9 @@ export const Logger = ({ initialMetricId = null }) => {
            icon={<Icons.Edit3 size={48} className="text-secondary opacity-50" />}
            title="No Metrics Configured"
            message="You need to define what to track before you can log data."
+           actionLabel="Create Metric"
+           actionIcon={<Icons.Plus />}
+           onAction={() => setActiveTab('System')}
         />
       ) : (
         <>

@@ -121,13 +121,19 @@ export const Horizon = ({ onLaunchSetup }) => {
           </Glass>
 
           {!onboardingComplete && (
-            <OrbitButton
-              onClick={onLaunchSetup}
-              variant="primary"
-              className="w-full"
-            >
-              Launch Setup
-            </OrbitButton>
+            <Glass className="p-4 flex items-center justify-between border-l-4 border-blue">
+                <div className="flex flex-col gap-1">
+                   <div className="font-bold text-primary">Welcome to ORBIT</div>
+                   <div className="text-xs text-secondary">Configure your first metric to start tracking.</div>
+                </div>
+                <OrbitButton
+                  onClick={onLaunchSetup}
+                  variant="primary"
+                  className="!w-auto px-4 text-xs font-bold"
+                >
+                  Launch Setup
+                </OrbitButton>
+            </Glass>
           )}
         </div>
       )}

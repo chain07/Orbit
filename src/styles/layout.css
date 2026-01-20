@@ -103,3 +103,13 @@
   flex-direction: column;
   gap: 4px;
 }
+
+/* Aggressive Header Spacing Fix */
+.view-header-stack h1 {
+  margin-bottom: 0 !important;
+  line-height: 1;
+}
+
+.view-header-stack p {
+  margin-top: 4px !important;
+}
