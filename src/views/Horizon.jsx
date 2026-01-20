@@ -104,10 +104,11 @@ export const Horizon = () => {
     <Glass className="p-4 border-l-4 border-blue">
       <div className="flex flex-col gap-2">
         <div className="text-xs font-bold text-blue uppercase tracking-wider flex items-center gap-2">
-          <span>✦</span> Horizon Agent
+          <Icons.Sparkles size={14} className="text-blue" />
+          Horizon Agent
         </div>
         {agentContent.map((insight, idx) => (
-          <div key={idx} className="text-sm font-medium leading-relaxed">
+          <div key={idx} className="text-sm font-medium leading-relaxed text-secondary">
             {insight.message}
           </div>
         ))}

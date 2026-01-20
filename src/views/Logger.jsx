@@ -31,45 +31,36 @@ export const Logger = ({ initialMetricId = null }) => {
   const hasMetrics = metrics && metrics.length > 0;
   const timeMetrics = metrics.filter(m => m.type === 'number' || m.type === 'duration');
 
-  if (!hasMetrics) {
-    return (
-      <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
-        <div className="flex flex-col gap-0 safe-pt">
-           <h1 className="text-3xl font-extrabold tracking-tight">Logger</h1>
-           <p className="text-secondary font-medium">Input engine.</p>
-        </div>
-        <EmptyState 
-           icon={<Icons.Edit3 size={48} className="text-secondary opacity-50" />}
-           title="No Metrics Configured"
-           message="You need to define what to track before you can log data."
-        />
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
       {/* Header - Fixed Gap */}
       <div className="flex flex-col gap-0 safe-pt">
         <h1 className="text-3xl font-extrabold tracking-tight">Logger</h1>
-
-        <div className="system-toggle-wrapper">
-          <SegmentedControl
-            options={[
-              { label: 'Daily Check-In', value: 'checkin' },
-              { label: 'Time Tracker', value: 'tracker' }
-            ]}
-            value={activeMode}
-            onChange={setActiveMode}
-          />
-        </div>
-
         <p className="text-secondary font-medium leading-tight">Input engine.</p>
+      </div>
+
+      <div className="system-toggle-wrapper">
+        <SegmentedControl
+          options={[
+            { label: 'Daily Check-In', value: 'checkin' },
+            { label: 'Time Tracker', value: 'tracker' }
+          ]}
+          value={activeMode}
+          onChange={setActiveMode}
+        />
       </div>
 
       <div className="fade-in">
         {activeMode === 'checkin' ? (
-          <DailyCheckInForm />
+          !hasMetrics ? (
+            <EmptyState
+              icon={<Icons.Edit3 size={48} className="text-secondary opacity-50" />}
+              title="No Metrics Configured"
+              message="You need to define what to track before you can log data."
+            />
+          ) : (
+            <DailyCheckInForm />
+          )
         ) : (
           <Glass className="p-4">
             <div className="flex flex-col gap-4">

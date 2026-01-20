@@ -48,7 +48,7 @@ export const Intel = () => {
       </div>
 
       {/* Added Margin Bottom */}
-      <div className="mb-4">
+      <div className="mb-4 md:mb-6 system-toggle-wrapper">
         <SegmentedControl
           options={segments.map(s => ({ label: s, value: s }))}
           value={segment}
@@ -67,14 +67,14 @@ export const Intel = () => {
                </div>
              </div>
           ) : (
-            <div className="flex flex-col items-center my-2 z-10 opacity-50">
-               <div className="text-5xl font-black text-secondary tracking-tighter">--%</div>
-               <div className="text-sm font-bold mt-1 px-2 py-0.5 rounded-full bg-separator/10 text-secondary">
-                 No Data
-               </div>
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="relative flex items-center justify-center opacity-30">
+                 <RingChart value={100} size={100} strokeWidth={10} color="var(--neutral-graph)" bgColor="rgba(0,0,0,0.05)" />
+                 <div className="absolute font-bold text-secondary text-xs uppercase tracking-wider">No Data</div>
+              </div>
             </div>
           )}
-          <div className="text-xs text-secondary text-center opacity-80 z-10">Operational Baseline</div>
+          <div className="text-xs text-secondary text-center opacity-80 z-10 relative">Operational Baseline</div>
           <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-blue opacity-5 rounded-full blur-2xl"></div>
         </Glass>
 
@@ -91,11 +91,17 @@ export const Intel = () => {
                </div>
             </div>
           ) : (
-             <div className="flex flex-col items-center my-2 z-10 opacity-50">
-               <div className="text-4xl font-black tracking-tight text-secondary">None</div>
+             <div className="absolute inset-x-4 top-10 bottom-0 flex items-center justify-center opacity-30 pointer-events-none">
+                <Sparkline
+                  data={[0, 0, 0, 0, 0, 0, 0]}
+                  lineColor="var(--neutral-graph)"
+                  fillColor="transparent"
+                  height={60}
+                  showDots={false}
+                />
              </div>
           )}
-          <div className="text-xs text-secondary text-center opacity-80 z-10">Status: {hasData ? stats.status : 'Offline'}</div>
+          <div className="text-xs text-secondary text-center opacity-80 z-10 relative">Status: {hasData ? stats.status : 'Offline'}</div>
            <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-orange opacity-5 rounded-full blur-2xl"></div>
         </Glass>
       </div>
