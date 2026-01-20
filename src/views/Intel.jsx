@@ -41,8 +41,8 @@ export const Intel = () => {
       
       <div className="view-header-stack">
         <div className="flex flex-col gap-0">
-          <h1 className="text-3xl font-extrabold tracking-tight">Intelligence</h1>
-          <p className="text-secondary font-medium">Pattern and telemetry analysis.</p>
+          <h1 className="text-3xl font-extrabold tracking-tight leading-none">Intelligence</h1>
+          <p className="text-secondary font-medium mt-0">Pattern and telemetry analysis.</p>
         </div>
 
         <SegmentedControl

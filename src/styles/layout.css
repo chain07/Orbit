@@ -98,8 +98,8 @@
 /* Consolidated Header Stack */
 .view-header-stack {
   padding-top: max(20px, env(safe-area-inset-top));
-  padding-bottom: 24px;
+  padding-bottom: 12px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
 }

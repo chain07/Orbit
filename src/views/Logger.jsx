@@ -35,8 +35,8 @@ export const Logger = ({ initialMetricId = null }) => {
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
       <div className="view-header-stack">
         <div className="flex flex-col gap-0">
-          <h1 className="text-3xl font-extrabold tracking-tight">Logger</h1>
-          <p className="text-secondary font-medium leading-tight">Input engine.</p>
+          <h1 className="text-3xl font-extrabold tracking-tight leading-none">Logger</h1>
+          <p className="text-secondary font-medium leading-tight mt-0">Input engine.</p>
         </div>
 
         <SegmentedControl

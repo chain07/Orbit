@@ -108,8 +108,8 @@ export const System = ({ onNavigate }) => {
       {/* Header */}
       <div className="view-header-stack">
         <div className="flex flex-col gap-0">
-          <h1 className="text-3xl font-extrabold tracking-tight">System</h1>
-          <p className="text-secondary font-medium system-subheader">Configuration</p>
+          <h1 className="text-3xl font-extrabold tracking-tight leading-none">System</h1>
+          <p className="text-secondary font-medium system-subheader mt-0">Configuration</p>
         </div>
 
         <SegmentedControl
