@@ -41,14 +41,12 @@ export const Intel = () => {
   return (
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
       
-      {/* Header - Fixed Gap */}
-      <div className="flex flex-col gap-0 safe-pt">
-        <h1 className="text-3xl font-extrabold tracking-tight">Intelligence</h1>
-        <p className="text-secondary font-medium">Pattern and telemetry analysis.</p>
-      </div>
+      <div className="view-header-stack">
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight">Intelligence</h1>
+          <p className="text-secondary font-medium">Pattern and telemetry analysis.</p>
+        </div>
 
-      {/* Added Margin Bottom */}
-      <div className="mb-4 md:mb-6 system-toggle-wrapper">
         <SegmentedControl
           options={segments.map(s => ({ label: s, value: s }))}
           value={segment}
@@ -68,13 +66,15 @@ export const Intel = () => {
              </div>
           ) : (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="relative flex items-center justify-center opacity-30">
-                 <RingChart value={100} size={100} strokeWidth={10} color="var(--neutral-graph)" bgColor="rgba(0,0,0,0.05)" />
-                 <div className="absolute font-bold text-secondary text-xs uppercase tracking-wider">No Data</div>
+              <div className="relative flex items-center justify-center">
+                 <RingChart value={100} size={100} strokeWidth={10} color="rgba(255,255,255,0.1)" bgColor="rgba(0,0,0,0.05)" />
+                 <div className="absolute font-bold text-secondary text-xs uppercase tracking-wider opacity-50">0%</div>
               </div>
             </div>
           )}
-          <div className="text-xs text-secondary text-center opacity-80 z-10 relative">Operational Baseline</div>
+          <div className="flex flex-col items-center justify-center text-xs text-secondary opacity-60 z-10 relative mt-auto">
+            {hasData ? 'Operational Baseline' : 'Log data to initialize.'}
+          </div>
           <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-blue opacity-5 rounded-full blur-2xl"></div>
         </Glass>
 

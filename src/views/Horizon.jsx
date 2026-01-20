@@ -85,7 +85,7 @@ export const Horizon = () => {
     const isColdStart = !hasMetrics || (logEntries && logEntries.length === 0);
 
     if (isColdStart) {
-      return [{ message: "I’m your Horizon Agent. I analyze your data to find trends, correlations, and momentum." }];
+      return [{ message: "I am your Horizon Agent. I work privately on your device to uncover patterns in your habits. Once you start logging, I'll reveal trends, momentum shifts, and correlations to help you optimize your routine." }];
     }
     return topInsights;
   }, [hasMetrics, logEntries, topInsights]);

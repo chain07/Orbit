@@ -33,13 +33,12 @@ export const Logger = ({ initialMetricId = null }) => {
 
   return (
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
-      {/* Header - Fixed Gap */}
-      <div className="flex flex-col gap-0 safe-pt">
-        <h1 className="text-3xl font-extrabold tracking-tight">Logger</h1>
-        <p className="text-secondary font-medium leading-tight">Input engine.</p>
-      </div>
+      <div className="view-header-stack">
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight">Logger</h1>
+          <p className="text-secondary font-medium leading-tight">Input engine.</p>
+        </div>
 
-      <div className="system-toggle-wrapper">
         <SegmentedControl
           options={[
             { label: 'Daily Check-In', value: 'checkin' },
