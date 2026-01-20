@@ -36,7 +36,7 @@ class WidgetErrorBoundary extends React.Component {
 }
 
 export const Horizon = () => {
-  const { metrics, logEntries, onboardingComplete } = useContext(StorageContext);
+  const { metrics, logEntries, resetOnboarding } = useContext(StorageContext);
   const { setActiveTab } = useContext(NavigationContext);
   const [segment, setSegment] = useState('Weekly');
   const [isEditing, setIsEditing] = useState(false);
@@ -47,6 +47,13 @@ export const Horizon = () => {
     month: 'long', 
     day: 'numeric' 
   });
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning,";
+    if (hour < 18) return "Good Afternoon,";
+    return "Good Evening,";
+  };
 
   const topInsights = useMemo(() => {
     if (!HorizonAgent || !HorizonAgent.generateAllInsights) return [];
@@ -72,6 +79,17 @@ export const Horizon = () => {
 
   const hasMetrics = metrics && metrics.length > 0;
 
+  // Agent Content Logic
+  const agentContent = useMemo(() => {
+    // Cold start check: No metrics or no logs implies system is just starting up
+    const isColdStart = !hasMetrics || (logEntries && logEntries.length === 0);
+
+    if (isColdStart) {
+      return [{ message: "I’m your Horizon Agent. I analyze your data to find trends, correlations, and momentum." }];
+    }
+    return topInsights;
+  }, [hasMetrics, logEntries, topInsights]);
+
   const showNudge = useMemo(() => {
       if (!hasMetrics) return false;
       if (isNudgeDismissed) return false;
@@ -81,6 +99,21 @@ export const Horizon = () => {
 
       return metricCount < 3 || !hasGoal;
   }, [metrics, hasMetrics, isNudgeDismissed]);
+
+  const AgentCard = () => (
+    <Glass className="p-4 border-l-4 border-blue">
+      <div className="flex flex-col gap-2">
+        <div className="text-xs font-bold text-blue uppercase tracking-wider flex items-center gap-2">
+          <span>✦</span> Horizon Agent
+        </div>
+        {agentContent.map((insight, idx) => (
+          <div key={idx} className="text-sm font-medium leading-relaxed">
+            {insight.message}
+          </div>
+        ))}
+      </div>
+    </Glass>
+  );
 
   return (
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
@@ -92,7 +125,7 @@ export const Horizon = () => {
         </div>
         <div className="flex justify-between items-end">
           <h1 className="text-3xl font-extrabold tracking-tight text-primary">
-            Hi, Captain.
+            {getGreeting()}
           </h1>
           {hasMetrics && (
             <OrbitButton
@@ -106,14 +139,24 @@ export const Horizon = () => {
         </div>
       </div>
 
+      {/* Position 1: Below Title if Metrics Exist (No Empty State) */}
+      {hasMetrics && agentContent.length > 0 && (
+         <AgentCard />
+      )}
+
       {!hasMetrics && (
         <EmptyState 
           icon="🚀"
           title="Welcome to ORBIT"
           message="Your dashboard is empty. Configure your first metric to start tracking."
           actionLabel="Launch Setup"
-          onAction={() => setActiveTab('System')}
+          onAction={() => resetOnboarding()}
         />
+      )}
+
+      {/* Position 2: Below Empty State if No Metrics */}
+      {!hasMetrics && agentContent.length > 0 && (
+         <AgentCard />
       )}
 
       {showNudge && (
@@ -144,21 +187,6 @@ export const Horizon = () => {
                   </OrbitButton>
               </div>
           </Glass>
-      )}
-
-      {hasMetrics && topInsights.length > 0 && (
-        <Glass className="p-4 border-l-4 border-blue">
-          <div className="flex flex-col gap-2">
-            <div className="text-xs font-bold text-blue uppercase tracking-wider flex items-center gap-2">
-              <span>✦</span> Horizon Agent
-            </div>
-            {topInsights.map((insight, idx) => (
-              <div key={idx} className="text-sm font-medium leading-relaxed">
-                {insight.message}
-              </div>
-            ))}
-          </div>
-        </Glass>
       )}
 
       {hasMetrics && (

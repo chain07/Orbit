@@ -36,6 +36,8 @@ export const Intel = () => {
     return AnalyticsEngine.calculateSystemHealth(metrics, logEntries, segment);
   }, [metrics, logEntries, segment]);
 
+  const hasData = metrics.length > 0 && logEntries.length > 0;
+
   return (
     <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
       
@@ -57,28 +59,43 @@ export const Intel = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Glass className="flex flex-col justify-between min-h-[140px] relative overflow-hidden">
           <div className="text-xs font-bold text-secondary uppercase tracking-wide z-10">System Health</div>
-          <div className="flex flex-col items-center my-2 z-10">
-             <div className="text-5xl font-black text-primary tracking-tighter">{stats.reliability}%</div>
-             <div className={`text-sm font-bold mt-1 px-2 py-0.5 rounded-full ${stats.trend.startsWith('-') ? 'bg-red/10 text-red' : 'bg-green/10 text-green'}`}>
-               {stats.trend}
+          {hasData ? (
+             <div className="flex flex-col items-center my-2 z-10">
+               <div className="text-5xl font-black text-primary tracking-tighter">{stats.reliability}%</div>
+               <div className={`text-sm font-bold mt-1 px-2 py-0.5 rounded-full ${stats.trend.startsWith('-') ? 'bg-red/10 text-red' : 'bg-green/10 text-green'}`}>
+                 {stats.trend}
+               </div>
              </div>
-          </div>
+          ) : (
+            <div className="flex flex-col items-center my-2 z-10 opacity-50">
+               <div className="text-5xl font-black text-secondary tracking-tighter">--%</div>
+               <div className="text-sm font-bold mt-1 px-2 py-0.5 rounded-full bg-separator/10 text-secondary">
+                 No Data
+               </div>
+            </div>
+          )}
           <div className="text-xs text-secondary text-center opacity-80 z-10">Operational Baseline</div>
           <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-blue opacity-5 rounded-full blur-2xl"></div>
         </Glass>
 
         <Glass className="flex flex-col justify-between min-h-[140px] relative overflow-hidden">
-          <div className="text-xs font-bold text-secondary uppercase tracking-wide z-10">Intensity</div>
-          <div className="flex flex-col items-center my-2 z-10">
-             <div className={`text-4xl font-black tracking-tight ${
-               stats.intensity === 'Peak' ? 'text-red' : 
-               stats.intensity === 'High' ? 'text-orange' : 
-               stats.intensity === 'Moderate' ? 'text-blue' : 'text-secondary'
-             }`}>
-               {stats.intensity}
+          <div className="text-xs font-bold text-secondary uppercase tracking-wide z-10">Momentum</div>
+          {hasData ? (
+            <div className="flex flex-col items-center my-2 z-10">
+               <div className={`text-4xl font-black tracking-tight ${
+                 stats.intensity === 'Peak' ? 'text-red' :
+                 stats.intensity === 'High' ? 'text-orange' :
+                 stats.intensity === 'Moderate' ? 'text-blue' : 'text-secondary'
+               }`}>
+                 {stats.intensity}
+               </div>
+            </div>
+          ) : (
+             <div className="flex flex-col items-center my-2 z-10 opacity-50">
+               <div className="text-4xl font-black tracking-tight text-secondary">None</div>
              </div>
-          </div>
-          <div className="text-xs text-secondary text-center opacity-80 z-10">Status: {stats.status}</div>
+          )}
+          <div className="text-xs text-secondary text-center opacity-80 z-10">Status: {hasData ? stats.status : 'Offline'}</div>
            <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-orange opacity-5 rounded-full blur-2xl"></div>
         </Glass>
       </div>

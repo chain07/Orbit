@@ -244,6 +244,7 @@ export const StorageProvider = ({ children }) => {
     addLogEntry,
     addTimeLog,
     completeOnboarding,
+    resetOnboarding: () => setOnboardingComplete(false),
     importData,
     importJSON: importData,
     exportData,

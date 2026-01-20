@@ -52,17 +52,20 @@ export const Logger = ({ initialMetricId = null }) => {
       {/* Header - Fixed Gap */}
       <div className="flex flex-col gap-0 safe-pt">
         <h1 className="text-3xl font-extrabold tracking-tight">Logger</h1>
+
+        <div className="system-toggle-wrapper">
+          <SegmentedControl
+            options={[
+              { label: 'Daily Check-In', value: 'checkin' },
+              { label: 'Time Tracker', value: 'tracker' }
+            ]}
+            value={activeMode}
+            onChange={setActiveMode}
+          />
+        </div>
+
         <p className="text-secondary font-medium leading-tight">Input engine.</p>
       </div>
-
-      <SegmentedControl
-        options={[
-          { label: 'Daily Check-In', value: 'checkin' },
-          { label: 'Time Tracker', value: 'tracker' }
-        ]}
-        value={activeMode}
-        onChange={setActiveMode}
-      />
 
       <div className="fade-in">
         {activeMode === 'checkin' ? (
