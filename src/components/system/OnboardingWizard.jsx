@@ -8,7 +8,7 @@ export const OnboardingWizard = ({ onComplete }) => {
   const { addMetric } = useContext(StorageContext);
   
   const steps = [
-    { title: 'Create Metric 1', key: 'metric1' },
+    { title: 'Define Your First Metric', key: 'metric1' },
     { title: 'Create Metric 2', key: 'metric2' },
     { title: 'Create Metric 3', key: 'metric3' },
     { title: 'Set Goals', key: 'goal' }
@@ -95,6 +95,9 @@ export const OnboardingWizard = ({ onComplete }) => {
             placeholder="e.g. Focus Time"
             className="w-full p-3 rounded-xl bg-bg-color border border-separator text-lg font-bold outline-none focus:border-blue"
           />
+          <div className="text-xs text-secondary mt-2">
+            What do you want to track? (e.g., 'Workout', 'Reading', 'Water')
+          </div>
         </div>
 
         <div>
@@ -125,8 +128,17 @@ export const OnboardingWizard = ({ onComplete }) => {
                <button
                  key={c}
                  onClick={() => updateField(metricSlot, 'color', c)}
-                 style={{ backgroundColor: c }}
-                 className={`w-10 h-10 rounded-full transition-transform active:scale-90 ${data.color === c ? 'ring-2 ring-offset-2 ring-primary scale-110' : ''}`}
+                 style={{
+                   backgroundColor: c,
+                   width: '40px',
+                   height: '40px',
+                   borderRadius: '50%',
+                   border: data.color === c ? '3px solid var(--bg-color)' : 'none',
+                   boxShadow: data.color === c ? '0 0 0 2px var(--text-primary)' : 'none',
+                   cursor: 'pointer',
+                   transform: data.color === c ? 'scale(1.1)' : 'scale(1)',
+                   transition: 'transform 0.2s'
+                 }}
                />
              ))}
            </div>

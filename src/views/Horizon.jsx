@@ -109,7 +109,6 @@ export const Horizon = () => {
       <div className="layout-content">
         {!hasMetrics && (
           <EmptyState
-            icon="🚀"
             title="Welcome to ORBIT"
             message="Your dashboard is empty. Configure your first metric to start tracking."
             actionLabel="Launch Setup"
