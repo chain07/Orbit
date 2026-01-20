@@ -9,3 +9,13 @@ Port 5173 is in use, trying another one...
   ➜  Local:   http://localhost:5174/
   ➜  Network: use --host to expose
 7:24:27 AM [vite] hmr update /src/components/ui/Icons.jsx
+2:52:24 PM [vite] hmr update /src/styles/layout.css, /src/styles/index.css
+2:52:32 PM [vite] hmr update /src/components/ui/SegmentedControl.jsx
+2:52:39 PM [vite] hmr update /src/views/Logger.jsx
+2:52:45 PM [vite] hmr update /src/views/Intel.jsx
+2:52:51 PM [vite] hmr update /src/views/System.jsx
+2:53:26 PM [vite] hmr update /src/app/App.jsx
+2:53:37 PM [vite] hmr update /src/views/Horizon.jsx
+2:54:07 PM [vite] hmr update /src/components/system/OnboardingWizard.jsx
+2:58:18 PM [vite] hmr update /src/views/Logger.jsx
+3:00:40 PM [vite] hmr update /src/views/Logger.jsx

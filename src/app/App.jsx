@@ -19,19 +19,6 @@ const AppContent = () => {
   const { onboardingComplete, completeOnboarding } = useContext(StorageContext);
   const [showWizard, setShowWizard] = useState(false);
 
-  // Onboarding Logic:
-  // 1. If onboardingComplete is FALSE (new user), show wizard.
-  // 2. If it turns TRUE (loaded from storage or finished), hide wizard.
-  useEffect(() => {
-    // Only show wizard if explicitly false (new user) AND we are on Horizon tab
-    // This prevents "Ghost Sheet" on other tabs.
-    if (onboardingComplete === false) {
-      setShowWizard(true);
-    } else if (onboardingComplete === true) {
-      setShowWizard(false);
-    }
-  }, [onboardingComplete]);
-
   const handleOnboardingFinish = () => {
     completeOnboarding();
     setShowWizard(false);
@@ -39,7 +26,7 @@ const AppContent = () => {
 
   const renderTab = () => {
     switch (activeTab) {
-      case 'Horizon': return <Horizon />;
+      case 'Horizon': return <Horizon onLaunchSetup={() => setShowWizard(true)} />;
       case 'Logger':
         return <Logger initialMetricId={navigationParams?.metricId} />;
       case 'Intel': return <Intel />;
@@ -79,7 +66,7 @@ const AppContent = () => {
       {showWizard && activeTab === 'Horizon' && (
         <div className="fixed inset-0 z-[200] bg-bg-color animate-fade-in overflow-y-auto flex items-center justify-center p-4">
           <div className="w-full max-w-lg h-full max-h-[90vh]">
-            <OnboardingWizard onComplete={handleOnboardingFinish} />
+            <OnboardingWizard onComplete={handleOnboardingFinish} onClose={() => setShowWizard(false)} />
           </div>
         </div>
       )}

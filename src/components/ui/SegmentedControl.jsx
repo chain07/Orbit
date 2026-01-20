@@ -4,7 +4,8 @@ export default function SegmentedControl({
   options = [],
   value,
   onChange,
-  name
+  name,
+  className = ''
 }) {
   // Ensure a stable unique name if not provided, using useMemo
   const groupName = useMemo(() =>
@@ -21,7 +22,7 @@ export default function SegmentedControl({
   );
 
   return (
-    <div className="segmented-control-wrapper w-full" data-count={normalizedOptions.length}>
+    <div className={`segmented-control-wrapper w-full ${className}`} data-count={normalizedOptions.length}>
        {normalizedOptions.map((opt) => (
          <React.Fragment key={opt.value}>
            <input

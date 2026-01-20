@@ -51,6 +51,7 @@ export const Intel = () => {
           options={segments.map(s => ({ label: s, value: s }))}
           value={segment}
           onChange={setSegment}
+          className="mt-4"
         />
       </div>
 

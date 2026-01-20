@@ -116,6 +116,7 @@ export const System = ({ onNavigate }) => {
           options={['Metrics', 'Settings']}
           value={viewMode}
           onChange={setViewMode}
+          className="mt-4"
         />
       </div>
 

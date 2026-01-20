@@ -4,13 +4,13 @@ import { Glass } from '../../components/ui/Glass';
 import { OrbitButton } from '../ui/OrbitButton';
 import '../../styles/index.css'; // Ensure standard buttons are available
 
-export const OnboardingWizard = ({ onComplete }) => {
+export const OnboardingWizard = ({ onComplete, onClose }) => {
   const { addMetric } = useContext(StorageContext);
   
   const steps = [
-    { title: 'Create Metric 1', key: 'metric1' },
-    { title: 'Create Metric 2', key: 'metric2' },
-    { title: 'Create Metric 3', key: 'metric3' },
+    { title: 'Define Your First Metric', key: 'metric1' },
+    { title: 'Define Metric 2', key: 'metric2' },
+    { title: 'Define Metric 3', key: 'metric3' },
     { title: 'Set Goals', key: 'goal' }
   ];
 
@@ -87,12 +87,12 @@ export const OnboardingWizard = ({ onComplete }) => {
     return (
       <div className="flex flex-col gap-4 animate-fade-in">
         <div>
-          <label className="text-xs font-bold text-secondary uppercase">Metric Name</label>
+          <label className="text-xs font-bold text-secondary uppercase">What do you want to track?</label>
           <input 
             type="text" 
             value={data.name}
             onChange={(e) => updateField(metricSlot, 'name', e.target.value)}
-            placeholder="e.g. Focus Time"
+            placeholder="e.g. Deep Work, Hydration"
             className="w-full p-3 rounded-xl bg-bg-color border border-separator text-lg font-bold outline-none focus:border-blue"
           />
         </div>
@@ -122,11 +122,11 @@ export const OnboardingWizard = ({ onComplete }) => {
           <label className="text-xs font-bold text-secondary uppercase">Color</label>
            <div className="flex gap-3 mt-1">
              {['#007AFF', '#34C759', '#FF9500', '#FF3B30', '#AF52DE'].map(c => (
-               <button
+               <div
                  key={c}
                  onClick={() => updateField(metricSlot, 'color', c)}
                  style={{ backgroundColor: c }}
-                 className={`w-10 h-10 rounded-full transition-transform active:scale-90 ${data.color === c ? 'ring-2 ring-offset-2 ring-primary scale-110' : ''}`}
+                 className={`w-8 h-8 rounded-full cursor-pointer transition-transform active:scale-90 ${data.color === c ? 'ring-2 ring-offset-2 ring-primary scale-110' : ''}`}
                />
              ))}
            </div>
@@ -169,8 +169,18 @@ export const OnboardingWizard = ({ onComplete }) => {
   };
 
   return (
-    <Glass className="h-full flex flex-col p-6 shadow-2xl border border-glass-border">
-        <div className="flex justify-between items-center border-b border-separator pb-4 mb-4">
+    <Glass className="h-full flex flex-col p-6 shadow-2xl border border-glass-border relative">
+        {onClose && (
+          <div className="absolute top-4 right-4 z-50">
+             <OrbitButton
+               onClick={onClose}
+               variant="secondary"
+               className="!w-8 !h-8 !p-0"
+               icon={<span className="text-lg">×</span>}
+             />
+          </div>
+        )}
+        <div className="flex justify-between items-center border-b border-separator pb-4 mb-4 pr-10">
             <div>
               <h2 className="text-xl font-extrabold">{steps[currentStep].title}</h2>
               <span className="text-xs text-secondary font-bold">Step {currentStep + 1} of {steps.length}</span>

@@ -35,7 +35,7 @@ class WidgetErrorBoundary extends React.Component {
   }
 }
 
-export const Horizon = () => {
+export const Horizon = ({ onLaunchSetup }) => {
   const { metrics, logEntries, onboardingComplete, resetOnboarding } = useContext(StorageContext);
   const { setActiveTab } = useContext(NavigationContext);
   const [segment, setSegment] = useState('Weekly');
@@ -122,7 +122,7 @@ export const Horizon = () => {
 
           {!onboardingComplete && (
             <OrbitButton
-              onClick={resetOnboarding}
+              onClick={onLaunchSetup}
               variant="primary"
               className="w-full"
             >
