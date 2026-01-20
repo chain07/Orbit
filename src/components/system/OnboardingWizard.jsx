@@ -120,28 +120,17 @@ export const OnboardingWizard = ({ onComplete }) => {
            </div>
         </div>
         
-        {/* Simple Color Picker to provide visual variety */}
+        {/* Standard Color Picker */}
         <div>
           <label className="text-xs font-bold text-secondary uppercase">Color</label>
-           <div className="flex gap-3 mt-1">
-             {['#007AFF', '#34C759', '#FF9500', '#FF3B30', '#AF52DE'].map(c => (
-               <button
-                 key={c}
-                 onClick={() => updateField(metricSlot, 'color', c)}
-                 style={{
-                   backgroundColor: c,
-                   width: '40px',
-                   height: '40px',
-                   borderRadius: '50%',
-                   border: data.color === c ? '3px solid var(--bg-color)' : 'none',
-                   boxShadow: data.color === c ? '0 0 0 2px var(--text-primary)' : 'none',
-                   cursor: 'pointer',
-                   transform: data.color === c ? 'scale(1.1)' : 'scale(1)',
-                   transition: 'transform 0.2s'
-                 }}
-               />
-             ))}
-           </div>
+          <div className="mt-1">
+            <input
+              type="color"
+              value={data.color}
+              onChange={(e) => updateField(metricSlot, 'color', e.target.value)}
+              className="input-color"
+            />
+          </div>
         </div>
       </div>
     );

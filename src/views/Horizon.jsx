@@ -8,6 +8,7 @@ import Glass from '../components/ui/Glass';
 import { getWidgetComponent } from '../components/widgets/WidgetRegistry';
 import { EditLayoutModal } from '../components/horizon/EditLayoutModal';
 import { EmptyState } from '../components/ui/EmptyState';
+import { OnboardingWizard } from '../components/system/OnboardingWizard';
 import { Icons } from '../components/ui/Icons';
 import { OrbitButton } from '../components/ui/OrbitButton';
 import '../styles/motion.css';
@@ -41,6 +42,7 @@ export const Horizon = () => {
   const [segment, setSegment] = useState('Weekly');
   const [isEditing, setIsEditing] = useState(false);
   const [isNudgeDismissed, setIsNudgeDismissed] = useState(false);
+  const [showWizard, setShowWizard] = useState(false);
   
   const todayDate = new Date().toLocaleDateString('en-US', { 
     weekday: 'long', 
@@ -112,8 +114,23 @@ export const Horizon = () => {
             title="Welcome to ORBIT"
             message="Your dashboard is empty. Configure your first metric to start tracking."
             actionLabel="Launch Setup"
-            onAction={() => setActiveTab('System')}
+            onAction={() => setShowWizard(true)}
           />
+        )}
+
+        {showWizard && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-4 animate-fade-in">
+            <div className="w-full max-w-lg h-[600px] relative">
+               {/* Close button for safety */}
+               <button
+                  onClick={() => setShowWizard(false)}
+                  className="absolute -top-10 right-0 text-white font-bold"
+               >
+                 Close
+               </button>
+               <OnboardingWizard onComplete={() => setShowWizard(false)} />
+            </div>
+          </div>
         )}
 
         {showNudge && (
@@ -146,23 +163,21 @@ export const Horizon = () => {
             </Glass>
         )}
 
-        {hasMetrics && (
-          <Glass className="p-4 border-l-4 border-blue mb-4">
-            <div className="flex flex-col gap-2">
-              <div className="text-xs font-bold text-blue uppercase tracking-wider flex items-center gap-2">
-                <span>✦</span> Horizon Agent
-              </div>
-              <div className="text-secondary text-sm">
-                  I am your Horizon Agent. I work privately on your device to uncover patterns in your habits.
-              </div>
-              {topInsights.map((insight, idx) => (
-                <div key={idx} className="text-sm font-medium leading-relaxed">
-                  {insight.message}
-                </div>
-              ))}
+        <Glass className="p-4 border-l-4 border-blue mb-4">
+          <div className="flex flex-col gap-2">
+            <div className="text-xs font-bold text-blue uppercase tracking-wider flex items-center gap-2">
+              <span>✦</span> Horizon Agent
             </div>
-          </Glass>
-        )}
+            <div className="text-secondary text-sm">
+                I am your Horizon Agent. I work privately on your device to uncover patterns in your habits.
+            </div>
+            {hasMetrics && topInsights.map((insight, idx) => (
+              <div key={idx} className="text-sm font-medium leading-relaxed">
+                {insight.message}
+              </div>
+            ))}
+          </div>
+        </Glass>
 
         {hasMetrics && (
           <>
