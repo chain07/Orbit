@@ -68,15 +68,13 @@ export const Intel = () => {
                 <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-blue opacity-5 rounded-full blur-2xl"></div>
               </>
             ) : (
-              <>
-                <div className="flex flex-col items-center justify-center flex-1 z-10">
-                  <RingChart value={100} color="rgba(255,255,255,0.1)" strokeWidth={8}>
-                     <div className="text-secondary opacity-50 font-bold text-xl">0%</div>
-                  </RingChart>
-                  <div className="text-xs text-secondary mt-4">Log data to initialize.</div>
+              <div className="flex flex-row items-center gap-6 flex-1 z-10 px-2">
+                <RingChart value={100} color="rgba(255,255,255,0.1)" strokeWidth={8} size={80} />
+                <div className="flex flex-col">
+                  <div className="text-4xl font-bold text-primary">0%</div>
+                  <div className="text-sm text-secondary">Awaiting Data</div>
                 </div>
-                <div className="text-xs text-secondary opacity-80 z-10">Operational Baseline</div>
-              </>
+              </div>
             )}
           </Glass>
 
@@ -98,16 +96,22 @@ export const Intel = () => {
               </>
             ) : (
               <>
-                <div className="flex-1 flex items-center z-10">
-                   <Sparkline data={[0, 0, 0, 0, 0]} showLabels={false} lineColor="rgba(255,255,255,0.1)" fillColor="transparent" />
+                <div className="flex-1 flex items-center z-10 w-full h-full">
+                   <Sparkline
+                     data={[0, 0, 0, 0, 0]}
+                     showLabels={false}
+                     showDots={false}
+                     labels={[]}
+                     lineColor="rgba(255,255,255,0.1)"
+                     fillColor="transparent"
+                     className="w-full h-full"
+                   />
                 </div>
                 <div className="text-xs text-secondary text-center opacity-80 z-10">Status: Offline</div>
               </>
             )}
           </Glass>
         </div>
-
-        <ReportGenerator segment={segment} />
 
         {insights.length > 0 && (
           <div className="flex flex-col gap-2">
@@ -145,6 +149,8 @@ export const Intel = () => {
             })}
           </div>
         </div>
+
+        <ReportGenerator segment={segment} />
       </div>
     </div>
   );

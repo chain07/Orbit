@@ -113,32 +113,56 @@ html, body {
 /* Global Button Styles: REMOVED - Replaced by buttons.css */
 
 /* --- Form Toggles (Checkbox) --- */
-.toggle-checkbox {
-  appearance: none;
-  -webkit-appearance: none;
-  background-color: white;
-  border-radius: 9999px;
-  cursor: pointer;
-  height: 1.25rem;
-  width: 1.25rem;
-  transition: transform 0.2s ease-in-out;
-  transform: translateX(0);
-}
-
-.toggle-checkbox:checked {
-  transform: translateX(100%);
-  border-color: white;
-}
-
-.toggle-label {
-  width: 2.5rem;
-  height: 1.5rem;
-  background-color: var(--separator);
-  border-radius: 9999px;
+/* Wrapper */
+.toggle-wrapper {
   position: relative;
+  display: inline-block;
+  width: 44px; /* w-11 approx */
+  height: 24px; /* h-6 */
+  vertical-align: middle;
+}
+
+/* Input (Hidden but accessible) */
+.toggle-checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Label (Track) */
+.toggle-label {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--separator);
+  border-radius: 9999px; /* rounded-full */
   transition: background-color 0.2s ease-in-out;
 }
 
-input:checked + .toggle-label {
+/* Knob (Pseudo-element) */
+.toggle-label:after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  transition: transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 1.0);
+}
+
+/* Checked State - Track */
+.toggle-checkbox:checked + .toggle-label {
   background-color: var(--blue);
+}
+
+/* Checked State - Knob */
+.toggle-checkbox:checked + .toggle-label:after {
+  transform: translateX(20px); /* 44px width - 2px left - 2px right - 20px width = 20px move */
 }
