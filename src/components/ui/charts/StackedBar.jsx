@@ -98,8 +98,7 @@ export const StackedBar = ({ data = [], colors = {}, title = "Activity", subtitl
              {Array.from({ length: 7 }).map((_, i) => (
                <div
                  key={i}
-                 className="h-full"
-                 style={{ width: '1px', backgroundColor: 'rgba(128, 128, 128, 0.1)' }}
+                 style={{ width: '1px', height: '100%', backgroundColor: 'rgba(0,0,0,0.05)' }}
                />
              ))}
            </div>
@@ -172,9 +171,13 @@ export const StackedBar = ({ data = [], colors = {}, title = "Activity", subtitl
       </div>
 
       {/* Footer */}
-      <div className="chart-footer">
-        <div className="tot-lbl">{footerLabel}</div>
-        <div className="tot-val">{footerValue}</div>
+      <div className="flex justify-between items-end mt-4 border-t pt-3" style={{ borderColor: 'rgba(0,0,0,0.1)' }}>
+          <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>
+              {footerLabel}
+          </span>
+          <span style={{ fontSize: '26px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1 }}>
+              {footerValue}
+          </span>
       </div>
 
     </div>

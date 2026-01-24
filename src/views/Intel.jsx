@@ -88,10 +88,18 @@ export const Intel = () => {
                   </div>
                 </div>
                 <div
-                  className="w-full rounded-full overflow-hidden mt-auto"
-                  style={{ height: '12px', backgroundColor: 'rgba(128, 128, 128, 0.2)' }}
+                  className="w-full overflow-hidden mt-auto"
+                  style={{
+                    height: '12px',
+                    backgroundColor: 'rgba(128, 128, 128, 0.2)',
+                    marginTop: '16px',
+                    borderRadius: '9999px'
+                  }}
                 >
-                  <div className="h-full bg-blue transition-all duration-500" style={{ width: '0%' }} />
+                  <div
+                    className="h-full bg-blue transition-all duration-500"
+                    style={{ width: '0%', borderRadius: '9999px' }}
+                  />
                 </div>
               </div>
             )}
@@ -114,16 +122,14 @@ export const Intel = () => {
                 </div>
               </>
             ) : (
-              <div className="relative flex flex-col justify-between overflow-hidden h-full">
+              <div className="flex flex-col justify-between h-full overflow-hidden relative">
                 <div className="flex justify-between items-start z-10 px-4 pt-4">
                   <span className="text-xs font-bold text-secondary uppercase tracking-wide">Momentum</span>
                   <span className="text-2xl font-bold font-mono text-zinc-400">0.0</span>
                 </div>
-                {/* Graph Container - Pinned to bottom, full width */}
-                <div
-                  className="absolute left-0 right-0 w-full z-0 opacity-50"
-                  style={{ bottom: 0, height: '60px' }}
-                >
+
+                {/* Graph Wrapper - Force Height */}
+                <div style={{ height: '60px', width: '100%', marginTop: 'auto' }}>
                   <Sparkline data={[]} height={60} showLabels={false} showDots={false} lineColor="rgba(255,255,255,0.1)" fillColor="transparent" className="w-full h-full" />
                 </div>
               </div>

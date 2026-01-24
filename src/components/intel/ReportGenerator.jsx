@@ -82,7 +82,7 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
           className="flex justify-between items-center p-4 cursor-pointer hover:bg-bg-color/30 transition-colors"
           onClick={() => setIsOpen(!isOpen)}
         >
-          <h3 className="text-lg font-bold">Report Generator</h3>
+          <h3 style={{ fontSize: '17px', fontWeight: '700' }}>Report Generator</h3>
           <div className="flex items-center gap-3">
              <div className="flex items-center gap-1.5 px-3 py-1 bg-secondary/10 rounded-full">
                  <Icons.BarChart2 size={14} className="text-secondary" />
