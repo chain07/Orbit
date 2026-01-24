@@ -71,7 +71,6 @@ export const TimeTracker = ({ metricId }) => {
     if (!currentStart && val.trim().length > 0) {
         const now = new Date();
         currentStart = toLocalISOString(now);
-        console.log("Auto-setting start time:", currentStart);
         setManualStartTime(currentStart);
     }
 
@@ -315,56 +314,38 @@ export const TimeTracker = ({ metricId }) => {
           <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
 
             <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '12px',
-                marginBottom: '16px',
-                width: '100%',
-                boxSizing: 'border-box'
+                border: '0.5px solid rgba(0,0,0,0.1)',
+                borderRadius: '12px',
+                overflow: 'hidden',
+                marginBottom: '20px',
+                backgroundColor: 'rgba(255,255,255,0.05)'
             }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
-                <label className="text-secondary uppercase" style={{ fontSize: '12px', fontWeight: 'bold', marginLeft: '4px' }}>Start Time</label>
-                <input
-                  type="datetime-local"
-                  value={manualStartTime}
-                  onChange={(e) => setManualStartTime(e.target.value)}
-                  style={{
-                    width: '100%',
-                    minWidth: 0,
-                    boxSizing: 'border-box',
-                    height: '44px',
-                    padding: '0 12px',
-                    borderRadius: '10px',
-                    border: '1px solid rgba(0,0,0,0.1)',
-                    backgroundColor: 'transparent',
-                    fontSize: '16px',
-                    fontWeight: 'bold',
-                    outline: 'none'
-                  }}
-                />
-              </div>
+                {/* Start Time Row */}
+                <div style={{
+                    borderBottom: '0.5px solid rgba(0,0,0,0.1)',
+                    padding: '10px 14px'
+                }}>
+                    <label style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: '700', display: 'block', marginBottom: '4px', textTransform: 'uppercase' }}>Start Time</label>
+                    <input
+                        type="datetime-local"
+                        value={manualStartTime}
+                        onChange={(e) => setManualStartTime(e.target.value)}
+                        style={{ width: '100%', border: 'none', background: 'transparent', fontSize: '16px', color: 'var(--text-primary)', outline: 'none', fontFamily: 'inherit' }}
+                    />
+                </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
-                <label className="text-secondary uppercase" style={{ fontSize: '12px', fontWeight: 'bold', marginLeft: '4px' }}>End Time</label>
-                <input
-                  type="datetime-local"
-                  value={manualEndTime}
-                  onChange={(e) => setManualEndTime(e.target.value)}
-                  style={{
-                    width: '100%',
-                    minWidth: 0,
-                    boxSizing: 'border-box',
-                    height: '44px',
-                    padding: '0 12px',
-                    borderRadius: '10px',
-                    border: '1px solid rgba(0,0,0,0.1)',
-                    backgroundColor: 'transparent',
-                    fontSize: '16px',
-                    fontWeight: 'bold',
-                    outline: 'none'
-                  }}
-                />
-              </div>
+                {/* End Time Row */}
+                <div style={{
+                    padding: '10px 14px'
+                }}>
+                    <label style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: '700', display: 'block', marginBottom: '4px', textTransform: 'uppercase' }}>End Time</label>
+                    <input
+                        type="datetime-local"
+                        value={manualEndTime}
+                        onChange={(e) => setManualEndTime(e.target.value)}
+                        style={{ width: '100%', border: 'none', background: 'transparent', fontSize: '16px', color: 'var(--text-primary)', outline: 'none', fontFamily: 'inherit' }}
+                    />
+                </div>
             </div>
 
             {/* Calculated/Editable Duration Field */}
