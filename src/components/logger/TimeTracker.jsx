@@ -4,13 +4,21 @@ import SegmentedControl from '../../components/ui/SegmentedControl';
 import { Icons } from '../../components/ui/Icons';
 import { OrbitButton } from '../ui/OrbitButton';
 
+const toLocalISOString = (date) => {
+  const pad = (n) => n.toString().padStart(2, '0');
+  return date.getFullYear() +
+      '-' + pad(date.getMonth() + 1) +
+      '-' + pad(date.getDate()) +
+      'T' + pad(date.getHours()) +
+      ':' + pad(date.getMinutes());
+};
+
 export const TimeTracker = ({ metricId }) => {
-  const { metrics, addTimeLog, addMetric } = useContext(StorageContext);
+  const { metrics, addTimeLog } = useContext(StorageContext);
   
   // State
-  const [mode, setMode] = useState('timer'); // 'timer' | 'manual'
+  const [mode, setMode] = useState('manual'); // 'timer' | 'manual'
   const [selectedMetricId, setSelectedMetricId] = useState(metricId || '');
-  const [newActivityName, setNewActivityName] = useState('');
   
   // Timer State
   const [running, setRunning] = useState(false);
@@ -18,10 +26,12 @@ export const TimeTracker = ({ metricId }) => {
   const [startTime, setStartTime] = useState(null); // Capture precise start time
   
   // Manual Entry State
-  const [manualHours, setManualHours] = useState('');
-  const [manualMinutes, setManualMinutes] = useState('');
+  const [manualStartTime, setManualStartTime] = useState('');
+  const [manualEndTime, setManualEndTime] = useState('');
+  const [durationDisplay, setDurationDisplay] = useState('');
+  const [isDurationFocused, setIsDurationFocused] = useState(false);
 
-  // Notes State (New for Phase 4.2)
+  // Notes State
   const [notes, setNotes] = useState('');
 
   // Sync prop if provided
@@ -29,11 +39,72 @@ export const TimeTracker = ({ metricId }) => {
     if (metricId) setSelectedMetricId(metricId);
   }, [metricId]);
 
+  // Calculate Duration Display (Only if not focused to avoid fighting user input)
+  useEffect(() => {
+    if (isDurationFocused) return;
+
+    if (manualStartTime && manualEndTime) {
+      const start = new Date(manualStartTime);
+      const end = new Date(manualEndTime);
+      if (end > start) {
+        const diff = end - start;
+        const totalMinutes = Math.floor(diff / (1000 * 60));
+        const hours = Math.floor(totalMinutes / 60);
+        const mins = totalMinutes % 60;
+        setDurationDisplay(`${hours}h ${mins}m`);
+      } else {
+        setDurationDisplay(''); // Invalid or negative
+      }
+    } else {
+      setDurationDisplay('');
+    }
+  }, [manualStartTime, manualEndTime, isDurationFocused]);
+
+  // Handle Manual Duration Edit
+  const handleDurationChange = (e) => {
+    const val = e.target.value;
+    setDurationDisplay(val);
+
+    let currentStart = manualStartTime;
+
+    // Auto-set start time to NOW if missing
+    if (!currentStart && val.trim().length > 0) {
+        const now = new Date();
+        currentStart = toLocalISOString(now);
+        setManualStartTime(currentStart);
+    }
+
+    if (!currentStart) return;
+
+    let minutes = 0;
+    // 1. HH:MM
+    if (val.includes(':')) {
+        const parts = val.split(':');
+        const h = parseInt(parts[0] || '0', 10);
+        const m = parseInt(parts[1] || '0', 10);
+        minutes = h * 60 + m;
+    }
+    // 2. '90m' or '90 min'
+    else if (val.toLowerCase().includes('m')) {
+        minutes = parseFloat(val);
+    }
+    // 3. Decimal hours '1.5' or '1'
+    else {
+        minutes = parseFloat(val) * 60;
+    }
+
+    if (!isNaN(minutes) && minutes > 0) {
+        const start = new Date(currentStart);
+        const newEnd = new Date(start.getTime() + minutes * 60000);
+        setManualEndTime(toLocalISOString(newEnd));
+    }
+  };
+
   // Timer Logic
   useEffect(() => {
     let timer;
     if (running) {
-      if (!startTime) setStartTime(new Date().toISOString()); // Set start time on first tick
+      if (!startTime) setStartTime(new Date().toISOString());
       timer = setInterval(() => setElapsed(prev => prev + 1), 1000);
     }
     return () => clearInterval(timer);
@@ -51,26 +122,6 @@ export const TimeTracker = ({ metricId }) => {
   const trackableMetrics = useMemo(() => 
     metrics.filter(m => m.type === 'duration' || m.type === 'number'), 
   [metrics]);
-
-  const handleCreateAndStart = () => {
-    if (!newActivityName.trim()) return;
-
-    const newMetric = {
-        id: crypto.randomUUID(),
-        name: newActivityName,
-        label: newActivityName,
-        type: 'duration',
-        goal: 0,
-        frequency: 'daily',
-        dashboardVisible: false,
-        color: '#007AFF'
-    };
-
-    addMetric(newMetric);
-    setSelectedMetricId(newMetric.id);
-    setRunning(true);
-    setNewActivityName('');
-  };
 
   const getSelectedMetricLabel = () => {
       const m = metrics.find(metric => metric.id === selectedMetricId);
@@ -90,9 +141,6 @@ export const TimeTracker = ({ metricId }) => {
     if (mode === 'timer') {
       if (elapsed === 0) return;
       calculatedDuration = elapsed / 3600; // Hours
-
-      // If timer was running, use the captured start time.
-      // If paused/stopped, logic might vary, but simplified here:
       finalStartTime = startTime || new Date(Date.now() - elapsed * 1000).toISOString();
       finalEndTime = new Date().toISOString();
 
@@ -100,24 +148,31 @@ export const TimeTracker = ({ metricId }) => {
       setRunning(false);
       setStartTime(null);
     } else {
-      const h = parseFloat(manualHours) || 0;
-      const m = parseFloat(manualMinutes) || 0;
-      if (h === 0 && m === 0) return;
+      if (!manualStartTime || !manualEndTime) {
+        alert("Please enter both start and end times.");
+        return;
+      }
 
-      calculatedDuration = h + (m / 60);
+      finalStartTime = new Date(manualStartTime).toISOString();
+      finalEndTime = new Date(manualEndTime).toISOString();
 
-      // For manual entry, we approximate the timeframe to "now"
-      const now = new Date();
-      finalEndTime = now.toISOString();
-      finalStartTime = new Date(now.getTime() - (calculatedDuration * 3600 * 1000)).toISOString();
+      const start = new Date(finalStartTime);
+      const end = new Date(finalEndTime);
 
-      setManualHours('');
-      setManualMinutes('');
+      if (end <= start) {
+        alert("End time must be after start time.");
+        return;
+      }
+
+      calculatedDuration = (end - start) / (1000 * 60 * 60); // Hours
+
+      setManualStartTime('');
+      setManualEndTime('');
+      setDurationDisplay('');
     }
 
-    // Phase 4.2 Update: Call addTimeLog instead of addLogEntry
     addTimeLog({
-      activityId: selectedMetricId, // Using correct activityId (metricId)
+      activityId: selectedMetricId,
       activityLabel: getSelectedMetricLabel(),
       startTime: finalStartTime,
       endTime: finalEndTime,
@@ -125,82 +180,99 @@ export const TimeTracker = ({ metricId }) => {
       notes: notes
     });
 
-    // Clear notes after save
     setNotes('');
   };
 
   return (
-    <div className="flex flex-col w-full gap-4">
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '1rem' }}>
       
-      {trackableMetrics.length === 0 ? (
-        <div className="flex flex-col gap-4 p-6 bg-bg-color border border-separator border-dashed rounded-2xl items-center text-center animate-fade-in">
-            <div className="w-12 h-12 rounded-full bg-blue/10 flex items-center justify-center text-blue mb-2">
-                <span className="text-2xl font-bold">+</span>
-            </div>
-            <div>
-                <div className="font-bold text-lg">No Activities Found</div>
-                <div className="text-secondary text-sm">Create a passive tracker to get started.</div>
-            </div>
-            <div className="flex gap-2 w-full mt-2">
-                <input
-                    type="text"
-                    placeholder="Activity Name (e.g. Walking)"
-                    value={newActivityName}
-                    onChange={e => setNewActivityName(e.target.value)}
-                    className="w-full p-3 bg-card border border-separator rounded-xl outline-none focus:border-blue flex-1"
-                />
-                <OrbitButton onClick={handleCreateAndStart} variant="primary">Start</OrbitButton>
-            </div>
-        </div>
-      ) : (
-        <>
-          {/* 1. Mode Toggle */}
-          <SegmentedControl
-            options={[{ label: 'Stopwatch', value: 'timer' }, { label: 'Manual Entry', value: 'manual' }]}
-            value={mode}
-            onChange={setMode}
-          />
+      {/* 1. Mode Toggle */}
+      <SegmentedControl
+        options={[{ label: 'Stopwatch', value: 'timer' }, { label: 'Manual Entry', value: 'manual' }]}
+        value={mode}
+        onChange={setMode}
+      />
 
-          {/* 2. Activity Selector */}
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-bold text-secondary uppercase ml-1">Activity</label>
-            <div className="relative">
-              <select
-                value={selectedMetricId}
-                onChange={(e) => setSelectedMetricId(e.target.value)}
-                className="w-full p-3 bg-bg-color border border-separator rounded-xl font-bold text-lg outline-none focus:border-blue appearance-none"
-              >
-                <option value="">Select Activity...</option>
-                {trackableMetrics.map(m => (
-                  <option key={m.id} value={m.id}>{m.label || m.name}</option>
-                ))}
-              </select>
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-secondary text-xs">
-                ▼
-              </div>
-            </div>
+      {/* 2. Activity Selector */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <label className="text-secondary uppercase" style={{ fontSize: '12px', fontWeight: 'bold', marginLeft: '4px' }}>Activity</label>
+        <div style={{ position: 'relative' }}>
+          <select
+            value={selectedMetricId}
+            onChange={(e) => setSelectedMetricId(e.target.value)}
+            className="input-standard"
+            style={{
+              width: '100%',
+              padding: '12px',
+              backgroundColor: 'var(--bg-color)',
+              border: '1px solid var(--separator)',
+              borderRadius: '14px',
+              fontWeight: 'bold',
+              fontSize: '1.125rem',
+              outline: 'none',
+              appearance: 'none',
+              WebkitAppearance: 'none',
+              MozAppearance: 'none',
+              backgroundImage: 'none',
+              paddingRight: '24px'
+            }}
+          >
+            <option value="">Select Activity...</option>
+            {trackableMetrics.length > 0 ? (
+              trackableMetrics.map(m => (
+                <option key={m.id} value={m.id}>{m.label || m.name}</option>
+              ))
+            ) : (
+              <option value="" disabled>No activities - Create below ↓</option>
+            )}
+          </select>
+          <div style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-secondary)' }}>
+            <Icons.ChevronDown size={14} />
           </div>
-        </>
-      )}
+        </div>
+      </div>
 
       {/* 3. Main Interface */}
-      <div className="flex flex-col items-center justify-center p-6 bg-bg-color border border-separator border-dashed rounded-2xl min-h-[220px]">
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1.5rem',
+          backgroundColor: 'var(--bg-color)',
+          border: '1px dashed var(--separator)',
+          borderRadius: '14px',
+          minHeight: '220px'
+        }}
+      >
         
         {mode === 'timer' ? (
           <>
             {/* Timer Display */}
-            <div className="text-6xl font-mono font-black tracking-tighter mb-8 tabular-nums">
+            <div
+              style={{
+                fontFamily: 'monospace',
+                fontVariantNumeric: 'tabular-nums',
+                textAlign: 'center',
+                width: '100%',
+                fontSize: '3.5rem',
+                fontWeight: '900',
+                letterSpacing: '-0.05em',
+                marginBottom: '2rem'
+              }}
+            >
               {formatTimer(elapsed)}
             </div>
             
             {/* Controls */}
-            <div className="flex w-full gap-3">
+            <div style={{ display: 'flex', width: '100%', gap: '12px' }}>
               {elapsed === 0 ? (
                 <OrbitButton
                   onClick={() => setRunning(true)}
                   variant="primary"
-                  className="flex-1 !bg-green !shadow-none"
-                  style={{ backgroundColor: 'var(--green)' }}
+                  className="!shadow-none"
+                  style={{ flex: 1, '--color-primary': 'var(--green)' }}
                 >
                   Start
                 </OrbitButton>
@@ -209,8 +281,8 @@ export const TimeTracker = ({ metricId }) => {
                   <OrbitButton
                     onClick={() => setRunning(!running)}
                     variant="primary"
-                    className="flex-1 !text-white !shadow-none"
-                    style={{ backgroundColor: running ? 'var(--orange)' : 'var(--green)' }}
+                    className="!text-white !shadow-none"
+                    style={{ flex: 1, '--color-primary': running ? 'var(--orange)' : 'var(--green)' }}
                   >
                     {running ? 'Pause' : 'Resume'}
                   </OrbitButton>
@@ -219,7 +291,7 @@ export const TimeTracker = ({ metricId }) => {
                     <OrbitButton
                       onClick={handleSave}
                       variant="primary"
-                      className="flex-1"
+                      style={{ flex: 1 }}
                     >
                       Save
                     </OrbitButton>
@@ -229,8 +301,8 @@ export const TimeTracker = ({ metricId }) => {
                     <OrbitButton
                       onClick={() => { setElapsed(0); setStartTime(null); }}
                       variant="secondary"
-                      className="!w-12 !px-0"
                       icon={<Icons.RotateCcw size={20} />}
+                      style={{ width: '48px', padding: 0 }}
                     />
                   )}
                 </>
@@ -238,51 +310,99 @@ export const TimeTracker = ({ metricId }) => {
             </div>
           </>
         ) : (
-          /* Manual Entry Inputs */
-          <div className="flex flex-col w-full gap-6">
-            <div className="flex items-center justify-center gap-4">
-              <div className="flex flex-col items-center gap-2">
-                <input
-                  type="number"
-                  placeholder="0"
-                  value={manualHours}
-                  onChange={(e) => setManualHours(e.target.value)}
-                  className="w-24 h-20 text-center text-4xl font-bold bg-card border border-separator rounded-2xl outline-none focus:border-blue"
-                />
-                <span className="text-xs font-bold text-secondary uppercase">Hours</span>
-              </div>
-              <span className="text-4xl font-bold text-separator pb-6">:</span>
-              <div className="flex flex-col items-center gap-2">
-                <input
-                  type="number"
-                  placeholder="0"
-                  value={manualMinutes}
-                  onChange={(e) => setManualMinutes(e.target.value)}
-                  className="w-24 h-20 text-center text-4xl font-bold bg-card border border-separator rounded-2xl outline-none focus:border-blue"
-                />
-                <span className="text-xs font-bold text-secondary uppercase">Mins</span>
-              </div>
+          /* Manual Entry Inputs - Refactored Layout */
+          <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+
+            <div style={{
+                border: '0.5px solid rgba(0,0,0,0.1)',
+                borderRadius: '12px',
+                overflow: 'hidden',
+                marginBottom: '20px',
+                backgroundColor: 'rgba(255,255,255,0.05)'
+            }}>
+                {/* Start Time Row */}
+                <div style={{
+                    borderBottom: '0.5px solid rgba(0,0,0,0.1)',
+                    padding: '10px 14px'
+                }}>
+                    <label style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: '700', display: 'block', marginBottom: '4px', textTransform: 'uppercase' }}>Start Time</label>
+                    <input
+                        type="datetime-local"
+                        value={manualStartTime}
+                        onChange={(e) => setManualStartTime(e.target.value)}
+                        style={{ width: '100%', border: 'none', background: 'transparent', fontSize: '16px', color: 'var(--text-primary)', outline: 'none', fontFamily: 'inherit' }}
+                    />
+                </div>
+
+                {/* End Time Row */}
+                <div style={{
+                    padding: '10px 14px'
+                }}>
+                    <label style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: '700', display: 'block', marginBottom: '4px', textTransform: 'uppercase' }}>End Time</label>
+                    <input
+                        type="datetime-local"
+                        value={manualEndTime}
+                        onChange={(e) => setManualEndTime(e.target.value)}
+                        style={{ width: '100%', border: 'none', background: 'transparent', fontSize: '16px', color: 'var(--text-primary)', outline: 'none', fontFamily: 'inherit' }}
+                    />
+                </div>
+            </div>
+
+            {/* Calculated/Editable Duration Field */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '16px' }}>
+               <label className="text-secondary uppercase" style={{ fontSize: '12px', fontWeight: 'bold', marginLeft: '4px' }}>Duration (Hours/Mins)</label>
+               <input
+                 type="text"
+                 value={durationDisplay}
+                 onChange={handleDurationChange}
+                 onFocus={() => setIsDurationFocused(true)}
+                 onBlur={() => setIsDurationFocused(false)}
+                 placeholder="e.g. 1.5, 90m, 1:30"
+                 style={{
+                    width: '100%',
+                    padding: '12px',
+                    backgroundColor: 'var(--bg-color)',
+                    border: '1px solid var(--separator)',
+                    borderRadius: '14px',
+                    fontFamily: 'monospace',
+                    fontSize: '1.125rem',
+                    color: 'var(--text-primary)',
+                    outline: 'none'
+                 }}
+               />
             </div>
             
-            <OrbitButton
-              onClick={handleSave}
-              variant="primary"
-              className="w-full"
-            >
-              Save Entry
-            </OrbitButton>
+            <div style={{ overflow: 'hidden', borderRadius: '14px', width: '100%' }}>
+              <OrbitButton
+                onClick={handleSave}
+                variant="primary"
+                style={{ width: '100%' }}
+              >
+                Log Session
+              </OrbitButton>
+            </div>
           </div>
         )}
       </div>
 
-      {/* 4. Notes Field (New) */}
+      {/* 4. Notes Field */}
       <div>
-          <label className="text-xs font-bold text-secondary uppercase ml-1">Notes</label>
+          <label className="text-secondary uppercase" style={{ fontSize: '12px', fontWeight: 'bold', marginLeft: '4px' }}>Notes</label>
           <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Session notes..."
-              className="w-full p-3 mt-1 bg-bg-color border border-separator rounded-xl outline-none focus:border-blue min-h-[80px]"
+              style={{
+                  width: '100%',
+                  padding: '12px',
+                  marginTop: '4px',
+                  backgroundColor: 'var(--bg-color)',
+                  border: '1px solid var(--separator)',
+                  borderRadius: '14px',
+                  outline: 'none',
+                  minHeight: '80px',
+                  fontFamily: 'inherit'
+              }}
           />
       </div>
     </div>

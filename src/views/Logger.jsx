@@ -3,6 +3,7 @@ import SegmentedControl from '../components/ui/SegmentedControl';
 import Glass from '../components/ui/Glass';
 import { DailyCheckInForm } from '../components/logger/DailyCheckInForm';
 import { TimeTracker } from '../components/logger/TimeTracker';
+import { ActivityManager } from '../components/logger/ActivityManager';
 import { Timeline } from '../components/logger/Timeline';
 import { StorageContext } from '../context/StorageContext';
 import { EmptyState } from '../components/ui/EmptyState';
@@ -12,7 +13,6 @@ import '../styles/motion.css';
 export const Logger = ({ initialMetricId = null }) => {
   const { metrics } = useContext(StorageContext);
   const [activeMode, setActiveMode] = useState('checkin');
-  const [selectedTrackerMetric, setSelectedTrackerMetric] = useState('');
 
   useEffect(() => {
     if (initialMetricId) {
@@ -20,7 +20,6 @@ export const Logger = ({ initialMetricId = null }) => {
       if (metric) {
         if (metric.type === 'duration') {
           setActiveMode('tracker');
-          setSelectedTrackerMetric(initialMetricId);
         } else {
            setActiveMode('checkin');
         }
@@ -29,12 +28,11 @@ export const Logger = ({ initialMetricId = null }) => {
   }, [initialMetricId, metrics]);
 
   const hasMetrics = metrics && metrics.length > 0;
-  const timeMetrics = metrics.filter(m => m.type === 'number' || m.type === 'duration');
 
   return (
     <div className="layout-padding fade-in">
       <div className="view-header-stack">
-        <h1 className="text-3xl font-extrabold tracking-tight">Logger</h1>
+        <h1 style={{ margin: 0, lineHeight: 1 }}>Logger</h1>
         <p className="text-secondary font-medium">Input engine.</p>
         <div className="system-toggle-wrapper">
           <SegmentedControl
@@ -48,73 +46,38 @@ export const Logger = ({ initialMetricId = null }) => {
         </div>
       </div>
 
-      {(!hasMetrics && activeMode === 'checkin') ? (
-        <div className="layout-content">
-          <EmptyState
-             icon={<Icons.Edit3 size={48} className="text-secondary opacity-50" />}
-             title="No Metrics Configured"
-             message="You need to define what to track before you can log data."
-          />
-        </div>
-      ) : (
-        <div className="layout-content flex flex-col gap-6">
-          <div className="fade-in">
-            {activeMode === 'checkin' ? (
-              <DailyCheckInForm />
+      <div className="layout-content" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div className="fade-in">
+          {activeMode === 'checkin' ? (
+            !hasMetrics ? (
+              <EmptyState
+                 icon={null}
+                 title="No Metrics Configured"
+                 message="You need to define what to track before you can log data."
+              />
             ) : (
-              <Glass className="p-4">
-                <div className="flex flex-col gap-4">
-                  <div className="text-sm font-bold text-secondary uppercase tracking-wide">
-                    Activity Tracker
-                  </div>
-
-                  {timeMetrics.length > 0 ? (
-                    <>
-                      <div className="flex flex-col gap-2">
-                        <label className="text-xs font-bold text-secondary uppercase">Select Activity</label>
-                        <div className="relative">
-                          <select
-                            value={selectedTrackerMetric}
-                            onChange={(e) => setSelectedTrackerMetric(e.target.value)}
-                            className="w-full p-3 rounded-xl bg-bg-color border border-separator text-lg font-bold outline-none focus:border-blue appearance-none"
-                          >
-                            <option value="">Choose activity...</option>
-                            {timeMetrics.map(m => (
-                              <option key={m.id} value={m.id}>{m.name}</option>
-                            ))}
-                          </select>
-                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-secondary">
-                            ▼
-                          </div>
-                        </div>
-                      </div>
-
-                      {selectedTrackerMetric ? (
-                         <div className="mt-2 p-6 bg-bg-color rounded-xl flex justify-center border border-separator border-opacity-50">
-                           <TimeTracker metricId={selectedTrackerMetric} />
-                         </div>
-                      ) : (
-                        <div className="text-center text-secondary opacity-60 italic py-8 border-2 border-dashed border-separator rounded-xl">
-                          Select an activity above to start tracking time
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <TimeTracker />
-                  )}
-                </div>
+              <DailyCheckInForm />
+            )
+          ) : (
+            <>
+              <Glass className="p-4" style={{ padding: '1rem' }}>
+                 <TimeTracker metricId={initialMetricId} />
               </Glass>
-            )}
-          </div>
+              <div style={{ height: '24px' }} />
+              <ActivityManager />
+            </>
+          )}
+        </div>
 
-          <div className="flex flex-col gap-2 mt-4">
-            <div className="section-label px-1 text-secondary font-bold text-xs uppercase">
+        {hasMetrics && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
+            <div className="section-label" style={{ padding: '0 4px', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
               Today's Timeline
             </div>
             <Timeline />
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

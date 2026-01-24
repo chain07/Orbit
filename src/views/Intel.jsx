@@ -176,22 +176,12 @@ export const Intel = () => {
 
         <ReportGenerator segment={segment} />
 
-        {/* Data Literacy Footer */}
-        <div className="mt-8 pt-8 border-t border-separator/50 flex flex-col gap-4 text-xs text-secondary pb-8">
-            <div className="font-bold uppercase tracking-wide opacity-70">About Metrics</div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                    <span className="font-bold block text-primary mb-1">System Health</span>
-                    Aggregate reliability of your system. Average % of goals completed.
-                </div>
-                <div>
-                    <span className="font-bold block text-primary mb-1">Momentum</span>
-                    Velocity of progress. Rate of change in activity volume.
-                </div>
-                <div>
-                    <span className="font-bold block text-primary mb-1">Activity Volume</span>
-                    Total accumulation of logged duration/frequency.
-                </div>
+        <div className="mt-12 mb-8 px-4">
+            <h4 className="text-xs font-bold text-secondary uppercase tracking-wide mb-3">About Metrics</h4>
+            <div className="space-y-3 text-xs text-secondary leading-relaxed opacity-80">
+                <p><strong className="text-primary">System Health:</strong> The heartbeat of your OS. Represents your daily reliability score, calculated as the average completion percentage of all active goals.</p>
+                <p><strong className="text-primary">Momentum:</strong> Your velocity vector. Measures the rate of change in your activity volume compared to the previous 7-day window.</p>
+                <p><strong className="text-primary">Activity Volume:</strong> Your raw output. The total accumulation of logged hours and repetitions, regardless of specific goals.</p>
             </div>
         </div>
       </div>

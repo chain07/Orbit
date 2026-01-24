@@ -21,7 +21,6 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
     label: metric?.label || '',
     type: metric?.type || 'number',
     goal: metric?.goal !== undefined ? metric.goal : 0,
-    frequency: metric?.frequency || 'daily',
     color: metric?.color || '#007AFF',
     widgetType: metric?.widgetType || 'ring',
     unit: metric?.unit || '',
@@ -66,8 +65,8 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
       ...metric,
       ...form,
       label: form.label || form.name,
-      // Ensure goal is null for types that don't use it to pass validation, unless it is 0 (passive)
-      goal: (form.type === 'number' || form.type === 'duration' || form.type === 'boolean') ? parseFloat(form.goal) : null
+      // Ensure goal is null for types that don't use it to pass validation
+      goal: (form.type !== 'text') ? (parseFloat(form.goal) || 0) : null
     };
     onSave(submission);
   };
@@ -122,46 +121,41 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
              </div>
         </div>
 
-        {/* Goal Configuration - NEW */}
-        <div className="animate-fade-in">
-            <div className="section-divider">Goal Configuration</div>
-
-            <div className="flex flex-col gap-4 mb-4">
-                <div>
-                   <label className="label-standard block mb-2">Frequency</label>
-                   <SegmentedControl
-                      options={['Daily', 'Weekly', 'Monthly'].map(o => ({ label: o, value: o.toLowerCase() }))}
-                      value={form.frequency}
-                      onChange={val => updateForm('frequency', val)}
-                   />
-                </div>
-
-                {(form.type === 'number' || form.type === 'duration' || form.type === 'boolean') && (
-                    <div className="form-group">
-                        <label className="label-standard block">Target Value (Set 0 for passive tracking)</label>
-                        <input
-                           type="number"
-                           value={form.goal}
-                           onChange={e => updateForm('goal', e.target.value)}
-                           className="input-standard"
+        {/* Goal Configuration (Global for relevant types) */}
+        {form.type !== 'text' && (
+            <div className="animate-fade-in mb-4">
+                <div className="section-divider">Goal Configuration</div>
+                <div className="flex flex-col gap-4">
+                    <div>
+                        <label className="label-standard block mb-2">Frequency</label>
+                        <SegmentedControl
+                            options={['Daily', 'Weekly']}
+                            value={form.config?.frequency || 'Daily'}
+                            onChange={v => updateConfig('frequency', v)}
                         />
-                        <div className="text-xs text-secondary mt-1">
-                          {form.frequency === 'daily' ? 'Target for each day.' :
-                           form.frequency === 'weekly' ? 'Target sum for the week (Mon-Sun).' :
-                           'Target sum for the current month.'}
+                    </div>
+                    <div>
+                        <label className="label-standard block">Target Value</label>
+                        <input
+                            type="number"
+                            value={form.goal}
+                            onChange={e => updateForm('goal', e.target.value)}
+                            className="input-standard"
+                            placeholder="0"
+                        />
+                        <div className="text-xs text-secondary mt-1 ml-1">
+                            Set to 0 for passive tracking (no daily goal).
                         </div>
                     </div>
-                )}
+                </div>
             </div>
-        </div>
+        )}
 
         {/* Dynamic Type Configuration */}
         <div className="animate-fade-in">
-            <div className="section-divider">Type Configuration</div>
-
             {/* NUMBER */}
             {form.type === 'number' && (
-               <div className="form-row">
+               <div className="form-row mt-4">
                     <div className="form-group">
                         <label className="label-standard block">Unit</label>
                         <input type="text" value={form.unit} onChange={e => updateForm('unit', e.target.value)} placeholder="kg" className="input-standard" />
@@ -171,7 +165,7 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
 
             {/* BOOLEAN */}
             {form.type === 'boolean' && (
-               <div className="form-row">
+               <div className="form-row mt-4">
                   <div className="form-group">
                       <label className="label-standard block">"True" Label</label>
                       <input type="text" value={form.config?.trueLabel || 'Yes'} onChange={e => updateConfig('trueLabel', e.target.value)} className="input-standard" />
@@ -185,7 +179,7 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
 
             {/* DURATION */}
             {form.type === 'duration' && (
-               <div className="flex flex-col gap-3">
+               <div className="flex flex-col gap-3 mt-4">
                   <div className="flex items-center gap-3 p-3 rounded-xl border border-separator">
                       <input
                         type="checkbox"
@@ -200,7 +194,7 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
 
             {/* RANGE */}
             {form.type === 'range' && (
-               <div className="flex flex-col gap-4">
+               <div className="flex flex-col gap-4 mt-4">
                   <div className="form-row">
                       <div className="form-group">
                           <label className="label-standard block">Min Value</label>
@@ -230,7 +224,7 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
 
             {/* SELECT */}
             {form.type === 'select' && (
-               <div className="flex flex-col gap-3">
+               <div className="flex flex-col gap-3 mt-4">
                   <div className="flex gap-2">
                       <input
                         type="text"

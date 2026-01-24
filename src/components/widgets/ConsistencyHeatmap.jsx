@@ -7,7 +7,7 @@ import { dateUtils } from '../../lib/dateUtils';
  * * Displays a contribution-graph style heatmap.
  * Expected data structure:
  * {
- * values: { [date]: number }, // 0-100 values
+ * values: { [date]: number }, // 0-1 values
  * startDate: string (YYYY-MM-DD),
  * endDate: string (YYYY-MM-DD),
  * color: string
@@ -40,10 +40,10 @@ export const ConsistencyHeatmap = ({ data }) => {
     // Assuming the parent passes a base color class is tricky in Tailwind without safelisting.
     // Instead, we will rely on the HeatMap's default scale or allow injection.
     
-    // For now, let's use the HeatMap's default scale but strictly mapped to 0-100
-    if (value >= 100) return 'bg-green-500';
-    if (value >= 75) return 'bg-green-400';
-    if (value >= 50) return 'bg-green-300';
+    // For now, let's use the HeatMap's default scale but strictly mapped
+    if (value >= 1) return 'bg-green-500';
+    if (value >= 0.75) return 'bg-green-400';
+    if (value >= 0.5) return 'bg-green-300';
     if (value > 0) return 'bg-green-200';
     return 'bg-gray-100 dark:bg-white/5';
   };
