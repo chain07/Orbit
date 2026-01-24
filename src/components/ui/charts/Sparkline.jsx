@@ -23,6 +23,7 @@ export const Sparkline = ({
   fillColor = 'rgba(79, 70, 229, 0.3)',
   showDots = true,
   showLabels = true,
+  className = '',
 }) => {
   // 1. Calculations & Normalization
   const { points, comparisonPoints, max, min, normalizedData, stepX } = useMemo(() => {
@@ -74,10 +75,10 @@ export const Sparkline = ({
   const uniqueId = React.useId(); // Unique ID for gradient definition
 
   return (
-    <div className="w-full flex flex-col select-none group" style={{ height: 'auto' }}>
+    <div className={`w-full flex flex-col select-none group ${className}`} style={{ height: className.includes('h-full') ? '100%' : 'auto' }}>
       
       {/* Chart Container */}
-      <div className="relative w-full flex" style={{ height }}>
+      <div className="relative w-full flex" style={{ height: className.includes('h-full') ? '100%' : height }}>
         
         {/* Y-Axis Labels (Left side overlay or separate column) */}
         {showLabels && (

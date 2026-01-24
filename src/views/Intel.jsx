@@ -68,9 +68,9 @@ export const Intel = () => {
                 <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-blue opacity-5 rounded-full blur-2xl"></div>
               </>
             ) : (
-              <div className="flex flex-row items-center gap-6 flex-1 z-10 px-2">
+              <div className="flex flex-row items-center justify-between w-full h-full px-4 z-10">
                 <RingChart value={100} color="rgba(255,255,255,0.1)" strokeWidth={8} size={80} />
-                <div className="flex flex-col">
+                <div className="flex flex-col items-end">
                   <div className="text-4xl font-bold text-primary">0%</div>
                   <div className="text-sm text-secondary">Awaiting Data</div>
                 </div>
@@ -78,8 +78,8 @@ export const Intel = () => {
             )}
           </Glass>
 
-          <Glass className={`flex flex-col justify-between min-h-[140px] relative overflow-hidden ${!hasData ? 'pb-4' : ''}`}>
-            <div className="text-xs font-bold text-secondary uppercase tracking-wide z-10">{hasData ? 'Intensity' : 'MOMENTUM'}</div>
+          <Glass className={`flex flex-col justify-between min-h-[140px] relative overflow-hidden ${!hasData ? '!p-0' : ''}`}>
+            <div className={`text-xs font-bold text-secondary uppercase tracking-wide z-20 ${!hasData ? 'absolute top-5 left-5' : ''}`}>{hasData ? 'Intensity' : 'MOMENTUM'}</div>
             {hasData ? (
               <>
                 <div className="flex flex-col items-center my-2 z-10">
@@ -96,7 +96,8 @@ export const Intel = () => {
               </>
             ) : (
               <>
-                <div className="flex-1 flex items-center z-10 w-full h-full">
+                <div className="absolute top-5 right-5 z-20 text-4xl font-bold text-secondary opacity-20">0.0</div>
+                <div className="absolute inset-0 w-full h-full flex items-end">
                    <Sparkline
                      data={[0, 0, 0, 0, 0]}
                      showLabels={false}
@@ -107,7 +108,7 @@ export const Intel = () => {
                      className="w-full h-full"
                    />
                 </div>
-                <div className="text-xs text-secondary text-center opacity-80 z-10">Status: Offline</div>
+                <div className="absolute bottom-5 w-full text-center text-xs text-secondary opacity-60 z-20">Status: Offline</div>
               </>
             )}
           </Glass>

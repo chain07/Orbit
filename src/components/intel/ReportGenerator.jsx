@@ -99,8 +99,8 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
           <div className="px-4 pb-4 animate-fade-in">
              <div className="flex flex-col gap-4">
               {/* Controls Row */}
-              <div className="flex justify-between items-center pt-2 border-t border-separator">
-                 <div className="text-xs font-bold text-secondary uppercase tracking-wide">
+              <div className="flex justify-between items-end pt-2 border-t border-separator">
+                 <div className="text-xs font-bold text-secondary uppercase tracking-wide mb-2">
                     Configuration
                  </div>
                  <OrbitButton
@@ -118,7 +118,7 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
               </div>
 
               {/* Section Toggles */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 {Object.entries(selectedSections).map(([key, value]) => (
                     <label key={key} className="flex items-center justify-between p-2 rounded-lg hover:bg-bg-color/50 transition-colors cursor-pointer group">
                       <span className="text-sm font-medium capitalize text-primary/80 group-hover:text-primary transition-colors">
