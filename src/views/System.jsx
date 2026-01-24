@@ -103,12 +103,10 @@ export const System = ({ onNavigate }) => {
   };
 
   return (
-    <div className="flex flex-col gap-6 p-4 pb-32 fade-in">
-      
-      {/* Header */}
-      <div className="safe-mt">
+    <div className="layout-padding fade-in">
+      <div className="view-header-stack">
         <h1 className="text-3xl font-extrabold tracking-tight">System</h1>
-        
+        <p className="text-secondary font-medium system-subheader">Configuration</p>
         <div className="system-toggle-wrapper">
           <SegmentedControl
             options={['Metrics', 'Settings']}
@@ -116,112 +114,112 @@ export const System = ({ onNavigate }) => {
             onChange={setViewMode}
           />
         </div>
-
-        <p className="text-secondary font-medium system-subheader">Configuration</p>
       </div>
 
-      {/* --- METRICS VIEW --- */}
-      {viewMode === 'Metrics' && (
-        <div className="flex flex-col gap-4">
-          <OrbitButton 
-            onClick={handleAddMetric}
-            variant="primary"
-            className="w-full"
-            icon={<span className="text-xl leading-none">+</span>}
-          >
-            Add New Metric
-          </OrbitButton>
+      <div className="layout-content">
+        {/* --- METRICS VIEW --- */}
+        {viewMode === 'Metrics' && (
+          <div className="flex flex-col gap-4">
+            <OrbitButton
+              onClick={handleAddMetric}
+              variant="primary"
+              className="w-full"
+              icon={<span className="text-xl leading-none">+</span>}
+            >
+              Add New Metric
+            </OrbitButton>
 
-          {metrics.length === 0 ? (
-            <Glass className="flex flex-col items-center justify-center p-8 text-center gap-3 opacity-80">
-              <div className="w-12 h-12 rounded-full bg-separator/20 flex items-center justify-center mb-1">
-                <Icons.Activity size={24} className="text-secondary" />
-              </div>
-              <div className="w-full text-center">
-                <div className="font-bold text-lg">No Metrics</div>
-                <div className="text-secondary text-sm max-w-[200px] mx-auto leading-relaxed">
-                  Create your first metric to start tracking your data.
+            {metrics.length === 0 ? (
+              <Glass className="flex flex-col items-center justify-center p-8 text-center gap-3 opacity-80">
+                <div className="w-12 h-12 rounded-full bg-separator/20 flex items-center justify-center mb-1">
+                  <Icons.Activity size={24} className="text-secondary" />
                 </div>
-              </div>
-            </Glass>
-          ) : (
-            <Glass className="p-2">
-              <div className="flex flex-col gap-2">
-                {unifiedList.map((item) => (
-                  <div 
-                    key={item.id}
-                    onClick={() => handleEditMetric(item)}
-                    className="p-3 rounded-xl border border-separator bg-card flex justify-between items-center cursor-pointer active:scale-[0.99] transition-transform hover:bg-bg-color/50"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg bg-bg-color text-blue">
-                         {item.icon}
-                      </div>
-                      <div>
-                        <div className="font-bold text-primary">{item.title}</div>
-                        <div className="text-xs text-secondary flex items-center gap-1">
-                          {item.category}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-secondary opacity-30">
-                      <Icons.ChevronRight size={16} />
-                    </div>
+                <div className="w-full text-center">
+                  <div className="font-bold text-lg">No Metrics</div>
+                  <div className="text-secondary text-sm max-w-[200px] mx-auto leading-relaxed">
+                    Create your first metric to start tracking your data.
                   </div>
-                ))}
-              </div>
-            </Glass>
-          )}
-        </div>
-      )}
-
-      {/* --- SETTINGS VIEW --- */}
-      {viewMode === 'Settings' && (
-        <div className="flex flex-col gap-6 animate-fade-in">
-            <DataManagement />
-
-            <Glass className="p-0 overflow-hidden">
-                <div className="font-bold text-lg p-4 border-b border-separator/50">App Preferences</div>
-                <div className="flex flex-col">
-                    <div className="flex justify-between items-center p-4 border-b border-separator/50">
-                        <span className="font-medium">Notifications</span>
-                        <div className="w-10 h-6 bg-separator/30 rounded-full relative">
-                            <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"></div>
-                        </div>
-                    </div>
-                    <div className="flex justify-between items-center p-4 border-b border-separator/50">
-                        <span className="font-medium">Haptics</span>
-                        <div className="w-10 h-6 bg-green rounded-full relative">
-                            <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"></div>
-                        </div>
-                    </div>
-                    <div className="flex justify-between items-center p-4">
-                        <span className="font-medium">Developer Mode</span>
-                        <button 
-                            onClick={() => setIsDebugMode(!isDebugMode)}
-                            className={`w-10 h-6 rounded-full relative transition-colors ${isDebugMode ? 'bg-blue' : 'bg-separator/30'}`}
-                        >
-                             <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${isDebugMode ? 'right-1' : 'left-1'}`}></div>
-                        </button>
-                    </div>
                 </div>
-            </Glass>
-
-            {isDebugMode && (
-                <Glass className="p-4 border-l-4 border-orange">
-                    <div className="text-xs font-bold text-orange uppercase tracking-wide mb-3">Developer Tools</div>
-                    <div className="flex gap-2">
-                        <OrbitButton onClick={seedTestData} variant="secondary" className="flex-1 !text-xs">Seed Test Data</OrbitButton>
-                        <OrbitButton onClick={exportArchive} variant="secondary" className="flex-1 !text-xs">Export Debug Archive</OrbitButton>
+              </Glass>
+            ) : (
+              <Glass className="p-2">
+                <div className="flex flex-col gap-2">
+                  {unifiedList.map((item) => (
+                    <div
+                      key={item.id}
+                      onClick={() => handleEditMetric(item)}
+                      className="p-3 rounded-xl border border-separator bg-card flex justify-between items-center cursor-pointer active:scale-[0.99] transition-transform hover:bg-bg-color/50"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg bg-bg-color text-blue">
+                           {item.icon}
+                        </div>
+                        <div>
+                          <div className="font-bold text-primary">{item.title}</div>
+                          <div className="text-xs text-secondary flex items-center gap-1">
+                            {item.category}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-secondary opacity-30">
+                        <Icons.ChevronRight size={16} />
+                      </div>
                     </div>
-                </Glass>
+                  ))}
+                </div>
+              </Glass>
             )}
+          </div>
+        )}
 
-            <div className="text-center text-xs text-secondary mt-8">
-                ORBIT v1.1.0 • Liquid Native
-            </div>
-        </div>
-      )}
+        {/* --- SETTINGS VIEW --- */}
+        {viewMode === 'Settings' && (
+          <div className="flex flex-col gap-6 animate-fade-in">
+              <DataManagement />
+
+              <Glass className="p-0 overflow-hidden">
+                  <div className="font-bold text-lg p-4 border-b border-separator/50">App Preferences</div>
+                  <div className="flex flex-col">
+                      <div className="flex justify-between items-center p-4 border-b border-separator/50">
+                          <span className="font-medium">Notifications</span>
+                          <div className="w-10 h-6 bg-separator/30 rounded-full relative">
+                              <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"></div>
+                          </div>
+                      </div>
+                      <div className="flex justify-between items-center p-4 border-b border-separator/50">
+                          <span className="font-medium">Haptics</span>
+                          <div className="w-10 h-6 bg-green rounded-full relative">
+                              <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"></div>
+                          </div>
+                      </div>
+                      <div className="flex justify-between items-center p-4">
+                          <span className="font-medium">Developer Mode</span>
+                          <button
+                              onClick={() => setIsDebugMode(!isDebugMode)}
+                              className={`w-10 h-6 rounded-full relative transition-colors ${isDebugMode ? 'bg-blue' : 'bg-separator/30'}`}
+                          >
+                               <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${isDebugMode ? 'right-1' : 'left-1'}`}></div>
+                          </button>
+                      </div>
+                  </div>
+              </Glass>
+
+              {isDebugMode && (
+                  <Glass className="p-4 border-l-4 border-orange">
+                      <div className="text-xs font-bold text-orange uppercase tracking-wide mb-3">Developer Tools</div>
+                      <div className="flex gap-2">
+                          <OrbitButton onClick={seedTestData} variant="secondary" className="flex-1 !text-xs">Seed Test Data</OrbitButton>
+                          <OrbitButton onClick={exportArchive} variant="secondary" className="flex-1 !text-xs">Export Debug Archive</OrbitButton>
+                      </div>
+                  </Glass>
+              )}
+
+              <div className="text-center text-xs text-secondary mt-8">
+                  ORBIT v1.1.0 • Liquid Native
+              </div>
+          </div>
+        )}
+      </div>
 
       {showBuilder && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4">

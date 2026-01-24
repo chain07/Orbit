@@ -11,7 +11,7 @@ export const EmptyState = ({
 }) => {
   return (
     <Glass className="p-8 flex flex-col items-center justify-center text-center gap-3 border-2 border-dashed border-separator border-opacity-50">
-      <div className="text-4xl opacity-50 mb-2">{icon}</div>
+      {icon && <div className="text-4xl opacity-50 mb-2">{icon}</div>}
       <div className="flex flex-col gap-1">
         <div className="text-lg font-bold text-primary">{title}</div>
         <div className="text-sm text-secondary max-w-[200px] mx-auto leading-relaxed">

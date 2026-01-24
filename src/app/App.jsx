@@ -10,32 +10,10 @@ import { Logger } from '../views/Logger';
 import { Intel } from '../views/Intel';
 import { System } from '../views/System';
 import BottomNav from '../components/ui/BottomNav';
-import UpdateManager from '../components/system/UpdateManager';
-import { OnboardingWizard } from '../components/system/OnboardingWizard';
 import { GlobalErrorBoundary } from '../components/system/GlobalErrorBoundary'; // Restored for production safety
 
 const AppContent = () => {
   const { activeTab, setActiveTab, navigationParams, setNavigationParams, tabs } = useContext(NavigationContext);
-  const { onboardingComplete, completeOnboarding } = useContext(StorageContext);
-  const [showWizard, setShowWizard] = useState(false);
-
-  // Onboarding Logic:
-  // 1. If onboardingComplete is FALSE (new user), show wizard.
-  // 2. If it turns TRUE (loaded from storage or finished), hide wizard.
-  useEffect(() => {
-    // Only show wizard if explicitly false (new user) AND we are on Horizon tab
-    // This prevents "Ghost Sheet" on other tabs.
-    if (onboardingComplete === false) {
-      setShowWizard(true);
-    } else if (onboardingComplete === true) {
-      setShowWizard(false);
-    }
-  }, [onboardingComplete]);
-
-  const handleOnboardingFinish = () => {
-    completeOnboarding();
-    setShowWizard(false);
-  };
 
   const renderTab = () => {
     switch (activeTab) {
@@ -65,9 +43,6 @@ const AppContent = () => {
          {renderTab()}
       </main>
       
-      {/* Update Manager */}
-      <UpdateManager />
-
       {/* Navigation */}
       <BottomNav
         tabs={tabs}
@@ -75,14 +50,6 @@ const AppContent = () => {
         onChange={handleTabChange}
       />
 
-      {/* Onboarding Overlay - Fixed: Only show on Horizon to prevent ghosting */}
-      {showWizard && activeTab === 'Horizon' && (
-        <div className="fixed inset-0 z-[200] bg-bg-color animate-fade-in overflow-y-auto flex items-center justify-center p-4">
-          <div className="w-full max-w-lg h-full max-h-[90vh]">
-            <OnboardingWizard onComplete={handleOnboardingFinish} />
-          </div>
-        </div>
-      )}
     </div>
   );
 };
