@@ -13,30 +13,30 @@ import { StackedBar } from '../components/ui/charts/StackedBar';
 import '../styles/motion.css';
 
 export const Intel = () => {
-  const { metrics, logEntries } = useContext(StorageContext);
+  const { metrics, logEntries, allLogs } = useContext(StorageContext);
   const [segment, setSegment] = useState('Daily');
 
-  const hasData = logEntries && logEntries.length > 0;
+  const hasData = allLogs && allLogs.length > 0;
   const segments = ['Daily', 'Weekly', 'Monthly'];
 
   const insights = useMemo(() => {
     if (!HorizonAgent || !HorizonAgent.generateAllInsights) return [];
     try {
-      const all = HorizonAgent.generateAllInsights(metrics, logEntries, segment);
+      const all = HorizonAgent.generateAllInsights(metrics, allLogs, segment);
       return Object.values(all).flat();
     } catch (e) {
       console.warn("Horizon Agent failed:", e);
       return [];
     }
-  }, [metrics, logEntries, segment]);
+  }, [metrics, allLogs, segment]);
 
   const widgets = useMemo(() => 
-    WidgetDataEngine.generateWidgets(metrics, logEntries, segment),
-  [metrics, logEntries, segment]);
+    WidgetDataEngine.generateWidgets(metrics, allLogs, segment),
+  [metrics, allLogs, segment]);
 
   const stats = useMemo(() => {
-    return AnalyticsEngine.calculateSystemHealth(metrics, logEntries, segment);
-  }, [metrics, logEntries, segment]);
+    return AnalyticsEngine.calculateSystemHealth(metrics, allLogs, segment);
+  }, [metrics, allLogs, segment]);
 
   const telemetrySubtitle = useMemo(() => {
     if (segment === 'Daily') return 'Today (4h Blocks)';

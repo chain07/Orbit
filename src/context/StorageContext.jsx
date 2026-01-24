@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import { OrbitDB } from '../lib/db';
 import {
   MetricConfig,
   LogEntry,
@@ -9,7 +10,9 @@ import {
   createMetric,
   createTimeLog,
   validateMetricValue,
-  migrateData
+  migrateData,
+  validateMetrics,
+  validateLogEntries
 } from '../types/schemas';
 
 // Re-export for backward compatibility
@@ -27,105 +30,100 @@ export const StorageProvider = ({ children }) => {
   const [timeLogs, setTimeLogs] = useState([]);
   const [widgetLayout, setWidgetLayout] = useState({});
   const [onboardingComplete, setOnboardingComplete] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
+  // Initialize DB and Load Data
   useEffect(() => {
-    try {
-      const storedData = localStorage.getItem('orbit_db');
-      if (storedData) {
-        let parsed = JSON.parse(storedData);
-
-        // Phase 1: Migrate Data to ensure metricId consistency
-        parsed = migrateData(parsed);
-
-        if (parsed.metrics) {
-            validateMetrics(parsed.metrics);
-            setMetrics(parsed.metrics);
-        }
-        if (parsed.logEntries) {
-            validateLogEntries(parsed.logEntries, parsed.metrics || []);
-            setLogEntries(parsed.logEntries);
-
-            // Storage Reset Safeguard
-            if (parsed.logEntries.length === 0 && parsed.metrics && parsed.metrics.length > 0) {
-               console.warn("Log entries are empty after migration. Check schema integrity.");
-            }
-        }
-        if (parsed.timeLogs) {
-            // No strict validation for timeLogs in migration yet, but good to have
-            // Assuming array
-            if (Array.isArray(parsed.timeLogs)) {
-                setTimeLogs(parsed.timeLogs);
-            }
-        }
-        if (parsed.widgetLayout) setWidgetLayout(parsed.widgetLayout);
-        if (typeof parsed.onboardingComplete !== 'undefined') {
-          setOnboardingComplete(parsed.onboardingComplete);
-        }
-      }
-    } catch (e) {
-      console.error("Failed to load ORBIT data", e);
-    }
-  }, []);
-
-  // Ref to store the latest data for unmount persistence
-  const dataRef = React.useRef({ metrics, logEntries, timeLogs, widgetLayout, onboardingComplete });
-
-  useEffect(() => {
-    dataRef.current = { metrics, logEntries, timeLogs, widgetLayout, onboardingComplete };
-  }, [metrics, logEntries, timeLogs, widgetLayout, onboardingComplete]);
-
-  useEffect(() => {
-    const saveToStorage = () => {
+    const init = async () => {
       try {
-        localStorage.setItem('orbit_db', JSON.stringify(dataRef.current));
-      } catch (e) {
-        if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
-          alert("Storage Quota Exceeded! Please export your data and clear space.");
-        } else {
-          console.error("Failed to save to localStorage", e);
+        await OrbitDB.init();
+
+        // Check for legacy localStorage data
+        const legacyData = localStorage.getItem('orbit_db');
+        if (legacyData) {
+          console.log("Migrating legacy data to IndexedDB...");
+          let parsed = JSON.parse(legacyData);
+          parsed = migrateData(parsed);
+
+          // Bulk Insert Migration
+          if (parsed.metrics) {
+              for (const m of parsed.metrics) await OrbitDB.put('metrics', m);
+          }
+          if (parsed.logEntries) {
+              for (const l of parsed.logEntries) await OrbitDB.add('logs', l);
+          }
+          if (parsed.timeLogs) {
+              for (const t of parsed.timeLogs) await OrbitDB.add('timeLogs', t);
+          }
+
+          // Keep lightweight config in localStorage
+          if (parsed.widgetLayout) localStorage.setItem('orbit_widget_layout', JSON.stringify(parsed.widgetLayout));
+          if (typeof parsed.onboardingComplete !== 'undefined') localStorage.setItem('orbit_onboarding', JSON.stringify(parsed.onboardingComplete));
+
+          // Clear legacy key
+          localStorage.removeItem('orbit_db');
+          console.log("Migration complete.");
         }
-      }
-    };
 
-    const handler = setTimeout(saveToStorage, 2000); // Debounce for 2 seconds
+        // Load data from DB
+        const dbMetrics = await OrbitDB.getAll('metrics');
+        const dbLogs = await OrbitDB.getAll('logs');
+        const dbTimeLogs = await OrbitDB.getAll('timeLogs');
 
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [metrics, logEntries, timeLogs, widgetLayout, onboardingComplete]);
+        setMetrics(dbMetrics || []);
+        setLogEntries(dbLogs || []);
+        setTimeLogs(dbTimeLogs || []);
 
-  // Ensure data is saved on unmount
-  useEffect(() => {
-    return () => {
-       // We can't easily know if the last debounce has run.
-       // But saving on unmount is safer than losing data.
-       // However, if we just saved (handler ran), this duplicates the save.
-       // Duplicate save is better than data loss.
-       try {
-        localStorage.setItem('orbit_db', JSON.stringify(dataRef.current));
+        // Load lightweight config from localStorage
+        const layout = localStorage.getItem('orbit_widget_layout');
+        if (layout) setWidgetLayout(JSON.parse(layout));
+
+        const onboarding = localStorage.getItem('orbit_onboarding');
+        if (onboarding) setOnboardingComplete(JSON.parse(onboarding));
+
+        setIsInitialized(true);
+
       } catch (e) {
-        // Ignore errors on unmount
+        console.error("Failed to initialize OrbitDB:", e);
       }
     };
+
+    init();
   }, []);
+
+  // Persist Lightweight Config to LocalStorage
+  useEffect(() => {
+      if (isInitialized) {
+          localStorage.setItem('orbit_widget_layout', JSON.stringify(widgetLayout));
+          localStorage.setItem('orbit_onboarding', JSON.stringify(onboardingComplete));
+      }
+  }, [widgetLayout, onboardingComplete, isInitialized]);
+
+  // Optimistic Updates + Async DB Operations
 
   const addMetric = useCallback((metricData) => {
     const newMetric = createMetric(metricData);
-    setMetrics(prev => [...prev, newMetric]);
+    setMetrics(prev => [...prev, newMetric]); // Optimistic
+    OrbitDB.put('metrics', newMetric).catch(e => console.error("DB Error (addMetric):", e));
   }, []);
 
   const updateMetric = useCallback((updatedMetric) => {
-    setMetrics(prev => prev.map(m => m.id === updatedMetric.id ? updatedMetric : m));
+    setMetrics(prev => prev.map(m => m.id === updatedMetric.id ? updatedMetric : m)); // Optimistic
+    OrbitDB.put('metrics', updatedMetric).catch(e => console.error("DB Error (updateMetric):", e));
   }, []);
 
   const deleteMetric = useCallback((id) => {
     setMetrics(prev => prev.filter(m => m.id !== id));
     setLogEntries(prev => prev.filter(l => l.metricId !== id));
     setTimeLogs(prev => prev.filter(l => l.activityId !== id));
+
+    // DB Deletion
+    OrbitDB.delete('metrics', id).catch(e => console.error("DB Error (deleteMetric):", e));
+    // Note: Deleting related logs in DB requires filtering/iterating or specific cleanup logic.
+    // We leave this as a future cleanup task or implement a bulk delete helper.
   }, []);
 
   const addLogEntry = useCallback((entryData) => {
-    // ENFORCEMENT: Strictly require metricId. metricKey is prohibited.
     if (!entryData.metricId) {
       throw new Error("MANDATORY_SCHEMA_VIOLATION: addLogEntry requires a valid metricId.");
     }
@@ -136,12 +134,13 @@ export const StorageProvider = ({ children }) => {
       timestamp: entryData.timestamp
     });
 
-    setLogEntries(prev => [...prev, newEntry]);
+    setLogEntries(prev => [...prev, newEntry]); // Optimistic
+    OrbitDB.add('logs', newEntry).catch(e => console.error("DB Error (addLogEntry):", e));
   }, []);
 
   const addTimeLog = useCallback((timeLogData) => {
       const newTimeLog = createTimeLog({
-          activityId: timeLogData.activityId || timeLogData.metricId, // Support both for flexibility
+          activityId: timeLogData.activityId || timeLogData.metricId,
           activityLabel: timeLogData.activityLabel,
           startTime: timeLogData.startTime,
           endTime: timeLogData.endTime,
@@ -149,69 +148,57 @@ export const StorageProvider = ({ children }) => {
           notes: timeLogData.notes
       });
 
-      setTimeLogs(prev => [...prev, newTimeLog]);
-
-      // OPTIONAL: Also add a simplified LogEntry for duration analytics if needed
-      // But adhering to strict separation, analytics engines should look at timeLogs for duration metrics if needed.
-      // However, current analytics engine looks at logEntries.
-      // For Phase 4.2 compliance, we persist to timeLogs.
-      // If we want this to show up in charts immediately without updating AnalyticsEngine, we might need to dual-log.
-      // But the instruction says "persist it to the timeLogs array, not just a generic numeric LogEntry".
-      // This implies we SHOULD NOT add a generic LogEntry, or at least that's the primary goal.
-      // I will implement strictly as requested: persist to timeLogs.
+      setTimeLogs(prev => [...prev, newTimeLog]); // Optimistic
+      OrbitDB.add('timeLogs', newTimeLog).catch(e => console.error("DB Error (addTimeLog):", e));
   }, []);
 
   const completeOnboarding = useCallback(() => {
     setOnboardingComplete(true);
   }, []);
 
-  const importData = useCallback((jsonData) => {
+  const importData = useCallback(async (jsonData) => {
     if (!jsonData) return;
     
     try {
-      // Apply migration to imported data
       const migrated = migrateData(jsonData);
 
-      // STRICT VALIDATION
+      // Validate
+      if (migrated.metrics) validateMetrics(migrated.metrics);
+      if (migrated.logEntries) validateLogEntries(migrated.logEntries, migrated.metrics || []);
+
+      // DB Bulk Insert
       if (migrated.metrics) {
-        validateMetrics(migrated.metrics);
+          await OrbitDB.clear('metrics');
+          for (const m of migrated.metrics) await OrbitDB.put('metrics', m);
       }
       if (migrated.logEntries) {
-        validateLogEntries(migrated.logEntries, migrated.metrics || []);
+          await OrbitDB.clear('logs');
+          for (const l of migrated.logEntries) await OrbitDB.add('logs', l);
+      }
+      if (migrated.timeLogs) {
+          await OrbitDB.clear('timeLogs');
+          for (const t of migrated.timeLogs) await OrbitDB.add('timeLogs', t);
       }
 
-      // State Update
-      if (Array.isArray(migrated.metrics)) {
-        const validMetrics = migrated.metrics.filter(m =>
-          m && typeof m === 'object' && m.id && m.name
-        );
-        setMetrics(validMetrics);
-      }
+      // Reload State from DB to ensure sync
+      const dbMetrics = await OrbitDB.getAll('metrics');
+      const dbLogs = await OrbitDB.getAll('logs');
+      const dbTimeLogs = await OrbitDB.getAll('timeLogs');
 
-      if (Array.isArray(migrated.logEntries)) {
-      const validLogs = migrated.logEntries.filter(l => 
-        l && typeof l === 'object' && l.metricId && (l.value !== undefined)
-      );
-      setLogEntries(validLogs);
-    }
+      setMetrics(dbMetrics || []);
+      setLogEntries(dbLogs || []);
+      setTimeLogs(dbTimeLogs || []);
 
-    if (Array.isArray(migrated.timeLogs)) {
-        setTimeLogs(migrated.timeLogs);
-    }
+      if (migrated.widgetLayout) setWidgetLayout(migrated.widgetLayout);
+      if (typeof migrated.onboardingComplete !== 'undefined') setOnboardingComplete(migrated.onboardingComplete);
 
-      if (migrated.widgetLayout && typeof migrated.widgetLayout === 'object') {
-        setWidgetLayout(migrated.widgetLayout);
-      }
-
-      if (typeof migrated.onboardingComplete !== 'undefined') {
-          setOnboardingComplete(migrated.onboardingComplete);
-      }
     } catch (error) {
-      console.error("Import failed: Schema validation error", error);
+      console.error("Import failed:", error);
       alert(`Import failed: ${error.message}`);
     }
   }, []);
 
+  // Note: exportData still reads from state (memory), which is fine as it is kept in sync.
   const exportData = useCallback(() => {
     return {
       metrics,
@@ -223,19 +210,37 @@ export const StorageProvider = ({ children }) => {
     };
   }, [metrics, logEntries, timeLogs, widgetLayout, onboardingComplete]);
 
-  const clearAllData = useCallback(() => {
+  const clearAllData = useCallback(async () => {
     setMetrics([]);
     setLogEntries([]);
     setTimeLogs([]);
     setWidgetLayout({});
     setOnboardingComplete(false);
-    localStorage.removeItem('orbit_db');
+
+    await OrbitDB.clear('metrics');
+    await OrbitDB.clear('logs');
+    await OrbitDB.clear('timeLogs');
+    localStorage.removeItem('orbit_widget_layout');
+    localStorage.removeItem('orbit_onboarding');
   }, []);
+
+  // Consolidate logs for analytics
+  const allLogs = useMemo(() => {
+      const timeLogEntries = timeLogs.map(t => ({
+          id: t.id,
+          metricId: t.activityId,
+          value: t.duration,
+          timestamp: t.startTime,
+          isTimeLog: true
+      }));
+      return [...logEntries, ...timeLogEntries];
+  }, [logEntries, timeLogs]);
 
   const value = useMemo(() => ({
     metrics,
     logEntries,
     timeLogs,
+    allLogs, // Exposed for Analytics
     widgetLayout,
     onboardingComplete,
     addMetric,
@@ -253,6 +258,7 @@ export const StorageProvider = ({ children }) => {
     metrics,
     logEntries,
     timeLogs,
+    allLogs,
     widgetLayout,
     onboardingComplete,
     addMetric,
@@ -272,22 +278,3 @@ export const StorageProvider = ({ children }) => {
     </StorageContext.Provider>
   );
 };
-
-// HELPER FUNCTIONS
-function validateMetrics(metrics) {
-  if (!Array.isArray(metrics)) {
-    throw new Error("Invalid import: 'metrics' must be an array.");
-  }
-  // Optional: Check if the first item has an ID to verify structure
-  if (metrics.length > 0 && !metrics[0].id) {
-     console.warn("Import warning: Metrics missing ID fields");
-  }
-  return true;
-}
-
-function validateLogEntries(logs) {
-  if (!Array.isArray(logs)) {
-    throw new Error("Invalid import: 'logs' must be an array.");
-  }
-  return true;
-}

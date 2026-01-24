@@ -236,8 +236,21 @@ export const AnalyticsEngine = {
   // ----------------------
   // System Health / Intel Stats
   // ----------------------
-  calculateSystemHealth: (metrics = [], logs = [], segment = 'Weekly') => {
+  calculateSystemHealth: (metrics = [], logs = [], segment = 'Weekly', timeLogs = []) => {
     if (!metrics.length) return { reliability: 0, trend: '0%', intensity: 'None', status: 'Offline' };
+
+    // Merge timeLogs if provided to ensure they contribute to stats
+    const allLogs = [...logs];
+    if (timeLogs && timeLogs.length > 0) {
+        timeLogs.forEach(t => {
+            // Normalize TimeLog to LogEntry format for calculation
+            allLogs.push({
+                metricId: t.activityId || t.metricId,
+                value: t.duration,
+                timestamp: t.startTime
+            });
+        });
+    }
 
     // Determine window size in days
     let days = 7;
@@ -247,14 +260,14 @@ export const AnalyticsEngine = {
     const now = new Date();
 
     // Filter logs for current window
-    const currentLogs = logs.filter(l => {
+    const currentLogs = allLogs.filter(l => {
       const d = new Date(l.timestamp);
       const diff = (now - d) / (1000 * 60 * 60 * 24);
       return diff <= days;
     });
 
     // Filter logs for previous window (for trend comparison)
-    const prevLogs = logs.filter(l => {
+    const prevLogs = allLogs.filter(l => {
       const d = new Date(l.timestamp);
       const diff = (now - d) / (1000 * 60 * 60 * 24);
       return diff > days && diff <= (days * 2);

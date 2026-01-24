@@ -29,7 +29,6 @@ export const System = ({ onNavigate }) => {
   } = useContext(StorageContext);
 
   const [viewMode, setViewMode] = useState('Metrics'); // 'Metrics' | 'Settings'
-  const [isDebugMode, setIsDebugMode] = useState(false);
 
   // Metric Management State
   const [showBuilder, setShowBuilder] = useState(false);
@@ -65,39 +64,6 @@ export const System = ({ onNavigate }) => {
     setShowBuilder(false);
   };
 
-  const seedTestData = () => {
-    if (!confirm("Inject random test data? This will affect your stats.")) return;
-    
-    const now = new Date();
-    metrics.forEach(m => {
-      for(let i=0; i<7; i++) {
-        const date = new Date();
-        date.setDate(now.getDate() - i);
-        const val = m.type === 'boolean' ? Math.random() > 0.5 : Math.floor(Math.random() * 10);
-        
-        addLogEntry({
-          metricId: m.id,
-          value: val,
-          timestamp: date.toISOString()
-        });
-      }
-    });
-    alert("Test data seeded.");
-  };
-
-  const exportArchive = () => {
-    const archive = {
-      timestamp: new Date().toISOString(),
-      metrics,
-      logs: logEntries
-    };
-    const blob = new Blob([JSON.stringify(archive, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'orbit-debug-archive.json';
-    a.click();
-  };
 
   return (
     <div className="layout-padding fade-in">
@@ -183,33 +149,14 @@ export const System = ({ onNavigate }) => {
                               <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"></div>
                           </div>
                       </div>
-                      <div className="flex justify-between items-center p-4 border-b border-separator/50">
+                      <div className="flex justify-between items-center p-4">
                           <span className="font-medium">Haptics</span>
                           <div className="w-10 h-6 bg-green rounded-full relative">
                               <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"></div>
                           </div>
                       </div>
-                      <div className="flex justify-between items-center p-4">
-                          <span className="font-medium">Developer Mode</span>
-                          <button
-                              onClick={() => setIsDebugMode(!isDebugMode)}
-                              className={`w-10 h-6 rounded-full relative transition-colors ${isDebugMode ? 'bg-blue' : 'bg-separator/30'}`}
-                          >
-                               <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${isDebugMode ? 'right-1' : 'left-1'}`}></div>
-                          </button>
-                      </div>
                   </div>
               </Glass>
-
-              {isDebugMode && (
-                  <Glass className="p-4 border-l-4 border-orange">
-                      <div className="text-xs font-bold text-orange uppercase tracking-wide mb-3">Developer Tools</div>
-                      <div className="flex gap-2">
-                          <OrbitButton onClick={seedTestData} variant="secondary" className="flex-1 !text-xs">Seed Test Data</OrbitButton>
-                          <OrbitButton onClick={exportArchive} variant="secondary" className="flex-1 !text-xs">Export Debug Archive</OrbitButton>
-                      </div>
-                  </Glass>
-              )}
 
               <div className="text-center text-xs text-secondary mt-8">
                   ORBIT v1.1.0 • Liquid Native

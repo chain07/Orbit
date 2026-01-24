@@ -38,7 +38,7 @@ class WidgetErrorBoundary extends React.Component {
 }
 
 export const Horizon = () => {
-  const { metrics, logEntries, onboardingComplete } = useContext(StorageContext);
+  const { metrics, logEntries, allLogs, onboardingComplete } = useContext(StorageContext);
   const { setActiveTab } = useContext(NavigationContext);
   const [segment, setSegment] = useState('Weekly');
   const [isEditing, setIsEditing] = useState(false);
@@ -62,24 +62,25 @@ export const Horizon = () => {
   const topInsights = useMemo(() => {
     if (!HorizonAgent || !HorizonAgent.generateAllInsights) return [];
     try {
-      const allInsights = HorizonAgent.generateAllInsights(metrics, logEntries);
+      const allInsights = HorizonAgent.generateAllInsights(metrics, allLogs);
       return Object.values(allInsights || {}).flat()
+        .filter(i => i.context === 'tactical')
         .sort((a, b) => (b.priority || 0) - (a.priority || 0))
-        .slice(0, 2);
+        .slice(0, 3);
     } catch (e) {
       return [];
     }
-  }, [metrics, logEntries]);
+  }, [metrics, allLogs]);
 
   const widgets = useMemo(() => {
     try {
       return WidgetDataEngine.generateWidgets
-        ? WidgetDataEngine.generateWidgets(metrics, logEntries, segment)
+        ? WidgetDataEngine.generateWidgets(metrics, allLogs, segment)
         : [];
     } catch (e) {
       return [];
     }
-  }, [metrics, logEntries, segment]);
+  }, [metrics, allLogs, segment]);
 
   const hasMetrics = metrics && metrics.length > 0;
 
@@ -171,7 +172,7 @@ export const Horizon = () => {
         <Glass className="p-4 border-l-4 border-blue mb-4">
           <div className="flex flex-col gap-2">
             <div className="text-xs font-bold text-blue uppercase tracking-wider flex items-center gap-2">
-              <Icons.Activity className="text-blue" size={14} /> HORIZON AGENT
+              <Icons.Activity className="text-blue" size={14} /> DAILY BRIEFING
             </div>
             <div className="text-secondary text-sm leading-relaxed">
               {hasMetrics && topInsights.length > 0 ? (
@@ -181,7 +182,7 @@ export const Horizon = () => {
                   </div>
                 ))
               ) : (
-                "I am your Horizon Agent. I work privately on your device to uncover patterns in your habits. Once you start logging, I'll reveal trends, momentum shifts, and correlations to help you optimize your routine."
+                "Good morning. I'll scan your data for actionable tactical moves and insights once you start logging. For now, try adding a few metrics to get started."
               )}
             </div>
           </div>
@@ -197,7 +198,7 @@ export const Horizon = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               {widgets.map((widget, idx) => {
-                const WidgetComponent = getWidgetComponent(widget.type);
+                const WidgetComponent = getWidgetComponent(widget.widgetType);
                 return (
                   <Glass key={widget.id || idx} className="relative overflow-hidden">
                      <WidgetErrorBoundary>
