@@ -15,6 +15,8 @@ import '../styles/motion.css';
 export const Intel = () => {
   const { metrics, logEntries } = useContext(StorageContext);
   const [segment, setSegment] = useState('Weekly');
+
+  const hasData = logEntries && logEntries.length > 0;
   const segments = ['Daily', 'Weekly', 'Monthly'];
 
   const insights = useMemo(() => {
@@ -54,29 +56,54 @@ export const Intel = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Glass className="flex flex-col justify-between min-h-[140px] relative overflow-hidden">
             <div className="text-xs font-bold text-secondary uppercase tracking-wide z-10">System Health</div>
-            <div className="flex flex-col items-center my-2 z-10">
-               <div className="text-5xl font-black text-primary tracking-tighter">{stats.reliability}%</div>
-               <div className={`text-sm font-bold mt-1 px-2 py-0.5 rounded-full ${stats.trend.startsWith('-') ? 'bg-red/10 text-red' : 'bg-green/10 text-green'}`}>
-                 {stats.trend}
-               </div>
-            </div>
-            <div className="text-xs text-secondary text-center opacity-80 z-10">Operational Baseline</div>
-            <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-blue opacity-5 rounded-full blur-2xl"></div>
+            {hasData ? (
+              <>
+                <div className="flex flex-col items-center my-2 z-10">
+                   <div className="text-5xl font-black text-primary tracking-tighter">{stats.reliability}%</div>
+                   <div className={`text-sm font-bold mt-1 px-2 py-0.5 rounded-full ${stats.trend.startsWith('-') ? 'bg-red/10 text-red' : 'bg-green/10 text-green'}`}>
+                     {stats.trend}
+                   </div>
+                </div>
+                <div className="text-xs text-secondary text-center opacity-80 z-10">Operational Baseline</div>
+                <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-blue opacity-5 rounded-full blur-2xl"></div>
+              </>
+            ) : (
+              <>
+                <div className="flex flex-col items-center justify-center flex-1 z-10">
+                  <RingChart value={100} color="rgba(255,255,255,0.1)" strokeWidth={8}>
+                     <div className="text-secondary opacity-50 font-bold text-xl">0%</div>
+                  </RingChart>
+                  <div className="text-xs text-secondary mt-4">Log data to initialize.</div>
+                </div>
+                <div className="text-xs text-secondary opacity-80 z-10">Operational Baseline</div>
+              </>
+            )}
           </Glass>
 
-          <Glass className="flex flex-col justify-between min-h-[140px] relative overflow-hidden">
-            <div className="text-xs font-bold text-secondary uppercase tracking-wide z-10">Intensity</div>
-            <div className="flex flex-col items-center my-2 z-10">
-               <div className={`text-4xl font-black tracking-tight ${
-                 stats.intensity === 'Peak' ? 'text-red' :
-                 stats.intensity === 'High' ? 'text-orange' :
-                 stats.intensity === 'Moderate' ? 'text-blue' : 'text-secondary'
-               }`}>
-                 {stats.intensity}
-               </div>
-            </div>
-            <div className="text-xs text-secondary text-center opacity-80 z-10">Status: {stats.status}</div>
-             <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-orange opacity-5 rounded-full blur-2xl"></div>
+          <Glass className={`flex flex-col justify-between min-h-[140px] relative overflow-hidden ${!hasData ? 'pb-4' : ''}`}>
+            <div className="text-xs font-bold text-secondary uppercase tracking-wide z-10">{hasData ? 'Intensity' : 'MOMENTUM'}</div>
+            {hasData ? (
+              <>
+                <div className="flex flex-col items-center my-2 z-10">
+                   <div className={`text-4xl font-black tracking-tight ${
+                     stats.intensity === 'Peak' ? 'text-red' :
+                     stats.intensity === 'High' ? 'text-orange' :
+                     stats.intensity === 'Moderate' ? 'text-blue' : 'text-secondary'
+                   }`}>
+                     {stats.intensity}
+                   </div>
+                </div>
+                <div className="text-xs text-secondary text-center opacity-80 z-10">Status: {stats.status}</div>
+                <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-orange opacity-5 rounded-full blur-2xl"></div>
+              </>
+            ) : (
+              <>
+                <div className="flex-1 flex items-center z-10">
+                   <Sparkline data={[0, 0, 0, 0, 0]} showLabels={false} lineColor="rgba(255,255,255,0.1)" fillColor="transparent" />
+                </div>
+                <div className="text-xs text-secondary text-center opacity-80 z-10">Status: Offline</div>
+              </>
+            )}
           </Glass>
         </div>
 

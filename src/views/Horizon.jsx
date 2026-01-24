@@ -51,6 +51,14 @@ export const Horizon = () => {
     day: 'numeric' 
   });
 
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good Morning.';
+    if (hour < 18) return 'Good Afternoon.';
+    if (hour < 21) return 'Good Evening.';
+    return 'Good Night.';
+  }, []);
+
   const topInsights = useMemo(() => {
     if (!HorizonAgent || !HorizonAgent.generateAllInsights) return [];
     try {
@@ -95,7 +103,7 @@ export const Horizon = () => {
         </div>
         <div className="flex justify-between items-end">
           <h1 className="text-3xl font-extrabold tracking-tight text-primary">
-            Hi, Captain.
+            {greeting}
           </h1>
           {hasMetrics && (
             <OrbitButton
@@ -163,16 +171,19 @@ export const Horizon = () => {
         <Glass className="p-4 border-l-4 border-blue mb-4">
           <div className="flex flex-col gap-2">
             <div className="text-xs font-bold text-blue uppercase tracking-wider flex items-center gap-2">
-              <span>✦</span> Horizon Agent
+              <Icons.Activity className="text-blue" size={14} /> HORIZON AGENT
             </div>
-            <div className="text-secondary text-sm">
-                I am your Horizon Agent. I work privately on your device to uncover patterns in your habits.
+            <div className="text-secondary text-sm leading-relaxed">
+              {hasMetrics && topInsights.length > 0 ? (
+                topInsights.map((insight, idx) => (
+                  <div key={idx} className="mb-1">
+                    {insight.message}
+                  </div>
+                ))
+              ) : (
+                "I am your Horizon Agent. I work privately on your device to uncover patterns in your habits. Once you start logging, I'll reveal trends, momentum shifts, and correlations to help you optimize your routine."
+              )}
             </div>
-            {hasMetrics && topInsights.map((insight, idx) => (
-              <div key={idx} className="text-sm font-medium leading-relaxed">
-                {insight.message}
-              </div>
-            ))}
           </div>
         </Glass>
 
