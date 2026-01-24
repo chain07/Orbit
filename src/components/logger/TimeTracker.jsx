@@ -201,7 +201,13 @@ export const TimeTracker = ({ metricId }) => {
           <select
             value={selectedMetricId}
             onChange={(e) => setSelectedMetricId(e.target.value)}
-            className="w-full p-3 bg-bg-color border border-separator rounded-[14px] font-bold text-lg outline-none focus:border-blue appearance-none"
+            className="w-full p-3 bg-bg-color border border-separator rounded-[14px] font-bold text-lg outline-none focus:border-blue"
+            style={{
+              appearance: 'none',
+              WebkitAppearance: 'none',
+              backgroundImage: 'none',
+              backgroundColor: 'transparent'
+            }}
           >
             <option value="">Select Activity...</option>
             {trackableMetrics.map(m => (
@@ -220,7 +226,16 @@ export const TimeTracker = ({ metricId }) => {
         {mode === 'timer' ? (
           <>
             {/* Timer Display */}
-            <div className="text-6xl font-mono font-black tracking-tighter mb-8 tabular-nums">
+            <div
+              className="text-6xl font-black tracking-tighter mb-8"
+              style={{
+                fontFamily: 'monospace',
+                fontVariantNumeric: 'tabular-nums',
+                textAlign: 'center',
+                width: '100%',
+                fontSize: '3.5rem'
+              }}
+            >
               {formatTimer(elapsed)}
             </div>
             
@@ -230,8 +245,8 @@ export const TimeTracker = ({ metricId }) => {
                 <OrbitButton
                   onClick={() => setRunning(true)}
                   variant="primary"
-                  className="flex-1 !bg-green !shadow-none"
-                  style={{ backgroundColor: 'var(--green)' }}
+                  className="flex-1 !shadow-none"
+                  style={{ '--color-primary': 'var(--green)' }}
                 >
                   Start
                 </OrbitButton>
@@ -241,7 +256,7 @@ export const TimeTracker = ({ metricId }) => {
                     onClick={() => setRunning(!running)}
                     variant="primary"
                     className="flex-1 !text-white !shadow-none"
-                    style={{ backgroundColor: running ? 'var(--orange)' : 'var(--green)' }}
+                    style={{ '--color-primary': running ? 'var(--orange)' : 'var(--green)' }}
                   >
                     {running ? 'Pause' : 'Resume'}
                   </OrbitButton>
@@ -270,10 +285,10 @@ export const TimeTracker = ({ metricId }) => {
           </>
         ) : (
           /* Manual Entry Inputs - Refactored Layout */
-          <div className="flex flex-col w-full gap-6">
+          <div className="flex flex-col w-full">
 
-            <div className="flex w-full gap-3"> {/* gap-3 */}
-              <div className="flex flex-col gap-1 flex-1"> {/* flex-1 */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <div className="flex flex-col gap-1" style={{ minWidth: 0 }}>
                 <label className="text-xs font-bold text-secondary uppercase ml-1">Start Time</label>
                 <input
                   type="datetime-local"
@@ -283,7 +298,7 @@ export const TimeTracker = ({ metricId }) => {
                 />
               </div>
 
-              <div className="flex flex-col gap-1 flex-1"> {/* flex-1 */}
+              <div className="flex flex-col gap-1" style={{ minWidth: 0 }}>
                 <label className="text-xs font-bold text-secondary uppercase ml-1">End Time</label>
                 <input
                   type="datetime-local"
@@ -295,7 +310,7 @@ export const TimeTracker = ({ metricId }) => {
             </div>
 
             {/* Calculated/Editable Duration Field */}
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
                <label className="text-xs font-bold text-secondary uppercase ml-1">Duration (Hours/Mins)</label>
                <input
                  type="text"
