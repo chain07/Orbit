@@ -19,6 +19,12 @@ export const StackedBar = ({ data = [], colors = {}, title = "Activity", subtitl
       return { processedData: [], max: 0, total: 0, avg: 0, categories: [] };
     }
 
+    // Calculate total from data unconditionally as per requirement
+    const calculatedTotal = data.reduce((sum, day) => {
+        const dayTotal = Object.values(day.values || {}).reduce((a, b) => a + b, 0);
+        return sum + dayTotal;
+    }, 0);
+
     let grandSum = 0;
     let maxDaily = 0;
     const cats = new Set();
@@ -42,8 +48,8 @@ export const StackedBar = ({ data = [], colors = {}, title = "Activity", subtitl
 
     // Smart Scale: Round up to nearest even number, minimum 4
     const computedMax = Math.max(4, Math.ceil(maxDaily / 2) * 2);
-    const computedTotal = grandSum;
-    const computedAvg = data.length ? grandSum / data.length : 0;
+    const computedTotal = calculatedTotal; // Use strict total calculation
+    const computedAvg = data.length ? calculatedTotal / data.length : 0;
 
     // Convert Set to Array and Sort by Total Sum Descending for Legend
     const catArray = Array.from(cats).map(k => {
@@ -70,9 +76,10 @@ export const StackedBar = ({ data = [], colors = {}, title = "Activity", subtitl
   };
 
   // UI Values based on Selection
-  const footerLabel = selectedIdx === null ? "Total Duration" : `Total for ${processedData[selectedIdx]?.label}`;
+  // Requirement: "Total Count" and Math.round(total)
+  const footerLabel = selectedIdx === null ? "Total Count" : `Total for ${processedData[selectedIdx]?.label}`;
   const footerValue = selectedIdx === null
-    ? `${total.toFixed(1)}h`
+    ? Math.round(total)
     : `${processedData[selectedIdx]?.sum.toFixed(1)}h`;
 
   return (
@@ -85,10 +92,12 @@ export const StackedBar = ({ data = [], colors = {}, title = "Activity", subtitl
            <div className="grid-lines-bg">
               {[0, 1, 2, 3, 4].map(i => <div key={i} className="h-line" />)}
            </div>
-           <div className="v-lines-bg absolute inset-0 flex justify-between pointer-events-none">
-              {Array.from({ length: processedData.length + 1 }).map((_, i) => (
-                <div key={i} className="w-[1px] h-full bg-zinc-200 dark:bg-zinc-800 opacity-20" />
-              ))}
+
+           {/* Vertical Grid Lines (Background) */}
+           <div className="absolute inset-0 flex justify-between pointer-events-none z-0">
+             {Array.from({ length: 7 }).map((_, i) => (
+               <div key={i} className="w-[1px] h-full bg-zinc-200 dark:bg-zinc-800 opacity-50" />
+             ))}
            </div>
 
            {/* Avg Line */}

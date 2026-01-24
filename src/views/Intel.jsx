@@ -79,20 +79,16 @@ export const Intel = () => {
                 <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-blue opacity-5 rounded-full blur-2xl z-0"></div>
               </div>
             ) : (
-              <div className="flex flex-col justify-center w-full h-full px-5 py-4 z-10">
-                <div className="flex justify-between items-end mb-3">
-                   <div className="flex flex-col">
-                      <span className="text-xs font-bold text-secondary uppercase tracking-wide">System Health</span>
-                      <span className="text-2xl font-bold mt-1">0%</span>
-                   </div>
-                   <span className="text-xs text-secondary mb-1">Awaiting Data</span>
+              <div className="flex flex-col justify-between h-full relative z-10 px-5 py-4">
+                <div className="flex justify-between items-start">
+                  <span className="text-xs font-bold text-secondary uppercase tracking-wide">System Health</span>
+                  <div className="text-right">
+                    <span className="text-2xl font-bold block leading-none">0%</span>
+                    <span className="text-xs text-secondary mt-1 block">Awaiting Data</span>
+                  </div>
                 </div>
-                {/* Track - Always Visible */}
-                <div className="w-full h-3 bg-zinc-200 dark:bg-zinc-800 rounded-full mt-4 overflow-hidden">
-                   <div
-                     className="h-full bg-blue transition-all duration-500 ease-out"
-                     style={{ width: '0%' }}
-                   />
+                <div className="w-full h-3 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden mt-auto">
+                  <div className="h-full bg-blue transition-all duration-500" style={{ width: '0%' }} />
                 </div>
               </div>
             )}
@@ -115,25 +111,16 @@ export const Intel = () => {
                 </div>
               </>
             ) : (
-              <>
-                <div className="flex justify-between items-start mb-2 px-4 pt-4 z-20">
-                  <span className="text-xs font-bold text-secondary uppercase tracking-wide">MOMENTUM</span>
+              <div className="relative flex flex-col justify-between overflow-hidden h-full">
+                <div className="flex justify-between items-start z-10 px-4 pt-4">
+                  <span className="text-xs font-bold text-secondary uppercase tracking-wide">Momentum</span>
                   <span className="text-2xl font-bold font-mono text-zinc-400">0.0</span>
                 </div>
-                <div className="w-full h-[60px] relative mt-auto">
-                   <Sparkline
-                     data={[0, 0, 0, 0, 0]}
-                     showLabels={false}
-                     showDots={false}
-                     labels={[]}
-                     lineColor="rgba(255,255,255,0.1)"
-                     fillColor="transparent"
-                     className="w-full h-full"
-                     height={60}
-                   />
-                   <div className="absolute bottom-2 w-full text-center text-xs text-secondary opacity-60 pointer-events-none">Status: Offline</div>
+                {/* Graph Container - Pinned to bottom, full width */}
+                <div className="absolute bottom-0 left-0 right-0 h-[60px] w-full z-0 opacity-50">
+                  <Sparkline data={[]} height={60} showLabels={false} showDots={false} lineColor="rgba(255,255,255,0.1)" fillColor="transparent" className="w-full h-full" />
                 </div>
-              </>
+              </div>
             )}
           </Glass>
         </div>
