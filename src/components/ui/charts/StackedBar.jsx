@@ -75,10 +75,6 @@ export const StackedBar = ({ data = [], colors = {}, title = "Activity", subtitl
     ? `${total.toFixed(1)}h`
     : `${processedData[selectedIdx]?.sum.toFixed(1)}h`;
 
-  if (!data || data.length === 0) {
-     return <div className="text-center text-secondary py-8">No data available</div>;
-  }
-
   return (
     <div className={`chart-interactive w-full ${selectedIdx !== null ? 'has-select' : ''}`}>
       

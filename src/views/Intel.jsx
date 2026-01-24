@@ -77,7 +77,7 @@ export const Intel = () => {
                    <span className="text-xs text-secondary mb-1">Awaiting Data</span>
                 </div>
                 {/* Progress Track */}
-                <div className="w-full h-3 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden relative">
+                <div className="w-full h-3 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden relative">
                    <div
                      className="h-full bg-blue transition-all duration-500 ease-out"
                      style={{ width: '0%' }}
@@ -137,7 +137,6 @@ export const Intel = () => {
         )}
 
         <div className="flex flex-col gap-2">
-          <div className="section-label px-1 text-secondary font-bold text-xs uppercase">Telemetry</div>
           {/* Note: In a real implementation, we would transform 'widgets' or use specific logic for StackedBar.
               Here we assume 'widgets' contains formatted data for charts or we fallback to empty if none.
               For phase 2.9, we explicitly render StackedBar if data exists or skeleton.
@@ -151,12 +150,12 @@ export const Intel = () => {
                       return <StackedBar data={sbWidget.data.entries} colors={sbWidget.data.colors} title={sbWidget.title} />;
                   }
                   // Fallback if no specific widget generated but we have data
-                  return <div className="text-center text-secondary py-8">Telemetry data processing...</div>;
+                  return <StackedBar data={[]} />;
                })()}
              </Glass>
           ) : (
-            <Glass className="min-h-[200px] flex items-center justify-center">
-                 <div className="text-secondary text-sm">Awaiting Telemetry Data</div>
+            <Glass>
+                 <StackedBar data={[]} />
             </Glass>
           )}
         </div>
