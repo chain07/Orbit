@@ -14,7 +14,7 @@ import '../styles/motion.css';
 
 export const Intel = () => {
   const { metrics, logEntries } = useContext(StorageContext);
-  const [segment, setSegment] = useState('Weekly');
+  const [segment, setSegment] = useState('Daily');
 
   const hasData = logEntries && logEntries.length > 0;
   const segments = ['Daily', 'Weekly', 'Monthly'];
@@ -37,6 +37,13 @@ export const Intel = () => {
   const stats = useMemo(() => {
     return AnalyticsEngine.calculateSystemHealth(metrics, logEntries, segment);
   }, [metrics, logEntries, segment]);
+
+  const telemetrySubtitle = useMemo(() => {
+    if (segment === 'Daily') return 'Today (4h Blocks)';
+    if (segment === 'Weekly') return 'Last 7 Days';
+    if (segment === 'Monthly') return 'Last 4 Weeks';
+    return '';
+  }, [segment]);
 
   return (
     <div className="layout-padding fade-in">
@@ -61,7 +68,7 @@ export const Intel = () => {
                    <div className="flex flex-col">
                       <span className="text-xs font-bold text-secondary uppercase tracking-wide">System Health</span>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-2xl font-bold">{stats.reliability}%</span>
+                        <span className="text-2xl font-bold" style={{ marginBottom: '4px' }}>{stats.reliability}%</span>
                         <div className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${stats.trend.startsWith('-') ? 'bg-red/10 text-red' : 'bg-green/10 text-green'}`}>
                           {stats.trend}
                         </div>
@@ -130,7 +137,7 @@ export const Intel = () => {
 
                 {/* Graph Wrapper - Force Height */}
                 <div style={{ height: '60px', width: '100%', marginTop: 'auto' }}>
-                  <Sparkline data={[]} height={60} showLabels={false} showDots={false} lineColor="rgba(255,255,255,0.1)" fillColor="transparent" className="w-full h-full" />
+                  <Sparkline data={[0, 0, 0, 0, 0, 0, 0]} height={60} showLabels={false} showDots={false} lineColor="rgba(255,255,255,0.1)" fillColor="transparent" className="w-full h-full" />
                 </div>
               </div>
             )}
@@ -153,7 +160,7 @@ export const Intel = () => {
           <Glass className="!p-4 !flex !flex-col !gap-4">
              <div className="flex justify-between items-start">
                 <span className="text-xs font-bold text-secondary uppercase tracking-wide">Activity Volume</span>
-                <span className="text-xs text-secondary">Last 7 Days</span>
+                <span className="text-xs text-secondary">{telemetrySubtitle}</span>
              </div>
              {(() => {
                 const sbWidget = hasData ? widgets.find(w => w.type === 'stackedbar') : null;
