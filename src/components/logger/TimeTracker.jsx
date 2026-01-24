@@ -65,7 +65,17 @@ export const TimeTracker = ({ metricId }) => {
     const val = e.target.value;
     setDurationDisplay(val);
 
-    if (!manualStartTime) return;
+    let currentStart = manualStartTime;
+
+    // Auto-set start time to NOW if missing
+    if (!currentStart && val.trim().length > 0) {
+        const now = new Date();
+        currentStart = toLocalISOString(now);
+        console.log("Auto-setting start time:", currentStart);
+        setManualStartTime(currentStart);
+    }
+
+    if (!currentStart) return;
 
     let minutes = 0;
     // 1. HH:MM
@@ -85,7 +95,7 @@ export const TimeTracker = ({ metricId }) => {
     }
 
     if (!isNaN(minutes) && minutes > 0) {
-        const start = new Date(manualStartTime);
+        const start = new Date(currentStart);
         const newEnd = new Date(start.getTime() + minutes * 60000);
         setManualEndTime(toLocalISOString(newEnd));
     }
