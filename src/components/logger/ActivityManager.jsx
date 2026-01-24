@@ -3,6 +3,7 @@ import { StorageContext } from '../../context/StorageContext';
 import { OrbitButton } from '../ui/OrbitButton';
 import { Icons } from '../../components/ui/Icons';
 import Glass from '../ui/Glass';
+import SegmentedControl from '../ui/SegmentedControl';
 
 export const ActivityManager = () => {
   const { metrics, addMetric } = useContext(StorageContext);
@@ -13,6 +14,7 @@ export const ActivityManager = () => {
   const [color, setColor] = useState('#007AFF');
   const [hasGoal, setHasGoal] = useState(false);
   const [goalValue, setGoalValue] = useState(0);
+  const [frequency, setFrequency] = useState('daily');
 
   // Filter for duration metrics
   const activities = metrics.filter(m => m.type === 'duration');
@@ -31,7 +33,7 @@ export const ActivityManager = () => {
       label: name,
       color: color,
       goal: finalGoal,
-      frequency: 'daily',
+      frequency: hasGoal ? frequency : 'daily',
       status: 'active'
     });
 
@@ -40,6 +42,7 @@ export const ActivityManager = () => {
     setColor('#007AFF');
     setHasGoal(false);
     setGoalValue(0);
+    setFrequency('daily');
     setIsCreating(false);
   };
 
@@ -52,7 +55,16 @@ export const ActivityManager = () => {
           <OrbitButton
             onClick={() => setIsCreating(true)}
             variant="secondary"
-            style={{ width: 'auto', height: '32px', padding: '0 12px', fontSize: '0.75rem' }}
+            style={{
+              width: 'auto',
+              height: 'auto',
+              padding: '4px 10px',
+              fontSize: '11px',
+              borderRadius: '20px',
+              backgroundColor: 'rgba(0,0,0,0.05)',
+              fontWeight: '600',
+              whiteSpace: 'nowrap'
+            }}
           >
             New
           </OrbitButton>
@@ -125,16 +137,27 @@ export const ActivityManager = () => {
              </div>
 
              {hasGoal && (
-               <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                 <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)', textTransform: 'uppercase', marginLeft: '4px' }}>Daily Goal (Hours)</label>
-                 <input
-                   type="number"
-                   value={goalValue}
-                   onChange={(e) => setGoalValue(e.target.value)}
-                   style={{ width: '100%', padding: '12px', backgroundColor: 'var(--card-bg)', border: '1px solid var(--separator)', borderRadius: '14px', fontFamily: 'monospace', fontSize: '1.125rem', outline: 'none' }}
-                   step="0.1"
-                   min="0"
-                 />
+               <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+
+                 <div style={{ width: '100%' }}>
+                    <SegmentedControl
+                       options={[{ label: 'Daily', value: 'daily' }, { label: 'Weekly', value: 'weekly' }]}
+                       value={frequency}
+                       onChange={setFrequency}
+                    />
+                 </div>
+
+                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                   <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)', textTransform: 'uppercase', marginLeft: '4px' }}>Target (Hours)</label>
+                   <input
+                     type="number"
+                     value={goalValue}
+                     onChange={(e) => setGoalValue(e.target.value)}
+                     style={{ width: '100%', padding: '12px', backgroundColor: 'var(--card-bg)', border: '1px solid var(--separator)', borderRadius: '14px', fontFamily: 'monospace', fontSize: '1.125rem', outline: 'none' }}
+                     step="0.1"
+                     min="0"
+                   />
+                 </div>
                </div>
              )}
           </div>
@@ -177,7 +200,7 @@ export const ActivityManager = () => {
 
                   {act.goal > 0 ? (
                     <div style={{ padding: '4px 8px', backgroundColor: 'rgba(0,122,255,0.1)', color: 'var(--blue)', fontSize: '0.75rem', fontWeight: 'bold', borderRadius: '6px' }}>
-                      Target: {act.goal}h
+                      {act.goal}h/{act.frequency === 'weekly' ? 'wk' : 'day'}
                     </div>
                   ) : (
                     <div style={{ padding: '4px 8px', backgroundColor: 'rgba(60,60,67,0.1)', color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 'bold', borderRadius: '6px' }}>

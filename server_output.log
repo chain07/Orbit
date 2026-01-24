@@ -15,3 +15,5 @@ Port 5173 is in use, trying another one...
 4:16:47 PM [vite] hmr update /src/components/logger/TimeTracker.jsx
 4:17:21 PM [vite] hmr update /src/components/logger/ActivityManager.jsx
 4:17:54 PM [vite] hmr update /src/views/Logger.jsx
+4:52:03 PM [vite] hmr update /src/components/logger/TimeTracker.jsx
+4:52:40 PM [vite] hmr update /src/components/logger/ActivityManager.jsx

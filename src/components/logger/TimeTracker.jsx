@@ -314,7 +314,14 @@ export const TimeTracker = ({ metricId }) => {
           /* Manual Entry Inputs - Refactored Layout */
           <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '12px',
+                marginBottom: '16px',
+                width: '100%',
+                boxSizing: 'border-box'
+            }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
                 <label className="text-secondary uppercase" style={{ fontSize: '12px', fontWeight: 'bold', marginLeft: '4px' }}>Start Time</label>
                 <input
