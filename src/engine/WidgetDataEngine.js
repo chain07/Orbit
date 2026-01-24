@@ -111,8 +111,6 @@ export const WidgetDataEngine = {
       ? MetricEngine.getLastNDaysValues(logs, days)
       : new Array(days).fill(0);
 
-    // FIX: Return raw values so the Sparkline component can handle scaling correctly.
-    // Previously returned 0-1 normalized values, which caused flatlining or incorrect axis.
     const currentVal = MetricEngine.getTodayValue ? MetricEngine.getTodayValue(logs) : 0;
 
     return {
