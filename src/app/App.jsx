@@ -10,7 +10,6 @@ import { Logger } from '../views/Logger';
 import { Intel } from '../views/Intel';
 import { System } from '../views/System';
 import BottomNav from '../components/ui/BottomNav';
-import UpdateManager from '../components/system/UpdateManager';
 import { GlobalErrorBoundary } from '../components/system/GlobalErrorBoundary'; // Restored for production safety
 
 const AppContent = () => {
@@ -44,9 +43,6 @@ const AppContent = () => {
          {renderTab()}
       </main>
       
-      {/* Update Manager */}
-      <UpdateManager />
-
       {/* Navigation */}
       <BottomNav
         tabs={tabs}

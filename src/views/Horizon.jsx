@@ -8,6 +8,7 @@ import Glass from '../components/ui/Glass';
 import { getWidgetComponent } from '../components/widgets/WidgetRegistry';
 import { EditLayoutModal } from '../components/horizon/EditLayoutModal';
 import { EmptyState } from '../components/ui/EmptyState';
+import UpdateManager from '../components/system/UpdateManager';
 import { OnboardingWizard } from '../components/system/OnboardingWizard';
 import { Icons } from '../components/ui/Icons';
 import { OrbitButton } from '../components/ui/OrbitButton';
@@ -109,6 +110,8 @@ export const Horizon = () => {
       </div>
 
       <div className="layout-content">
+        <UpdateManager />
+
         {!hasMetrics && (
           <EmptyState
             icon={null}
@@ -122,13 +125,6 @@ export const Horizon = () => {
         {showWizard && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-4 animate-fade-in">
             <div className="w-full max-w-lg h-[600px] relative">
-               {/* Close button for safety */}
-               <button
-                  onClick={() => setShowWizard(false)}
-                  className="absolute -top-10 right-0 text-white font-bold"
-               >
-                 Close
-               </button>
                <OnboardingWizard onComplete={() => setShowWizard(false)} />
             </div>
           </div>
