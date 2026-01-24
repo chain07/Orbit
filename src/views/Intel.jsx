@@ -175,6 +175,25 @@ export const Intel = () => {
         </div>
 
         <ReportGenerator segment={segment} />
+
+        {/* Data Literacy Footer */}
+        <div className="mt-8 pt-8 border-t border-separator/50 flex flex-col gap-4 text-xs text-secondary pb-8">
+            <div className="font-bold uppercase tracking-wide opacity-70">About Metrics</div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <span className="font-bold block text-primary mb-1">System Health</span>
+                    Aggregate reliability of your system. Average % of goals completed.
+                </div>
+                <div>
+                    <span className="font-bold block text-primary mb-1">Momentum</span>
+                    Velocity of progress. Rate of change in activity volume.
+                </div>
+                <div>
+                    <span className="font-bold block text-primary mb-1">Activity Volume</span>
+                    Total accumulation of logged duration/frequency.
+                </div>
+            </div>
+        </div>
       </div>
     </div>
   );

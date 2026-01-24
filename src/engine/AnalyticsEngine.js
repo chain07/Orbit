@@ -260,22 +260,25 @@ export const AnalyticsEngine = {
       return diff > days && diff <= (days * 2);
     });
 
+    // Only count metrics that have a real goal (> 0)
+    const scoredMetrics = metrics.filter(m => m.goal > 0);
+
     // 1. Reliability (Average Goal Completion)
     let totalCompletion = 0;
-    metrics.forEach(m => {
+    scoredMetrics.forEach(m => {
        // MetricEngine.goalCompletion handles 0-100 logic
        const comp = MetricEngine.goalCompletion ? MetricEngine.goalCompletion(m, currentLogs) : 0;
        totalCompletion += Math.min(comp, 100); // Cap individual impact at 100%
     });
-    const reliability = Math.round(totalCompletion / (metrics.length || 1));
+    const reliability = Math.round(totalCompletion / (scoredMetrics.length || 1));
 
     // 2. Trend Calculation
     let prevTotal = 0;
-    metrics.forEach(m => {
+    scoredMetrics.forEach(m => {
        const comp = MetricEngine.goalCompletion ? MetricEngine.goalCompletion(m, prevLogs) : 0;
        prevTotal += Math.min(comp, 100);
     });
-    const prevReliability = Math.round(prevTotal / (metrics.length || 1));
+    const prevReliability = Math.round(prevTotal / (scoredMetrics.length || 1));
     const trendVal = reliability - prevReliability;
     const trend = trendVal >= 0 ? `+${trendVal}%` : `${trendVal}%`;
 

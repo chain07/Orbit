@@ -188,22 +188,53 @@ export const MetricEngine = {
   // Goal completion %
   // ----------------------
   goalCompletion: (metricConfig, logs = []) => {
+    // 1. Telemetry/Passive: Goal 0 always passes
+    if (metricConfig.goal === 0) return 100;
+
     const metricLogs = logs.filter(l => l.metricId === metricConfig.id);
     if (metricLogs.length === 0) return 0;
 
-    const type = metricConfig.type;
+    const now = new Date();
+    const freq = metricConfig.frequency || 'daily';
+    let startTime;
 
-    switch (type) {
-      case MetricType.BOOLEAN:
-        const trueCount = metricLogs.filter(l => l.value).length;
-        return Math.min(100, Math.max(0, (trueCount / metricLogs.length) * 100));
-      case MetricType.NUMBER:
-      case MetricType.PERCENTAGE:
-        const sum = metricLogs.reduce((acc, l) => acc + l.value, 0);
-        return Math.min(100, Math.max(0, (sum / (metricLogs.length * (metricConfig.goal || 1))) * 100));
-      default:
-        return 0;
+    // Calculate Window Start
+    if (freq === 'weekly') {
+        // Start of Week (Sunday based)
+        const d = new Date(now);
+        const day = d.getDay(); // 0-6
+        d.setDate(d.getDate() - day);
+        d.setHours(0, 0, 0, 0);
+        startTime = d;
+    } else if (freq === 'monthly') {
+        startTime = new Date(now.getFullYear(), now.getMonth(), 1);
+    } else {
+        // Daily
+        startTime = new Date(now);
+        startTime.setHours(0, 0, 0, 0);
     }
+
+    // Filter by Time Window
+    const startIso = startTime.toISOString();
+    const relevantLogs = metricLogs.filter(l => l.timestamp >= startIso);
+
+    // Calculate Sum
+    const currentSum = relevantLogs.reduce((acc, l) => {
+        let val = 0;
+        if (typeof l.value === 'boolean') {
+             val = l.value ? 1 : 0;
+        } else {
+             val = parseFloat(l.value) || 0;
+        }
+        return acc + val;
+    }, 0);
+
+    const goal = metricConfig.goal || 1;
+
+    // Calculate Percentage
+    const percentage = (currentSum / goal) * 100;
+
+    return Math.min(100, Math.max(0, percentage));
   },
 
   // ----------------------

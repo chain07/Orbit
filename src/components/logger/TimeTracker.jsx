@@ -5,11 +5,12 @@ import { Icons } from '../../components/ui/Icons';
 import { OrbitButton } from '../ui/OrbitButton';
 
 export const TimeTracker = ({ metricId }) => {
-  const { metrics, addTimeLog } = useContext(StorageContext);
+  const { metrics, addTimeLog, addMetric } = useContext(StorageContext);
   
   // State
   const [mode, setMode] = useState('timer'); // 'timer' | 'manual'
   const [selectedMetricId, setSelectedMetricId] = useState(metricId || '');
+  const [newActivityName, setNewActivityName] = useState('');
   
   // Timer State
   const [running, setRunning] = useState(false);
@@ -50,6 +51,26 @@ export const TimeTracker = ({ metricId }) => {
   const trackableMetrics = useMemo(() => 
     metrics.filter(m => m.type === 'duration' || m.type === 'number'), 
   [metrics]);
+
+  const handleCreateAndStart = () => {
+    if (!newActivityName.trim()) return;
+
+    const newMetric = {
+        id: crypto.randomUUID(),
+        name: newActivityName,
+        label: newActivityName,
+        type: 'duration',
+        goal: 0,
+        frequency: 'daily',
+        dashboardVisible: false,
+        color: '#007AFF'
+    };
+
+    addMetric(newMetric);
+    setSelectedMetricId(newMetric.id);
+    setRunning(true);
+    setNewActivityName('');
+  };
 
   const getSelectedMetricLabel = () => {
       const m = metrics.find(metric => metric.id === selectedMetricId);
@@ -111,32 +132,56 @@ export const TimeTracker = ({ metricId }) => {
   return (
     <div className="flex flex-col w-full gap-4">
       
-      {/* 1. Mode Toggle */}
-      <SegmentedControl
-        options={[{ label: 'Stopwatch', value: 'timer' }, { label: 'Manual Entry', value: 'manual' }]}
-        value={mode}
-        onChange={setMode}
-      />
-
-      {/* 2. Activity Selector */}
-      <div className="flex flex-col gap-1">
-        <label className="text-xs font-bold text-secondary uppercase ml-1">Activity</label>
-        <div className="relative">
-          <select
-            value={selectedMetricId}
-            onChange={(e) => setSelectedMetricId(e.target.value)}
-            className="w-full p-3 bg-bg-color border border-separator rounded-xl font-bold text-lg outline-none focus:border-blue appearance-none"
-          >
-            <option value="">Select Activity...</option>
-            {trackableMetrics.map(m => (
-              <option key={m.id} value={m.id}>{m.label || m.name}</option>
-            ))}
-          </select>
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-secondary text-xs">
-            ▼
-          </div>
+      {trackableMetrics.length === 0 ? (
+        <div className="flex flex-col gap-4 p-6 bg-bg-color border border-separator border-dashed rounded-2xl items-center text-center animate-fade-in">
+            <div className="w-12 h-12 rounded-full bg-blue/10 flex items-center justify-center text-blue mb-2">
+                <span className="text-2xl font-bold">+</span>
+            </div>
+            <div>
+                <div className="font-bold text-lg">No Activities Found</div>
+                <div className="text-secondary text-sm">Create a passive tracker to get started.</div>
+            </div>
+            <div className="flex gap-2 w-full mt-2">
+                <input
+                    type="text"
+                    placeholder="Activity Name (e.g. Walking)"
+                    value={newActivityName}
+                    onChange={e => setNewActivityName(e.target.value)}
+                    className="w-full p-3 bg-card border border-separator rounded-xl outline-none focus:border-blue flex-1"
+                />
+                <OrbitButton onClick={handleCreateAndStart} variant="primary">Start</OrbitButton>
+            </div>
         </div>
-      </div>
+      ) : (
+        <>
+          {/* 1. Mode Toggle */}
+          <SegmentedControl
+            options={[{ label: 'Stopwatch', value: 'timer' }, { label: 'Manual Entry', value: 'manual' }]}
+            value={mode}
+            onChange={setMode}
+          />
+
+          {/* 2. Activity Selector */}
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-bold text-secondary uppercase ml-1">Activity</label>
+            <div className="relative">
+              <select
+                value={selectedMetricId}
+                onChange={(e) => setSelectedMetricId(e.target.value)}
+                className="w-full p-3 bg-bg-color border border-separator rounded-xl font-bold text-lg outline-none focus:border-blue appearance-none"
+              >
+                <option value="">Select Activity...</option>
+                {trackableMetrics.map(m => (
+                  <option key={m.id} value={m.id}>{m.label || m.name}</option>
+                ))}
+              </select>
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-secondary text-xs">
+                ▼
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* 3. Main Interface */}
       <div className="flex flex-col items-center justify-center p-6 bg-bg-color border border-separator border-dashed rounded-2xl min-h-[220px]">
