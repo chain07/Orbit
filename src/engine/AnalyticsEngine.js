@@ -72,8 +72,8 @@ export const AnalyticsEngine = {
     // Normalize dates to start of day for cleaner comparison?
     // Or just use timestamps. Timestamps are fine for rolling windows.
 
-    const currentWindowStart = new Date(today.getTime() - windowDays * 24 * 60 * 60 * 1000);
-    const previousWindowStart = new Date(today.getTime() - 2 * windowDays * 24 * 60 * 60 * 1000);
+    const currentWindowStart = new Date(today.getTime() - windowDays * 24 * 60 * 60 * 1000).toISOString();
+    const previousWindowStart = new Date(today.getTime() - 2 * windowDays * 24 * 60 * 60 * 1000).toISOString();
 
     // Pre-group logs by metricId for O(1) lookup
     const logsByMetric = new Map();
@@ -86,11 +86,11 @@ export const AnalyticsEngine = {
       const metricLogs = logsByMetric.get(metric.id) || [];
 
       // Sort logs by timestamp ascending
-      metricLogs.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      metricLogs.sort((a, b) => (a.timestamp < b.timestamp ? -1 : (a.timestamp > b.timestamp ? 1 : 0)));
 
-      const currentWindowLogs = metricLogs.filter(l => new Date(l.timestamp) >= currentWindowStart);
+      const currentWindowLogs = metricLogs.filter(l => l.timestamp >= currentWindowStart);
       const previousWindowLogs = metricLogs.filter(l => {
-        const ts = new Date(l.timestamp);
+        const ts = l.timestamp;
         return ts >= previousWindowStart && ts < currentWindowStart;
       });
 
