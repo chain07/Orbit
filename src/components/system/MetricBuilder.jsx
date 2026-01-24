@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Glass } from '../ui/Glass';
 import { Icons } from '../ui/Icons';
 import { OrbitButton } from '../ui/OrbitButton';
+import SegmentedControl from '../ui/SegmentedControl';
 
 const WIDGET_DESCRIPTIONS = {
   ring: "Visualizes progress towards a daily numeric goal.",
@@ -120,17 +121,41 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
              </div>
         </div>
 
+        {/* Goal Configuration (Global for relevant types) */}
+        {form.type !== 'text' && (
+            <div className="animate-fade-in mb-4">
+                <div className="section-divider">Goal Configuration</div>
+                <div className="flex flex-col gap-4">
+                    <div>
+                        <label className="label-standard block mb-2">Frequency</label>
+                        <SegmentedControl
+                            options={['Daily', 'Weekly']}
+                            value={form.config?.frequency || 'Daily'}
+                            onChange={v => updateConfig('frequency', v)}
+                        />
+                    </div>
+                    <div>
+                        <label className="label-standard block">Target Value</label>
+                        <input
+                            type="number"
+                            value={form.goal}
+                            onChange={e => updateForm('goal', e.target.value)}
+                            className="input-standard"
+                            placeholder="0"
+                        />
+                        <div className="text-xs text-secondary mt-1 ml-1">
+                            Set to 0 for passive tracking (no daily goal).
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )}
+
         {/* Dynamic Type Configuration */}
         <div className="animate-fade-in">
-            <div className="section-divider">Configuration</div>
-
             {/* NUMBER */}
             {form.type === 'number' && (
-               <div className="form-row">
-                    <div className="form-group">
-                        <label className="label-standard block">Target Goal</label>
-                        <input type="number" value={form.goal} onChange={e => updateForm('goal', e.target.value)} className="input-standard" />
-                    </div>
+               <div className="form-row mt-4">
                     <div className="form-group">
                         <label className="label-standard block">Unit</label>
                         <input type="text" value={form.unit} onChange={e => updateForm('unit', e.target.value)} placeholder="kg" className="input-standard" />
@@ -140,7 +165,7 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
 
             {/* BOOLEAN */}
             {form.type === 'boolean' && (
-               <div className="form-row">
+               <div className="form-row mt-4">
                   <div className="form-group">
                       <label className="label-standard block">"True" Label</label>
                       <input type="text" value={form.config?.trueLabel || 'Yes'} onChange={e => updateConfig('trueLabel', e.target.value)} className="input-standard" />
@@ -154,11 +179,7 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
 
             {/* DURATION */}
             {form.type === 'duration' && (
-               <div className="flex flex-col gap-3">
-                  <div>
-                      <label className="label-standard block">Daily Goal (Hours)</label>
-                      <input type="number" value={form.goal} onChange={e => updateForm('goal', e.target.value)} className="input-standard" />
-                  </div>
+               <div className="flex flex-col gap-3 mt-4">
                   <div className="flex items-center gap-3 p-3 rounded-xl border border-separator">
                       <input
                         type="checkbox"
@@ -173,7 +194,7 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
 
             {/* RANGE */}
             {form.type === 'range' && (
-               <div className="flex flex-col gap-4">
+               <div className="flex flex-col gap-4 mt-4">
                   <div className="form-row">
                       <div className="form-group">
                           <label className="label-standard block">Min Value</label>
@@ -203,7 +224,7 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
 
             {/* SELECT */}
             {form.type === 'select' && (
-               <div className="flex flex-col gap-3">
+               <div className="flex flex-col gap-3 mt-4">
                   <div className="flex gap-2">
                       <input
                         type="text"

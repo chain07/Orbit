@@ -567,7 +567,6 @@ export class TimeLog {
 export const createMetric = (data) => {
   // Provide defaults for optional fields
   const defaults = {
-    id: data.id || crypto.randomUUID(),
     dashboardVisible: true,
     unit: '',
     displayOrder: 0,
@@ -575,8 +574,11 @@ export const createMetric = (data) => {
     range: null,
     options: []
   };
+
+  // Ensure ID is generated if missing or undefined (even if explicitly passed as undefined)
+  const id = data.id || crypto.randomUUID();
   
-  return new MetricConfig({ ...defaults, ...data });
+  return new MetricConfig({ ...defaults, ...data, id });
 };
 
 /**
@@ -586,11 +588,12 @@ export const createMetric = (data) => {
  */
 export const createLog = (data) => {
   const defaults = {
-    id: data.id || crypto.randomUUID(),
     timestamp: new Date().toISOString()
   };
+
+  const id = data.id || crypto.randomUUID();
   
-  return new LogEntry({ ...defaults, ...data });
+  return new LogEntry({ ...defaults, ...data, id });
 };
 
 /**
@@ -600,16 +603,17 @@ export const createLog = (data) => {
  */
 export const createTimeLog = (data) => {
   const defaults = {
-    id: data.id || crypto.randomUUID(),
     notes: ''
   };
+
+  const id = data.id || crypto.randomUUID();
   
   // Auto-calculate duration if not provided
   if (!data.duration && data.startTime && data.endTime) {
     defaults.duration = TimeLog.calculateDuration(data.startTime, data.endTime);
   }
   
-  return new TimeLog({ ...defaults, ...data });
+  return new TimeLog({ ...defaults, ...data, id });
 };
 
 // ============================================================================
