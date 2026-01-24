@@ -94,11 +94,12 @@ export const StackedBar = ({ data = [], colors = {}, title = "Activity", subtitl
            </div>
 
            {/* Vertical Grid Lines (Background) */}
+           {/* Vertical Grid Lines (Background) */}
            <div className="absolute inset-0 flex justify-between pointer-events-none z-0" style={{ paddingLeft: '10px', paddingRight: '10px' }}>
              {Array.from({ length: (processedData && processedData.length > 0) ? processedData.length : 7 }).map((_, i) => (
                <div
                  key={i}
-                 style={{ width: '1px', height: '100%', backgroundColor: 'rgba(128, 128, 128, 0.1)' }}
+                 style={{ width: '1px', height: '100%', backgroundColor: 'rgba(0,0,0,0.05)' }}
                />
              ))}
            </div>

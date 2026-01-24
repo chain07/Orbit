@@ -95,7 +95,7 @@ export const Intel = () => {
                   </div>
                 </div>
                 <div
-                  className="w-full overflow-hidden mt-auto"
+                  className="w-full overflow-hidden"
                   style={{
                     height: '12px',
                     backgroundColor: 'rgba(128, 128, 128, 0.2)',
@@ -105,7 +105,10 @@ export const Intel = () => {
                 >
                   <div
                     className="h-full bg-blue transition-all duration-500"
-                    style={{ width: '0%', borderRadius: '9999px' }}
+                    style={{
+                      width: '0%',
+                      borderRadius: '9999px'
+                    }}
                   />
                 </div>
               </div>
