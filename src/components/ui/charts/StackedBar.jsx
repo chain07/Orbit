@@ -85,8 +85,10 @@ export const StackedBar = ({ data = [], colors = {}, title = "Activity", subtitl
            <div className="grid-lines-bg">
               {[0, 1, 2, 3, 4].map(i => <div key={i} className="h-line" />)}
            </div>
-           <div className="v-lines-bg">
-              {processedData.map((_, i) => <div key={i} className="v-line" />)}
+           <div className="v-lines-bg absolute inset-0 flex justify-between pointer-events-none">
+              {Array.from({ length: processedData.length + 1 }).map((_, i) => (
+                <div key={i} className="w-[1px] h-full bg-zinc-200 dark:bg-zinc-800 opacity-20" />
+              ))}
            </div>
 
            {/* Avg Line */}

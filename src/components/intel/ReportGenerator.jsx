@@ -13,7 +13,7 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
     highs: true,
     lows: true,
     averages: true,
-    correlations: false,
+    correlations: true,
     streaks: true,
     completion: true
   });
@@ -119,7 +119,7 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
               </div>
 
               {/* Section Toggles */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-5">
                 {Object.entries(selectedSections).map(([key, value]) => (
                     <label key={key} className="flex items-center justify-between p-2 rounded-lg hover:bg-bg-color/50 transition-colors cursor-pointer group">
                       <span className="text-sm font-medium capitalize text-primary/80 group-hover:text-primary transition-colors">

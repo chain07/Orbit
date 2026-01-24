@@ -54,19 +54,30 @@ export const Intel = () => {
 
       <div className="layout-content flex flex-col gap-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Glass className="flex flex-col justify-between min-h-[140px] relative overflow-hidden">
-            <div className="text-xs font-bold text-secondary uppercase tracking-wide z-10">System Health</div>
+          <Glass className="flex flex-col justify-between min-h-[140px] relative overflow-hidden !p-0">
             {hasData ? (
-              <>
-                <div className="flex flex-col items-center my-2 z-10">
-                   <div className="text-5xl font-black text-primary tracking-tighter">{stats.reliability}%</div>
-                   <div className={`text-sm font-bold mt-1 px-2 py-0.5 rounded-full ${stats.trend.startsWith('-') ? 'bg-red/10 text-red' : 'bg-green/10 text-green'}`}>
-                     {stats.trend}
+              <div className="flex flex-col justify-between w-full h-full px-5 py-4 z-10">
+                <div className="flex justify-between items-end mb-3">
+                   <div className="flex flex-col">
+                      <span className="text-xs font-bold text-secondary uppercase tracking-wide">System Health</span>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-2xl font-bold">{stats.reliability}%</span>
+                        <div className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${stats.trend.startsWith('-') ? 'bg-red/10 text-red' : 'bg-green/10 text-green'}`}>
+                          {stats.trend}
+                        </div>
+                      </div>
                    </div>
+                   <span className="text-xs text-secondary mb-1">Operational Baseline</span>
                 </div>
-                <div className="text-xs text-secondary text-center opacity-80 z-10">Operational Baseline</div>
-                <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-blue opacity-5 rounded-full blur-2xl"></div>
-              </>
+                {/* Track - Always Visible */}
+                <div className="w-full h-3 bg-zinc-200 dark:bg-zinc-800 rounded-full mt-4 overflow-hidden">
+                  <div
+                    className="h-full bg-blue transition-all duration-500"
+                    style={{ width: `${stats.reliability}%` }}
+                  />
+                </div>
+                <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-blue opacity-5 rounded-full blur-2xl z-0"></div>
+              </div>
             ) : (
               <div className="flex flex-col justify-center w-full h-full px-5 py-4 z-10">
                 <div className="flex justify-between items-end mb-3">
@@ -76,8 +87,8 @@ export const Intel = () => {
                    </div>
                    <span className="text-xs text-secondary mb-1">Awaiting Data</span>
                 </div>
-                {/* Progress Track */}
-                <div className="w-full h-3 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden relative">
+                {/* Track - Always Visible */}
+                <div className="w-full h-3 bg-zinc-200 dark:bg-zinc-800 rounded-full mt-4 overflow-hidden">
                    <div
                      className="h-full bg-blue transition-all duration-500 ease-out"
                      style={{ width: '0%' }}
@@ -87,26 +98,29 @@ export const Intel = () => {
             )}
           </Glass>
 
-          <Glass className={`flex flex-col justify-between min-h-[140px] relative overflow-hidden ${!hasData ? '!p-0' : ''}`}>
-            <div className={`text-xs font-bold text-secondary uppercase tracking-wide z-20 ${!hasData ? 'absolute top-5 left-5' : ''}`}>{hasData ? 'Intensity' : 'MOMENTUM'}</div>
+          <Glass className={`flex flex-col justify-between min-h-[140px] relative overflow-hidden !p-0`}>
             {hasData ? (
               <>
-                <div className="flex flex-col items-center my-2 z-10">
-                   <div className={`text-4xl font-black tracking-tight ${
+                <div className="flex justify-between items-start mb-2 px-4 pt-4 z-20">
+                  <span className="text-xs font-bold text-secondary uppercase tracking-wide">Intensity</span>
+                  <span className={`text-2xl font-bold font-mono ${
                      stats.intensity === 'Peak' ? 'text-red' :
                      stats.intensity === 'High' ? 'text-orange' :
                      stats.intensity === 'Moderate' ? 'text-blue' : 'text-secondary'
-                   }`}>
-                     {stats.intensity}
-                   </div>
+                   }`}>{stats.intensity}</span>
                 </div>
-                <div className="text-xs text-secondary text-center opacity-80 z-10">Status: {stats.status}</div>
                 <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-orange opacity-5 rounded-full blur-2xl"></div>
+                <div className="w-full h-[60px] relative mt-auto">
+                   <div className="text-xs text-secondary text-center opacity-80 absolute bottom-2 w-full">Status: {stats.status}</div>
+                </div>
               </>
             ) : (
               <>
-                <div className="absolute top-5 right-5 z-20 text-4xl font-bold text-secondary opacity-20">0.0</div>
-                <div className="absolute inset-0 w-full h-full flex items-end">
+                <div className="flex justify-between items-start mb-2 px-4 pt-4 z-20">
+                  <span className="text-xs font-bold text-secondary uppercase tracking-wide">MOMENTUM</span>
+                  <span className="text-2xl font-bold font-mono text-zinc-400">0.0</span>
+                </div>
+                <div className="w-full h-[60px] relative mt-auto">
                    <Sparkline
                      data={[0, 0, 0, 0, 0]}
                      showLabels={false}
@@ -117,8 +131,8 @@ export const Intel = () => {
                      className="w-full h-full"
                      height={60}
                    />
+                   <div className="absolute bottom-2 w-full text-center text-xs text-secondary opacity-60 pointer-events-none">Status: Offline</div>
                 </div>
-                <div className="absolute bottom-5 w-full text-center text-xs text-secondary opacity-60 z-20">Status: Offline</div>
               </>
             )}
           </Glass>
