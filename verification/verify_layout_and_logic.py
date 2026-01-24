@@ -31,7 +31,7 @@ def verify_layout_and_logic():
         # 3. Verify Wizard Opened and Text Updated
         try:
             # Wait for the specific text in the modal
-            page.wait_for_selector("text=Define Your First Metric", timeout=5000)
+            page.wait_for_selector("text=Define your first 3 metrics", timeout=5000)
             print("✅ Wizard opened successfully with new title")
         except:
             print("❌ Wizard did NOT open or title mismatch")

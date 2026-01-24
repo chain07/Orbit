@@ -448,6 +448,163 @@ window.$RefreshSig$ = () => (type) => type;</script>
         background: rgba(255, 255, 255, 0.1);
     }
 }
+</style><style type="text/css" data-vite-dev-id="/app/src/styles/metric_builder.css">/* src/styles/metric_builder.css */
+
+/* --- Modal Header --- */
+.metric-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--separator);
+  background-color: var(--bg-color);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  /* Match Main Card Radius */
+  border-top-left-radius: var(--radius-card);
+  border-top-right-radius: var(--radius-card);
+}
+
+.metric-modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.btn-cancel-text {
+  color: #8E8E93; /* Neutral gray */
+  font-weight: 500;
+  font-size: 16px;
+  background: none;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.btn-cancel-text:hover {
+  color: var(--text-primary);
+}
+
+.btn-cancel-text:active {
+  opacity: 0.7;
+}
+
+/* --- Form Grid & Layout --- */
+.form-row {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+
+.form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Vertical alignment for Color Input to match Select */
+.form-group-color {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; /* Aligns input to bottom */
+}
+
+/* --- Inputs Polish --- */
+.input-standard {
+  height: 44px; /* Standardize height */
+  width: 100%;
+  padding: 0 12px;
+  border-radius: 10px; /* Consistent radius */
+  border: 1px solid var(--separator);
+  background-color: transparent;
+  color: var(--text-primary);
+  font-size: 16px; /* Legible size */
+  font-weight: 500;
+  outline: none;
+  appearance: none; /* Remove native UI for selects */
+  transition: border-color 0.2s;
+}
+
+.input-standard:focus {
+  border-color: var(--blue);
+}
+
+/* Special handling for Color Input to match height */
+.input-color {
+  height: 44px !important;
+  width: 100%;
+  padding: 2px 4px; /* Padding for inner color swatch */
+  border-radius: 10px;
+  border: 1px solid var(--separator);
+  background-color: transparent;
+  cursor: pointer;
+}
+
+/* --- Labels --- */
+.label-standard {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  margin-bottom: 8px; /* Consistent gap */
+  letter-spacing: 0.5px;
+}
+
+/* --- Divider Section --- */
+.section-divider {
+  margin-top: 24px;
+  margin-bottom: 8px; /* Tighter gap */
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(0,0,0,0.05); /* Subtle line */
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Dark mode adjust for divider */
+@media (prefers-color-scheme: dark) {
+  .section-divider {
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+}
+
+/* --- Content Wrapper --- */
+.modal-content-scroll {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* Vertical rhythm */
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-footer {
+  padding: 16px;
+  border-top: 1px solid var(--separator);
+  background-color: var(--bg-color);
+  /* Match Main Card Radius */
+  border-bottom-left-radius: var(--radius-card);
+  border-bottom-right-radius: var(--radius-card);
+}
+
+.visualization-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* Tight gap */
+}
+
+.widget-helper-text {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+  line-height: 1.4;
+}
 </style><style type="text/css" data-vite-dev-id="/app/src/styles/index.css">/* src/styles/index.css */
 /* src/styles/tokens.css */
 /* =========================
@@ -1200,9 +1357,9 @@ input:checked + .toggle-label {
 }
 </style></head>
   <body>
-    <div id="root"><div class="flex flex-col min-h-screen w-full bg-bg-color font-system text-primary relative"><main class="flex-1 w-full layout-padding"><div class="layout-padding fade-in"><div class="view-header-stack"><h1 class="text-3xl font-extrabold tracking-tight">System</h1><p class="text-secondary font-medium system-subheader">Configuration</p><div class="system-toggle-wrapper"><div class="segmented-control-wrapper w-full" data-count="2"><input id="sc-i6mwdib1l-Metrics" type="radio" value="Metrics" checked="" name="sc-i6mwdib1l"><label for="sc-i6mwdib1l-Metrics">Metrics</label><input id="sc-i6mwdib1l-Settings" type="radio" value="Settings" name="sc-i6mwdib1l"><label for="sc-i6mwdib1l-Settings">Settings</label><div class="glider"></div></div></div></div><div class="layout-content"><div class="flex flex-col gap-4"><button type="button" class="btn-orbit btn-primary  w-full" aria-label="Add New Metric"><div class="btn-core"><span class="btn-icon"><span class="text-xl leading-none">+</span></span>Add New Metric</div></button><div class="glass flex flex-col items-center justify-center p-8 text-center gap-3 opacity-80"><div class="w-12 h-12 rounded-full bg-separator/20 flex items-center justify-center mb-1"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-secondary"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div><div class="w-full text-center"><div class="font-bold text-lg">No Metrics</div><div class="text-secondary text-sm max-w-[200px] mx-auto leading-relaxed">Create your first metric to start tracking your data.</div></div></div></div></div></div></main><div class="tab-bar-container"><div class="glass tab-bar"><div class="tab-indicator" style="width: 64px; transform: translateX(204px);"></div><div class="tab-item " role="button" aria-label="Horizon" aria-selected="false"><div class="relative z-10 active:scale-95 transition-transform duration-200"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class=""><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></div></div><div class="tab-item " role="button" aria-label="Logger" aria-selected="false"><div class="relative z-10 active:scale-95 transition-transform duration-200"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class=""><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></div></div><div class="tab-item " role="button" aria-label="Intel" aria-selected="false"><div class="relative z-10 active:scale-95 transition-transform duration-200"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class=""><circle cx="12" cy="12" r="2"></circle><path d="M16.24 7.76a6 6 0 0 1 0 8.49"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg></div></div><div class="tab-item active" role="button" aria-label="System" aria-selected="true"><div class="relative z-10 active:scale-95 transition-transform duration-200"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class=""><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg></div></div></div></div></div></div>
+    <div id="root"><div class="flex flex-col min-h-screen w-full bg-bg-color font-system text-primary relative"><main class="flex-1 w-full layout-padding"><div class="layout-padding fade-in"><div class="view-header-stack"><div class="text-xs font-bold text-secondary uppercase tracking-wide">Saturday, January 24</div><div class="flex justify-between items-end"><h1 class="text-3xl font-extrabold tracking-tight text-primary">Hi, Captain.</h1></div></div><div class="layout-content"><div class="glass p-8 flex flex-col items-center justify-center text-center gap-3 border-2 border-dashed border-separator border-opacity-50"><div class="text-4xl opacity-50 mb-2">⊕</div><div class="flex flex-col gap-1"><div class="text-lg font-bold text-primary">Welcome to ORBIT</div><div class="text-sm text-secondary max-w-[200px] mx-auto leading-relaxed">Your dashboard is empty. Configure your first metric to start tracking.</div></div><button type="button" class="btn-orbit btn-primary  mt-4" aria-label="Launch Setup"><div class="btn-core">Launch Setup</div></button></div><div class="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-4 animate-fade-in"><div class="w-full max-w-lg h-[600px] relative"><button class="absolute -top-10 right-0 text-white font-bold">Close</button><div class="glass w-full max-w-lg flex flex-col bg-bg-color max-h-[90vh] overflow-hidden !p-0"><div class="metric-modal-header"><h2 class="metric-modal-title">Define your first 3 metrics</h2><div class="text-xs text-secondary font-bold">Step 1/4</div></div><div class="modal-content-scroll"><div class="flex flex-col gap-4 animate-fade-in"><div><label class="label-standard block">METRIC NAME</label><input placeholder="e.g. Focus Time" class="input-standard" type="text" value=""></div><div class="form-row"><div class="form-group"><label class="label-standard block">Type</label><select class="input-standard"><option value="boolean">Yes/No (Habit)</option><option value="number">Number (Count)</option></select></div><div class="form-group-color"><label class="label-standard block">Color</label><input class="input-color" type="color" value="#007AFF"></div></div><div class="visualization-section"><div class="section-divider">Visualization</div><div class="widget-helper-text">Heatmap tracking for daily habits and completion.</div></div></div></div><div class="modal-footer flex flex-col gap-3"><div class="flex gap-3"><button type="button" class="btn-orbit btn-secondary  flex-1 opacity-0 pointer-events-none" disabled="" aria-label="Back"><div class="btn-core">Back</div></button><button type="button" class="btn-orbit btn-primary  flex-1" aria-label="Next"><div class="btn-core">Next</div></button></div><button class="text-xs text-secondary underline hover:text-primary mx-auto pb-1">Skip Setup</button></div></div></div></div><div class="glass p-4 border-l-4 border-blue mb-4"><div class="flex flex-col gap-2"><div class="text-xs font-bold text-blue uppercase tracking-wider flex items-center gap-2"><span>✦</span> Horizon Agent</div><div class="text-secondary text-sm">I am your Horizon Agent. I work privately on your device to uncover patterns in your habits.</div></div></div></div></div></main><div class="tab-bar-container"><div class="glass tab-bar"><div class="tab-indicator" style="width: 64px; transform: translateX(0px);"></div><div class="tab-item active" role="button" aria-label="Horizon" aria-selected="true"><div class="relative z-10 active:scale-95 transition-transform duration-200"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class=""><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></div></div><div class="tab-item " role="button" aria-label="Logger" aria-selected="false"><div class="relative z-10 active:scale-95 transition-transform duration-200"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class=""><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></div></div><div class="tab-item " role="button" aria-label="Intel" aria-selected="false"><div class="relative z-10 active:scale-95 transition-transform duration-200"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class=""><circle cx="12" cy="12" r="2"></circle><path d="M16.24 7.76a6 6 0 0 1 0 8.49"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg></div></div><div class="tab-item " role="button" aria-label="System" aria-selected="false"><div class="relative z-10 active:scale-95 transition-transform duration-200"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class=""><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg></div></div></div></div></div></div>
 
-    <script type="module" src="/src/main.jsx?t=1768951566455"></script>
+    <script type="module" src="/src/main.jsx?t=1769217653642"></script>
 
 
 </body></html>

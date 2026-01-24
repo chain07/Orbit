@@ -2,7 +2,17 @@ import React, { useState, useContext } from 'react';
 import { StorageContext } from '../../context/StorageContext';
 import { Glass } from '../../components/ui/Glass';
 import { OrbitButton } from '../ui/OrbitButton';
-import '../../styles/index.css'; // Ensure standard buttons are available
+import '../../styles/metric_builder.css';
+
+const WIDGET_DESCRIPTIONS = {
+  ring: "Visualizes progress towards a daily numeric goal.",
+  sparkline: "Shows the trajectory of values over the last 7 days.",
+  heatmap: "Heatmap tracking for daily habits and completion.",
+  stackedbar: "Breaks down total activity by category.",
+  number: "Displays the raw total or latest value.",
+  streak: "Highlights consecutive days of activity.",
+  history: "A chronological list of all entries."
+};
 
 export const OnboardingWizard = ({ onComplete }) => {
   const { addMetric } = useContext(StorageContext);
@@ -16,27 +26,27 @@ export const OnboardingWizard = ({ onComplete }) => {
 
   const [currentStep, setCurrentStep] = useState(0);
   
-  // Initialize state for the three metrics we will build
-  // Defaulting to diverse colors and widget types for a better starting dashboard
   const [formData, setFormData] = useState({
-    metric1: { name: '', type: 'boolean', goal: 1, color: '#007AFF', widgetType: 'ring' },
+    metric1: { name: '', type: 'boolean', goal: 1, color: '#007AFF', widgetType: 'heatmap' },
     metric2: { name: '', type: 'number', goal: 10, color: '#34C759', widgetType: 'sparkline' },
     metric3: { name: '', type: 'number', goal: 5, color: '#FF9500', widgetType: 'bar' }
   });
 
-  // Implemented properly to handle updates (replacing unused placeholder)
   const updateField = (metricSlot, field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [metricSlot]: {
-        ...prev[metricSlot],
-        [field]: value
-      }
-    }));
+    setFormData(prev => {
+        const newData = { ...prev };
+        newData[metricSlot] = { ...prev[metricSlot], [field]: value };
+
+        // Smart Default Logic (similar to MetricBuilder)
+        if (field === 'type') {
+            if (value === 'boolean') newData[metricSlot].widgetType = 'heatmap';
+            if (value === 'number') newData[metricSlot].widgetType = 'ring';
+        }
+        return newData;
+    });
   };
 
   const nextStep = () => {
-    // Basic validation for the metric creation steps
     if (currentStep < 3) {
       const currentKey = steps[currentStep].key;
       if (!formData[currentKey].name) {
@@ -44,7 +54,6 @@ export const OnboardingWizard = ({ onComplete }) => {
         return;
       }
     }
-
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
@@ -57,10 +66,8 @@ export const OnboardingWizard = ({ onComplete }) => {
   };
 
   const handleFinish = () => {
-    // Submit all metrics
     ['metric1', 'metric2', 'metric3'].forEach(key => {
       const m = formData[key];
-      // Only add metrics that were actually named by the user
       if (m.name) {
          addMetric({
              name: m.name,
@@ -68,7 +75,7 @@ export const OnboardingWizard = ({ onComplete }) => {
              goal: parseFloat(m.goal),
              color: m.color,
              widgetType: m.widgetType,
-             label: m.name // Ensure label is set for consistency
+             label: m.name
          });
       }
     });
@@ -81,87 +88,77 @@ export const OnboardingWizard = ({ onComplete }) => {
       }
   };
 
-  // Implements actual metric creation form for each step
   const renderMetricForm = (metricSlot) => {
     const data = formData[metricSlot];
     return (
       <div className="flex flex-col gap-4 animate-fade-in">
         <div>
-          <label className="text-xs font-bold text-secondary uppercase">Metric Name</label>
+          <label className="label-standard block">METRIC NAME</label>
           <input 
             type="text" 
             value={data.name}
             onChange={(e) => updateField(metricSlot, 'name', e.target.value)}
             placeholder="e.g. Focus Time"
-            className="w-full p-3 rounded-xl bg-bg-color border border-separator text-lg font-bold outline-none focus:border-blue"
+            className="input-standard"
           />
-          <div className="text-xs text-secondary mt-2">
-            What do you want to track? (e.g., 'Workout', 'Reading', 'Water')
-          </div>
         </div>
 
-        <div>
-           <label className="text-xs font-bold text-secondary uppercase">Type</label>
-           <div className="flex gap-2 mt-1">
-             <OrbitButton
-                onClick={() => updateField(metricSlot, 'type', 'boolean')}
-                variant={data.type === 'boolean' ? 'primary' : 'secondary'}
-                className="flex-1 justify-center"
-             >
-                Yes/No
-             </OrbitButton>
-             <OrbitButton
-                onClick={() => updateField(metricSlot, 'type', 'number')}
-                variant={data.type === 'number' ? 'primary' : 'secondary'}
-                className="flex-1 justify-center"
-             >
-                Number
-             </OrbitButton>
+        <div className="form-row">
+           <div className="form-group">
+              <label className="label-standard block">Type</label>
+              <select
+                value={data.type}
+                onChange={(e) => updateField(metricSlot, 'type', e.target.value)}
+                className="input-standard"
+              >
+                <option value="boolean">Yes/No (Habit)</option>
+                <option value="number">Number (Count)</option>
+              </select>
+           </div>
+           <div className="form-group-color">
+              <label className="label-standard block">Color</label>
+              <input
+                type="color"
+                value={data.color}
+                onChange={(e) => updateField(metricSlot, 'color', e.target.value)}
+                className="input-color"
+              />
            </div>
         </div>
         
-        {/* Standard Color Picker */}
-        <div>
-          <label className="text-xs font-bold text-secondary uppercase">Color</label>
-          <div className="mt-1">
-            <input
-              type="color"
-              value={data.color}
-              onChange={(e) => updateField(metricSlot, 'color', e.target.value)}
-              className="input-color"
-            />
-          </div>
+        {/* Widget Preview / Helper */}
+        <div className="visualization-section">
+             <div className="section-divider">Visualization</div>
+             <div className="widget-helper-text">
+                {WIDGET_DESCRIPTIONS[data.widgetType] || "Tracks your progress."}
+             </div>
         </div>
       </div>
     );
   };
 
-  // Implements goal setting form for step 4
   const renderGoalForm = () => {
-    // Only show goal inputs for metrics that are numeric
     const numericMetrics = ['metric1', 'metric2', 'metric3'].filter(k => formData[k].type === 'number' && formData[k].name);
     
     if (numericMetrics.length === 0) {
       return (
         <div className="text-center py-8 text-secondary">
           <div className="text-3xl mb-2">✨</div>
-          <p>All your metrics are Yes/No habits.</p>
-          <p className="text-sm mt-1">You're ready to go!</p>
+          <p>All set!</p>
         </div>
       );
     }
 
     return (
       <div className="flex flex-col gap-4 animate-fade-in">
-        <p className="text-sm text-secondary mb-2">Set daily targets for your numeric metrics.</p>
         {numericMetrics.map(key => (
           <div key={key}>
-            <label className="text-xs font-bold text-secondary uppercase">{formData[key].name} Goal</label>
+            <label className="label-standard block">{formData[key].name} Goal</label>
             <input 
               type="number" 
               value={formData[key].goal}
               onChange={(e) => updateField(key, 'goal', e.target.value)}
-              className="w-full p-3 rounded-xl bg-bg-color border border-separator text-lg font-bold outline-none"
+              className="input-standard"
             />
           </div>
         ))}
@@ -170,51 +167,38 @@ export const OnboardingWizard = ({ onComplete }) => {
   };
 
   return (
-    <Glass className="h-full flex flex-col p-6 shadow-2xl border border-glass-border">
-        <div className="flex justify-between items-center border-b border-separator pb-4 mb-4">
-            <div>
-              <h2 className="text-xl font-extrabold">{steps[currentStep].title}</h2>
-              <span className="text-xs text-secondary font-bold">Step {currentStep + 1} of {steps.length}</span>
-            </div>
-            {/* Progress dot indicator */}
-            <div className="flex gap-1">
-              {steps.map((_, idx) => (
-                <div
-                  key={idx}
-                  className={`w-2 h-2 rounded-full ${idx === currentStep ? 'bg-blue' : 'bg-separator opacity-30'}`}
-                />
-              ))}
-            </div>
+    <Glass className="w-full max-w-lg flex flex-col bg-bg-color max-h-[90vh] overflow-hidden !p-0">
+        <div className="metric-modal-header">
+            <h2 className="metric-modal-title">Define your first 3 metrics</h2>
+            <div className="text-xs text-secondary font-bold">Step {currentStep + 1}/{steps.length}</div>
         </div>
 
-        {/* Form Content */}
-        <div className="flex-1 overflow-y-auto min-h-[250px]">
-          {currentStep < 3 ? renderMetricForm(steps[currentStep].key) : renderGoalForm()}
+        <div className="modal-content-scroll">
+            {currentStep < 3 ? renderMetricForm(steps[currentStep].key) : renderGoalForm()}
         </div>
 
-        {/* Footer Actions */}
-        <div className="flex flex-col gap-3 pt-4 border-t border-separator mt-4">
-            <div className="flex justify-between gap-3">
-              <OrbitButton
-                onClick={prevStep}
-                disabled={currentStep === 0}
-                variant="secondary"
-                className={`flex-1 ${currentStep === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                Back
-              </OrbitButton>
-              <OrbitButton
-                onClick={nextStep}
-                variant="primary"
-                className="flex-1"
-              >
-                {currentStep === steps.length - 1 ? 'Launch ORBIT 🚀' : 'Next'}
-              </OrbitButton>
-            </div>
+        <div className="modal-footer flex flex-col gap-3">
+             <div className="flex gap-3">
+                <OrbitButton
+                    onClick={prevStep}
+                    disabled={currentStep === 0}
+                    variant="secondary"
+                    className={`flex-1 ${currentStep === 0 ? 'opacity-0 pointer-events-none' : ''}`}
+                >
+                    Back
+                </OrbitButton>
+                <OrbitButton
+                    onClick={nextStep}
+                    variant="primary"
+                    className="flex-1"
+                >
+                    {currentStep === steps.length - 1 ? 'Launch ORBIT 🚀' : 'Next'}
+                </OrbitButton>
+             </div>
 
-            <OrbitButton onClick={handleSkip} variant="secondary" className="!w-full !text-xs !bg-transparent text-secondary">
+             <button onClick={handleSkip} className="text-xs text-secondary underline hover:text-primary mx-auto pb-1">
                 Skip Setup
-            </OrbitButton>
+             </button>
         </div>
     </Glass>
   );
