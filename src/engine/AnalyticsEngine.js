@@ -221,9 +221,14 @@ export const AnalyticsEngine = {
   // ----------------------
   windowComparisons: (metrics = [], logs = [], windowDays = 7) => {
     const comparisons = {};
+
+    // OPTIMIZED: Calculate averages for all metrics in one pass per window
+    const currentAverages = AnalyticsEngine.rollingAverages(metrics, logs, windowDays);
+    const previousAverages = AnalyticsEngine.rollingAverages(metrics, logs, 2 * windowDays);
+
     metrics.forEach(metric => {
-      const avgCurrent = AnalyticsEngine.rollingAverages([metric], logs, windowDays)[metric.id];
-      const avgPrevious = AnalyticsEngine.rollingAverages([metric], logs, 2 * windowDays)[metric.id];
+      const avgCurrent = currentAverages[metric.id];
+      const avgPrevious = previousAverages[metric.id];
       comparisons[metric.id] = {
         current: avgCurrent,
         previous: avgPrevious,
