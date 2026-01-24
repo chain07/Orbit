@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Glass } from '../ui/Glass';
 import { Icons } from '../ui/Icons';
 import { OrbitButton } from '../ui/OrbitButton';
-import SegmentedControl from '../ui/SegmentedControl';
 
 const WIDGET_DESCRIPTIONS = {
   ring: "Visualizes progress towards a daily numeric goal.",
@@ -21,7 +20,6 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
     label: metric?.label || '',
     type: metric?.type || 'number',
     goal: metric?.goal !== undefined ? metric.goal : 0,
-    frequency: metric?.frequency || 'daily',
     color: metric?.color || '#007AFF',
     widgetType: metric?.widgetType || 'ring',
     unit: metric?.unit || '',
@@ -66,8 +64,8 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
       ...metric,
       ...form,
       label: form.label || form.name,
-      // Ensure goal is null for types that don't use it to pass validation, unless it is 0 (passive)
-      goal: (form.type === 'number' || form.type === 'duration' || form.type === 'boolean') ? parseFloat(form.goal) : null
+      // Ensure goal is null for types that don't use it to pass validation
+      goal: (form.type === 'number' || form.type === 'duration') ? (parseFloat(form.goal) || 0) : null
     };
     onSave(submission);
   };
@@ -122,46 +120,17 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
              </div>
         </div>
 
-        {/* Goal Configuration - NEW */}
-        <div className="animate-fade-in">
-            <div className="section-divider">Goal Configuration</div>
-
-            <div className="flex flex-col gap-4 mb-4">
-                <div>
-                   <label className="label-standard block mb-2">Frequency</label>
-                   <SegmentedControl
-                      options={['Daily', 'Weekly', 'Monthly'].map(o => ({ label: o, value: o.toLowerCase() }))}
-                      value={form.frequency}
-                      onChange={val => updateForm('frequency', val)}
-                   />
-                </div>
-
-                {(form.type === 'number' || form.type === 'duration' || form.type === 'boolean') && (
-                    <div className="form-group">
-                        <label className="label-standard block">Target Value (Set 0 for passive tracking)</label>
-                        <input
-                           type="number"
-                           value={form.goal}
-                           onChange={e => updateForm('goal', e.target.value)}
-                           className="input-standard"
-                        />
-                        <div className="text-xs text-secondary mt-1">
-                          {form.frequency === 'daily' ? 'Target for each day.' :
-                           form.frequency === 'weekly' ? 'Target sum for the week (Mon-Sun).' :
-                           'Target sum for the current month.'}
-                        </div>
-                    </div>
-                )}
-            </div>
-        </div>
-
         {/* Dynamic Type Configuration */}
         <div className="animate-fade-in">
-            <div className="section-divider">Type Configuration</div>
+            <div className="section-divider">Configuration</div>
 
             {/* NUMBER */}
             {form.type === 'number' && (
                <div className="form-row">
+                    <div className="form-group">
+                        <label className="label-standard block">Target Goal</label>
+                        <input type="number" value={form.goal} onChange={e => updateForm('goal', e.target.value)} className="input-standard" />
+                    </div>
                     <div className="form-group">
                         <label className="label-standard block">Unit</label>
                         <input type="text" value={form.unit} onChange={e => updateForm('unit', e.target.value)} placeholder="kg" className="input-standard" />
@@ -186,6 +155,10 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
             {/* DURATION */}
             {form.type === 'duration' && (
                <div className="flex flex-col gap-3">
+                  <div>
+                      <label className="label-standard block">Daily Goal (Hours)</label>
+                      <input type="number" value={form.goal} onChange={e => updateForm('goal', e.target.value)} className="input-standard" />
+                  </div>
                   <div className="flex items-center gap-3 p-3 rounded-xl border border-separator">
                       <input
                         type="checkbox"

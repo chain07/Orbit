@@ -4,13 +4,21 @@ import SegmentedControl from '../../components/ui/SegmentedControl';
 import { Icons } from '../../components/ui/Icons';
 import { OrbitButton } from '../ui/OrbitButton';
 
+const toLocalISOString = (date) => {
+  const pad = (n) => n.toString().padStart(2, '0');
+  return date.getFullYear() +
+      '-' + pad(date.getMonth() + 1) +
+      '-' + pad(date.getDate()) +
+      'T' + pad(date.getHours()) +
+      ':' + pad(date.getMinutes());
+};
+
 export const TimeTracker = ({ metricId }) => {
-  const { metrics, addTimeLog, addMetric } = useContext(StorageContext);
+  const { metrics, addTimeLog } = useContext(StorageContext);
   
   // State
   const [mode, setMode] = useState('manual'); // 'timer' | 'manual'
   const [selectedMetricId, setSelectedMetricId] = useState(metricId || '');
-  const [newActivityName, setNewActivityName] = useState('');
   
   // Timer State
   const [running, setRunning] = useState(false);
@@ -20,8 +28,10 @@ export const TimeTracker = ({ metricId }) => {
   // Manual Entry State
   const [manualStartTime, setManualStartTime] = useState('');
   const [manualEndTime, setManualEndTime] = useState('');
+  const [durationDisplay, setDurationDisplay] = useState('');
+  const [isDurationFocused, setIsDurationFocused] = useState(false);
 
-  // Notes State (New for Phase 4.2)
+  // Notes State
   const [notes, setNotes] = useState('');
 
   // Sync prop if provided
@@ -29,11 +39,63 @@ export const TimeTracker = ({ metricId }) => {
     if (metricId) setSelectedMetricId(metricId);
   }, [metricId]);
 
+  // Calculate Duration Display (Only if not focused to avoid fighting user input)
+  useEffect(() => {
+    if (isDurationFocused) return;
+
+    if (manualStartTime && manualEndTime) {
+      const start = new Date(manualStartTime);
+      const end = new Date(manualEndTime);
+      if (end > start) {
+        const diff = end - start;
+        const totalMinutes = Math.floor(diff / (1000 * 60));
+        const hours = Math.floor(totalMinutes / 60);
+        const mins = totalMinutes % 60;
+        setDurationDisplay(`${hours}h ${mins}m`);
+      } else {
+        setDurationDisplay(''); // Invalid or negative
+      }
+    } else {
+      setDurationDisplay('');
+    }
+  }, [manualStartTime, manualEndTime, isDurationFocused]);
+
+  // Handle Manual Duration Edit
+  const handleDurationChange = (e) => {
+    const val = e.target.value;
+    setDurationDisplay(val);
+
+    if (!manualStartTime) return;
+
+    let minutes = 0;
+    // 1. HH:MM
+    if (val.includes(':')) {
+        const parts = val.split(':');
+        const h = parseInt(parts[0] || '0', 10);
+        const m = parseInt(parts[1] || '0', 10);
+        minutes = h * 60 + m;
+    }
+    // 2. '90m' or '90 min'
+    else if (val.toLowerCase().includes('m')) {
+        minutes = parseFloat(val);
+    }
+    // 3. Decimal hours '1.5' or '1'
+    else {
+        minutes = parseFloat(val) * 60;
+    }
+
+    if (!isNaN(minutes) && minutes > 0) {
+        const start = new Date(manualStartTime);
+        const newEnd = new Date(start.getTime() + minutes * 60000);
+        setManualEndTime(toLocalISOString(newEnd));
+    }
+  };
+
   // Timer Logic
   useEffect(() => {
     let timer;
     if (running) {
-      if (!startTime) setStartTime(new Date().toISOString()); // Set start time on first tick
+      if (!startTime) setStartTime(new Date().toISOString());
       timer = setInterval(() => setElapsed(prev => prev + 1), 1000);
     }
     return () => clearInterval(timer);
@@ -51,26 +113,6 @@ export const TimeTracker = ({ metricId }) => {
   const trackableMetrics = useMemo(() => 
     metrics.filter(m => m.type === 'duration' || m.type === 'number'), 
   [metrics]);
-
-  const handleCreateAndStart = () => {
-    if (!newActivityName.trim()) return;
-
-    const newMetric = {
-        id: crypto.randomUUID(),
-        name: newActivityName,
-        label: newActivityName,
-        type: 'duration',
-        goal: 0,
-        frequency: 'daily',
-        dashboardVisible: false,
-        color: '#007AFF'
-    };
-
-    addMetric(newMetric);
-    setSelectedMetricId(newMetric.id);
-    setRunning(true);
-    setNewActivityName('');
-  };
 
   const getSelectedMetricLabel = () => {
       const m = metrics.find(metric => metric.id === selectedMetricId);
@@ -90,9 +132,6 @@ export const TimeTracker = ({ metricId }) => {
     if (mode === 'timer') {
       if (elapsed === 0) return;
       calculatedDuration = elapsed / 3600; // Hours
-
-      // If timer was running, use the captured start time.
-      // If paused/stopped, logic might vary, but simplified here:
       finalStartTime = startTime || new Date(Date.now() - elapsed * 1000).toISOString();
       finalEndTime = new Date().toISOString();
 
@@ -120,11 +159,11 @@ export const TimeTracker = ({ metricId }) => {
 
       setManualStartTime('');
       setManualEndTime('');
+      setDurationDisplay('');
     }
 
-    // Phase 4.2 Update: Call addTimeLog instead of addLogEntry
     addTimeLog({
-      activityId: selectedMetricId, // Using correct activityId (metricId)
+      activityId: selectedMetricId,
       activityLabel: getSelectedMetricLabel(),
       startTime: finalStartTime,
       endTime: finalEndTime,
@@ -132,66 +171,41 @@ export const TimeTracker = ({ metricId }) => {
       notes: notes
     });
 
-    // Clear notes after save
     setNotes('');
   };
 
   return (
     <div className="flex flex-col w-full gap-4">
       
-      {trackableMetrics.length === 0 ? (
-        <div className="flex flex-col gap-4 p-6 bg-bg-color border border-separator border-dashed rounded-2xl items-center text-center animate-fade-in">
-            <div className="w-12 h-12 rounded-full bg-blue/10 flex items-center justify-center text-blue mb-2">
-                <span className="text-2xl font-bold">+</span>
-            </div>
-            <div>
-                <div className="font-bold text-lg">No Activities Found</div>
-                <div className="text-secondary text-sm">Create a passive tracker to get started.</div>
-            </div>
-            <div className="flex gap-2 w-full mt-2">
-                <input
-                    type="text"
-                    placeholder="Activity Name (e.g. Walking)"
-                    value={newActivityName}
-                    onChange={e => setNewActivityName(e.target.value)}
-                    className="w-full p-3 bg-card border border-separator rounded-xl outline-none focus:border-blue flex-1"
-                />
-                <OrbitButton onClick={handleCreateAndStart} variant="primary">Start</OrbitButton>
-            </div>
-        </div>
-      ) : (
-        <>
-          {/* 1. Mode Toggle */}
-          <SegmentedControl
-            options={[{ label: 'Stopwatch', value: 'timer' }, { label: 'Manual Entry', value: 'manual' }]}
-            value={mode}
-            onChange={setMode}
-          />
+      {/* 1. Mode Toggle */}
+      <SegmentedControl
+        options={[{ label: 'Stopwatch', value: 'timer' }, { label: 'Manual Entry', value: 'manual' }]}
+        value={mode}
+        onChange={setMode}
+      />
 
-          {/* 2. Activity Selector */}
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-bold text-secondary uppercase ml-1">Activity</label>
-            <div className="relative">
-              <select
-                value={selectedMetricId}
-                onChange={(e) => setSelectedMetricId(e.target.value)}
-                className="w-full p-3 bg-bg-color border border-separator rounded-xl font-bold text-lg outline-none focus:border-blue appearance-none"
-              >
-                <option value="">Select Activity...</option>
-                {trackableMetrics.map(m => (
-                  <option key={m.id} value={m.id}>{m.label || m.name}</option>
-                ))}
-              </select>
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-secondary text-xs">
-                ▼
-              </div>
-            </div>
+      {/* 2. Activity Selector */}
+      <div className="flex flex-col gap-1">
+        <label className="text-xs font-bold text-secondary uppercase ml-1">Activity</label>
+        <div className="relative">
+          <select
+            value={selectedMetricId}
+            onChange={(e) => setSelectedMetricId(e.target.value)}
+            className="w-full p-3 bg-bg-color border border-separator rounded-[14px] font-bold text-lg outline-none focus:border-blue appearance-none"
+          >
+            <option value="">Select Activity...</option>
+            {trackableMetrics.map(m => (
+              <option key={m.id} value={m.id}>{m.label || m.name}</option>
+            ))}
+          </select>
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-secondary text-xs">
+            ▼
           </div>
-        </>
-      )}
+        </div>
+      </div>
 
       {/* 3. Main Interface */}
-      <div className="flex flex-col items-center justify-center p-6 bg-bg-color border border-separator border-dashed rounded-2xl min-h-[220px]">
+      <div className="flex flex-col items-center justify-center p-6 bg-bg-color border border-separator border-dashed rounded-[14px] min-h-[220px]">
         
         {mode === 'timer' ? (
           <>
@@ -245,28 +259,43 @@ export const TimeTracker = ({ metricId }) => {
             </div>
           </>
         ) : (
-          /* Manual Entry Inputs */
+          /* Manual Entry Inputs - Refactored Layout */
           <div className="flex flex-col w-full gap-6">
-            <div className="flex flex-col gap-4 w-full">
-              <div className="flex flex-col gap-1">
+
+            <div className="flex w-full gap-3"> {/* gap-3 */}
+              <div className="flex flex-col gap-1 flex-1"> {/* flex-1 */}
                 <label className="text-xs font-bold text-secondary uppercase ml-1">Start Time</label>
                 <input
                   type="datetime-local"
                   value={manualStartTime}
                   onChange={(e) => setManualStartTime(e.target.value)}
-                  className="w-full p-3 bg-card border border-separator rounded-xl font-bold text-lg outline-none focus:border-blue"
+                  className="w-full p-3 bg-card border border-separator rounded-[14px] font-bold text-sm outline-none focus:border-blue"
                 />
               </div>
 
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 flex-1"> {/* flex-1 */}
                 <label className="text-xs font-bold text-secondary uppercase ml-1">End Time</label>
                 <input
                   type="datetime-local"
                   value={manualEndTime}
                   onChange={(e) => setManualEndTime(e.target.value)}
-                  className="w-full p-3 bg-card border border-separator rounded-xl font-bold text-lg outline-none focus:border-blue"
+                  className="w-full p-3 bg-card border border-separator rounded-[14px] font-bold text-sm outline-none focus:border-blue"
                 />
               </div>
+            </div>
+
+            {/* Calculated/Editable Duration Field */}
+            <div className="flex flex-col gap-1">
+               <label className="text-xs font-bold text-secondary uppercase ml-1">Duration (Hours/Mins)</label>
+               <input
+                 type="text"
+                 value={durationDisplay}
+                 onChange={handleDurationChange}
+                 onFocus={() => setIsDurationFocused(true)}
+                 onBlur={() => setIsDurationFocused(false)}
+                 placeholder="e.g. 1.5, 90m, 1:30"
+                 className="w-full p-3 bg-bg-color border border-separator rounded-[14px] font-mono text-lg text-primary outline-none focus:border-blue"
+               />
             </div>
             
             <div className="overflow-hidden rounded-[14px] w-full">
@@ -282,14 +311,14 @@ export const TimeTracker = ({ metricId }) => {
         )}
       </div>
 
-      {/* 4. Notes Field (New) */}
+      {/* 4. Notes Field */}
       <div>
           <label className="text-xs font-bold text-secondary uppercase ml-1">Notes</label>
           <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Session notes..."
-              className="w-full p-3 mt-1 bg-bg-color border border-separator rounded-xl outline-none focus:border-blue min-h-[80px]"
+              className="w-full p-3 mt-1 bg-bg-color border border-separator rounded-[14px] outline-none focus:border-blue min-h-[80px]"
           />
       </div>
     </div>

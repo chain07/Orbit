@@ -9,7 +9,7 @@ export const Recipes = {
   // ----------------------
   // Default Metrics (Bootstrap)
   // ----------------------
-  // NOTE: Emptied defaults to satisfy "No Assumptions" rule.
+  // FIX: Emptied defaults to satisfy "No Assumptions" rule.
   // The system must start blank and rely on user creation or onboarding wizards.
   defaultMetrics: [],
 

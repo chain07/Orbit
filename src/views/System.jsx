@@ -37,21 +37,13 @@ export const System = ({ onNavigate }) => {
 
   // Unified List Logic (From Remediation Branch - UI Polish)
   const unifiedList = useMemo(() => {
-    return metrics.map(m => {
-      let goalLabel = '';
-      if (m.goal === 0) goalLabel = 'Passive';
-      else if (m.frequency === 'weekly') goalLabel = `${m.goal}/wk`;
-      else if (m.frequency === 'monthly') goalLabel = `${m.goal}/mo`;
-      else goalLabel = 'Daily';
-
-      return {
-        ...m,
-        isMetric: true,
-        category: 'Metric',
-        title: `${m.name} (${goalLabel})`,
-        icon: getTypeIcon(m.type)
-      };
-    });
+    return metrics.map(m => ({
+      ...m,
+      isMetric: true,
+      category: 'Metric',
+      title: m.name,
+      icon: getTypeIcon(m.type)
+    }));
   }, [metrics]);
 
   // Handler Functions (From Main Branch - Security Fixes)
@@ -67,8 +59,8 @@ export const System = ({ onNavigate }) => {
 
   const handleSaveMetric = (metric) => {
     if (!metric.id) {
-      // Use standard UUID generation
-      metric.id = crypto.randomUUID();
+      // Secure ID generation from incoming branch
+      metric.id = metric.label.toLowerCase().replace(/\s+/g, '_') + '_' + Math.random().toString(36).substr(2, 5);
     }
     
     if (editingMetric) updateMetric(metric);
