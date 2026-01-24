@@ -172,17 +172,21 @@ export const WidgetDataEngine = {
       : 0;
 
     // OPTIMIZED: Is Active Check
-    // Avoid toLocaleDateString inside loop.
+    // Use ISO string comparison to avoid Date object creation in loop
     let isActive = false;
     const now = new Date();
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime();
+
+    // Get local midnight and next midnight
+    const startOfLocalDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const endOfLocalDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+
+    // Convert to ISO string (UTC) to match log format
+    const startIso = startOfLocalDay.toISOString();
+    const endIso = endOfLocalDay.toISOString();
 
     // 1. Get today's logs for this metric
-    // Use simple numeric timestamp check
     const todayLogs = logs.filter(l => {
-       const t = new Date(l.timestamp).getTime();
-       return t >= startOfDay && t < endOfDay;
+       return l.timestamp >= startIso && l.timestamp < endIso;
     });
 
     if (metric.type === MetricType.BOOLEAN) {
