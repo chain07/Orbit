@@ -111,10 +111,11 @@ export const Horizon = () => {
       <div className="layout-content">
         {!hasMetrics && (
           <EmptyState
+            icon={null}
             title="Welcome to ORBIT"
             message="Your dashboard is empty. Configure your first metric to start tracking."
-            actionLabel="Launch Setup"
-            onAction={() => setShowWizard(true)}
+            actionLabel={showWizard ? "Close Setup" : "Launch Setup"}
+            onAction={() => setShowWizard(!showWizard)}
           />
         )}
 
