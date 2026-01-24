@@ -68,11 +68,20 @@ export const Intel = () => {
                 <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-blue opacity-5 rounded-full blur-2xl"></div>
               </>
             ) : (
-              <div className="flex flex-row items-center justify-between w-full h-full px-4 z-10">
-                <RingChart value={100} color="rgba(255,255,255,0.1)" strokeWidth={8} size={80} />
-                <div className="flex flex-col items-end">
-                  <div className="text-4xl font-bold text-primary">0%</div>
-                  <div className="text-sm text-secondary">Awaiting Data</div>
+              <div className="flex flex-col justify-center w-full h-full px-5 py-4 z-10">
+                <div className="flex justify-between items-end mb-3">
+                   <div className="flex flex-col">
+                      <span className="text-xs font-bold text-secondary uppercase tracking-wide">System Health</span>
+                      <span className="text-2xl font-bold mt-1">0%</span>
+                   </div>
+                   <span className="text-xs text-secondary mb-1">Awaiting Data</span>
+                </div>
+                {/* Progress Track */}
+                <div className="w-full h-3 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden relative">
+                   <div
+                     className="h-full bg-blue transition-all duration-500 ease-out"
+                     style={{ width: '0%' }}
+                   />
                 </div>
               </div>
             )}
@@ -106,6 +115,7 @@ export const Intel = () => {
                      lineColor="rgba(255,255,255,0.1)"
                      fillColor="transparent"
                      className="w-full h-full"
+                     height={60}
                    />
                 </div>
                 <div className="absolute bottom-5 w-full text-center text-xs text-secondary opacity-60 z-20">Status: Offline</div>
@@ -128,27 +138,27 @@ export const Intel = () => {
 
         <div className="flex flex-col gap-2">
           <div className="section-label px-1 text-secondary font-bold text-xs uppercase">Telemetry</div>
-          <div className="widget-grid">
-            {widgets.map((widget, idx) => {
-              const { type, data, title } = widget;
-              return (
-                <Glass key={idx}>
-                  <div className="flex flex-col gap-3 h-full">
-                    <div className="text-sm font-bold text-secondary uppercase tracking-wide">{title}</div>
-                    <div className="flex-1 flex items-center justify-center min-h-[100px]">
-                      {type === 'ring' && <RingChart value={data.value} label={data.label} color={data.color} />}
-                      {type === 'heatmap' && <HeatMap data={data.values} startDate={data.start} endDate={data.end} />}
-                      {type === 'sparkline' && <Sparkline data={data.data} lineColor={data.color} fillColor={data.color} />}
-                      {type === 'stackedbar' && <StackedBar data={data.entries} colors={data.colors} />}
-                      {type === 'number' && (
-                         <div className="text-3xl font-bold">{data.value} <span className="text-sm text-secondary">{data.unit}</span></div>
-                      )}
-                    </div>
-                  </div>
-                </Glass>
-              );
-            })}
-          </div>
+          {/* Note: In a real implementation, we would transform 'widgets' or use specific logic for StackedBar.
+              Here we assume 'widgets' contains formatted data for charts or we fallback to empty if none.
+              For phase 2.9, we explicitly render StackedBar if data exists or skeleton.
+          */}
+          {hasData ? (
+             <Glass>
+               {/* We find the stackedbar widget data if it exists, else mock or use the component directly */}
+               {(() => {
+                  const sbWidget = widgets.find(w => w.type === 'stackedbar');
+                  if(sbWidget) {
+                      return <StackedBar data={sbWidget.data.entries} colors={sbWidget.data.colors} title={sbWidget.title} />;
+                  }
+                  // Fallback if no specific widget generated but we have data
+                  return <div className="text-center text-secondary py-8">Telemetry data processing...</div>;
+               })()}
+             </Glass>
+          ) : (
+            <Glass className="min-h-[200px] flex items-center justify-center">
+                 <div className="text-secondary text-sm">Awaiting Telemetry Data</div>
+            </Glass>
+          )}
         </div>
 
         <ReportGenerator segment={segment} />

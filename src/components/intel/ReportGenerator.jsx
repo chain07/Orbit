@@ -99,10 +99,7 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
           <div className="px-4 pb-4 animate-fade-in">
              <div className="flex flex-col gap-4">
               {/* Controls Row */}
-              <div className="flex justify-between items-end pt-2 border-t border-separator">
-                 <div className="text-xs font-bold text-secondary uppercase tracking-wide mb-2">
-                    Configuration
-                 </div>
+              <div className="flex justify-end pt-2 border-t border-separator">
                  <OrbitButton
                     onClick={(e) => {
                       e.stopPropagation();
@@ -115,6 +112,10 @@ export const ReportGenerator = ({ segment = 'Weekly' }) => {
                  >
                    Archive
                  </OrbitButton>
+              </div>
+
+              <div className="text-xs font-bold text-secondary uppercase tracking-wide mt-2 mb-1">
+                 Configuration
               </div>
 
               {/* Section Toggles */}
