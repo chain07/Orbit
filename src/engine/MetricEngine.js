@@ -129,18 +129,20 @@ export const MetricEngine = {
 
   // ----------------------
   // NEW: Get Value for Specific Date
+  // OPTIMIZED: Uses string comparison for high performance
   // ----------------------
   getValueForDate: (logs = [], date) => {
     const target = new Date(date);
     target.setHours(0, 0, 0, 0);
-    const targetTime = target.getTime();
+
+    const endTarget = new Date(target);
+    endTarget.setDate(target.getDate() + 1);
+
+    const startIso = target.toISOString();
+    const endIso = endTarget.toISOString();
 
     return logs
-      .filter(l => {
-        const d = new Date(l.timestamp);
-        d.setHours(0, 0, 0, 0);
-        return d.getTime() === targetTime;
-      })
+      .filter(l => l.timestamp >= startIso && l.timestamp < endIso)
       .reduce((acc, l) => acc + (parseFloat(l.value) || 0), 0);
   },
 

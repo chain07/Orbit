@@ -65,7 +65,7 @@ export const MetricBuilder = ({ metric = null, onSave, onCancel }) => {
       ...form,
       label: form.label || form.name,
       // Ensure goal is null for types that don't use it to pass validation
-      goal: (form.type === 'number' || form.type === 'duration') ? parseFloat(form.goal) : null
+      goal: (form.type === 'number' || form.type === 'duration') ? (parseFloat(form.goal) || 0) : null
     };
     onSave(submission);
   };

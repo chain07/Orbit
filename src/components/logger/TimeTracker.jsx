@@ -8,7 +8,7 @@ export const TimeTracker = ({ metricId }) => {
   const { metrics, addTimeLog } = useContext(StorageContext);
   
   // State
-  const [mode, setMode] = useState('timer'); // 'timer' | 'manual'
+  const [mode, setMode] = useState('manual'); // 'timer' | 'manual'
   const [selectedMetricId, setSelectedMetricId] = useState(metricId || '');
   
   // Timer State
@@ -17,8 +17,8 @@ export const TimeTracker = ({ metricId }) => {
   const [startTime, setStartTime] = useState(null); // Capture precise start time
   
   // Manual Entry State
-  const [manualHours, setManualHours] = useState('');
-  const [manualMinutes, setManualMinutes] = useState('');
+  const [manualStartTime, setManualStartTime] = useState('');
+  const [manualEndTime, setManualEndTime] = useState('');
 
   // Notes State (New for Phase 4.2)
   const [notes, setNotes] = useState('');
@@ -79,19 +79,26 @@ export const TimeTracker = ({ metricId }) => {
       setRunning(false);
       setStartTime(null);
     } else {
-      const h = parseFloat(manualHours) || 0;
-      const m = parseFloat(manualMinutes) || 0;
-      if (h === 0 && m === 0) return;
+      if (!manualStartTime || !manualEndTime) {
+        alert("Please enter both start and end times.");
+        return;
+      }
 
-      calculatedDuration = h + (m / 60);
+      finalStartTime = new Date(manualStartTime).toISOString();
+      finalEndTime = new Date(manualEndTime).toISOString();
 
-      // For manual entry, we approximate the timeframe to "now"
-      const now = new Date();
-      finalEndTime = now.toISOString();
-      finalStartTime = new Date(now.getTime() - (calculatedDuration * 3600 * 1000)).toISOString();
+      const start = new Date(finalStartTime);
+      const end = new Date(finalEndTime);
 
-      setManualHours('');
-      setManualMinutes('');
+      if (end <= start) {
+        alert("End time must be after start time.");
+        return;
+      }
+
+      calculatedDuration = (end - start) / (1000 * 60 * 60); // Hours
+
+      setManualStartTime('');
+      setManualEndTime('');
     }
 
     // Phase 4.2 Update: Call addTimeLog instead of addLogEntry
@@ -195,37 +202,37 @@ export const TimeTracker = ({ metricId }) => {
         ) : (
           /* Manual Entry Inputs */
           <div className="flex flex-col w-full gap-6">
-            <div className="flex items-center justify-center gap-4">
-              <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col gap-4 w-full">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-secondary uppercase ml-1">Start Time</label>
                 <input
-                  type="number"
-                  placeholder="0"
-                  value={manualHours}
-                  onChange={(e) => setManualHours(e.target.value)}
-                  className="w-24 h-20 text-center text-4xl font-bold bg-card border border-separator rounded-2xl outline-none focus:border-blue"
+                  type="datetime-local"
+                  value={manualStartTime}
+                  onChange={(e) => setManualStartTime(e.target.value)}
+                  className="w-full p-3 bg-card border border-separator rounded-xl font-bold text-lg outline-none focus:border-blue"
                 />
-                <span className="text-xs font-bold text-secondary uppercase">Hours</span>
               </div>
-              <span className="text-4xl font-bold text-separator pb-6">:</span>
-              <div className="flex flex-col items-center gap-2">
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-secondary uppercase ml-1">End Time</label>
                 <input
-                  type="number"
-                  placeholder="0"
-                  value={manualMinutes}
-                  onChange={(e) => setManualMinutes(e.target.value)}
-                  className="w-24 h-20 text-center text-4xl font-bold bg-card border border-separator rounded-2xl outline-none focus:border-blue"
+                  type="datetime-local"
+                  value={manualEndTime}
+                  onChange={(e) => setManualEndTime(e.target.value)}
+                  className="w-full p-3 bg-card border border-separator rounded-xl font-bold text-lg outline-none focus:border-blue"
                 />
-                <span className="text-xs font-bold text-secondary uppercase">Mins</span>
               </div>
             </div>
             
-            <OrbitButton
-              onClick={handleSave}
-              variant="primary"
-              className="w-full"
-            >
-              Save Entry
-            </OrbitButton>
+            <div className="overflow-hidden rounded-[14px] w-full">
+              <OrbitButton
+                onClick={handleSave}
+                variant="primary"
+                className="w-full"
+              >
+                Log Session
+              </OrbitButton>
+            </div>
           </div>
         )}
       </div>

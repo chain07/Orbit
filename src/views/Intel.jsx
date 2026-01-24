@@ -175,6 +175,15 @@ export const Intel = () => {
         </div>
 
         <ReportGenerator segment={segment} />
+
+        <div className="mt-12 mb-8 px-4">
+            <h4 className="text-xs font-bold text-secondary uppercase tracking-wide mb-3">About Metrics</h4>
+            <div className="space-y-3 text-xs text-secondary leading-relaxed opacity-80">
+                <p><strong className="text-primary">System Health:</strong> The heartbeat of your OS. Represents your daily reliability score, calculated as the average completion percentage of all active goals.</p>
+                <p><strong className="text-primary">Momentum:</strong> Your velocity vector. Measures the rate of change in your activity volume compared to the previous 7-day window.</p>
+                <p><strong className="text-primary">Activity Volume:</strong> Your raw output. The total accumulation of logged hours and repetitions, regardless of specific goals.</p>
+            </div>
+        </div>
       </div>
     </div>
   );
