@@ -141,15 +141,14 @@ export const WidgetDataEngine = {
         const dayLogs = logsByDate[date];
         let dayValue = 0;
 
+        let rawValue = 0;
         if (metric.type === MetricType.BOOLEAN) {
-             const hasTrue = dayLogs.some(l => l.value);
-             dayValue = hasTrue ? 1 : 0;
+             rawValue = dayLogs.some(l => l.value);
         } else {
-             const total = dayLogs.reduce((sum, l) => sum + (parseFloat(l.value) || 0), 0);
-             // FIX: Return 0-100 percentage or raw-ish value for intensity.
-             // Previous was 0-1. We multiply by 100 to match Ring/Chart standard scale.
-             dayValue = MetricEngine.normalizeValue(metric, total) * 100;
+             rawValue = dayLogs.reduce((sum, l) => sum + (parseFloat(l.value) || 0), 0);
         }
+        // Normalize to 0-100 scale for consistency across widget types
+        dayValue = MetricEngine.normalizeValue(metric, rawValue) * 100;
         values[date] = dayValue;
     });
 
