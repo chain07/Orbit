@@ -210,12 +210,16 @@ export const TimeTracker = ({ metricId }) => {
             }}
           >
             <option value="">Select Activity...</option>
-            {trackableMetrics.map(m => (
-              <option key={m.id} value={m.id}>{m.label || m.name}</option>
-            ))}
+            {trackableMetrics.length > 0 ? (
+              trackableMetrics.map(m => (
+                <option key={m.id} value={m.id}>{m.label || m.name}</option>
+              ))
+            ) : (
+              <option value="" disabled>No activities - Create below ↓</option>
+            )}
           </select>
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-secondary text-xs">
-            ▼
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-secondary">
+            <Icons.ChevronDown size={14} />
           </div>
         </div>
       </div>

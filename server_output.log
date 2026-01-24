@@ -10,3 +10,5 @@ Port 5173 is in use, trying another one...
   ➜  Local:   http://localhost:5174/
   ➜  Network: use --host to expose
 2:44:05 PM [vite] hmr update /src/components/logger/TimeTracker.jsx
+3:55:27 PM [vite] hmr update /src/components/logger/TimeTracker.jsx
+3:56:12 PM [vite] hmr update /src/views/Logger.jsx

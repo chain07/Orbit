@@ -3,6 +3,7 @@ import SegmentedControl from '../components/ui/SegmentedControl';
 import Glass from '../components/ui/Glass';
 import { DailyCheckInForm } from '../components/logger/DailyCheckInForm';
 import { TimeTracker } from '../components/logger/TimeTracker';
+import { ActivityManager } from '../components/logger/ActivityManager';
 import { Timeline } from '../components/logger/Timeline';
 import { StorageContext } from '../context/StorageContext';
 import { EmptyState } from '../components/ui/EmptyState';
@@ -58,9 +59,13 @@ export const Logger = ({ initialMetricId = null }) => {
               <DailyCheckInForm />
             )
           ) : (
-            <Glass className="p-4">
-               <TimeTracker metricId={initialMetricId} />
-            </Glass>
+            <>
+              <Glass className="p-4">
+                 <TimeTracker metricId={initialMetricId} />
+              </Glass>
+              <div style={{ height: '24px' }} />
+              <ActivityManager />
+            </>
           )}
         </div>
 
