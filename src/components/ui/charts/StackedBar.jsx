@@ -95,11 +95,15 @@ export const StackedBar = ({ data = [], colors = {}, title = "Activity", subtitl
 
            {/* Vertical Grid Lines (Background) */}
            {/* Vertical Grid Lines (Background) */}
-           <div className="absolute inset-0 flex justify-between pointer-events-none z-0" style={{ paddingLeft: '10px', paddingRight: '10px' }}>
-             {Array.from({ length: (processedData && processedData.length > 0) ? processedData.length : 7 }).map((_, i) => (
+           <div className="absolute inset-0 flex justify-between pointer-events-none z-0" style={{ width: '100%' }}>
+             {Array.from({ length: 7 }).map((_, i) => (
                <div
                  key={i}
-                 style={{ width: '1px', height: '100%', backgroundColor: 'rgba(0,0,0,0.05)' }}
+                 style={{
+                   flex: 1,
+                   borderRight: '1px dashed rgba(128, 128, 128, 0.3)',
+                   height: '100%'
+                 }}
                />
              ))}
            </div>
@@ -172,12 +176,12 @@ export const StackedBar = ({ data = [], colors = {}, title = "Activity", subtitl
       </div>
 
       {/* Footer */}
-      <div className="flex justify-between items-end mt-4 border-t pt-3" style={{ borderColor: 'rgba(0,0,0,0.1)' }}>
+      <div className="flex justify-between items-end mt-4 border-t pt-3" style={{ borderColor: 'rgba(128, 128, 128, 0.1)' }}>
           <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>
-              {footerLabel}
+              Total Logs
           </span>
           <span style={{ fontSize: '26px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1 }}>
-              {footerValue}
+              {Math.round(total)}
           </span>
       </div>
 

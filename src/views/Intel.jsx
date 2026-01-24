@@ -68,7 +68,7 @@ export const Intel = () => {
                    <div className="flex flex-col">
                       <span className="text-xs font-bold text-secondary uppercase tracking-wide">System Health</span>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-2xl font-bold" style={{ marginBottom: '4px' }}>{stats.reliability}%</span>
+                        <span className="text-2xl font-bold" style={{ marginBottom: '8px' }}>{stats.reliability}%</span>
                         <div className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${stats.trend.startsWith('-') ? 'bg-red/10 text-red' : 'bg-green/10 text-green'}`}>
                           {stats.trend}
                         </div>
@@ -90,7 +90,7 @@ export const Intel = () => {
                 <div className="flex justify-between items-start">
                   <span className="text-xs font-bold text-secondary uppercase tracking-wide">System Health</span>
                   <div className="text-right">
-                    <span className="text-2xl font-bold block leading-none">0%</span>
+                    <span className="text-2xl font-bold block leading-none" style={{ marginBottom: '8px' }}>0%</span>
                     <span className="text-xs text-secondary mt-1 block">Awaiting Data</span>
                   </div>
                 </div>
