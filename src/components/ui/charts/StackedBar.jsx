@@ -76,8 +76,8 @@ export const StackedBar = ({ data = [], colors = {}, title = "Activity", subtitl
   };
 
   // UI Values based on Selection
-  // Requirement: "Total Count" and Math.round(total)
-  const footerLabel = selectedIdx === null ? "Total Count" : `Total for ${processedData[selectedIdx]?.label}`;
+  // Requirement: "Total Logs" and Math.round(total)
+  const footerLabel = selectedIdx === null ? "Total Logs" : `Total for ${processedData[selectedIdx]?.label}`;
   const footerValue = selectedIdx === null
     ? Math.round(total)
     : `${processedData[selectedIdx]?.sum.toFixed(1)}h`;
@@ -96,7 +96,11 @@ export const StackedBar = ({ data = [], colors = {}, title = "Activity", subtitl
            {/* Vertical Grid Lines (Background) */}
            <div className="absolute inset-0 flex justify-between pointer-events-none z-0">
              {Array.from({ length: 7 }).map((_, i) => (
-               <div key={i} className="w-[1px] h-full bg-zinc-200 dark:bg-zinc-800 opacity-50" />
+               <div
+                 key={i}
+                 className="h-full"
+                 style={{ width: '1px', backgroundColor: 'rgba(128, 128, 128, 0.1)' }}
+               />
              ))}
            </div>
 

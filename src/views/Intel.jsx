@@ -87,7 +87,10 @@ export const Intel = () => {
                     <span className="text-xs text-secondary mt-1 block">Awaiting Data</span>
                   </div>
                 </div>
-                <div className="w-full h-3 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden mt-auto">
+                <div
+                  className="w-full rounded-full overflow-hidden mt-auto"
+                  style={{ height: '12px', backgroundColor: 'rgba(128, 128, 128, 0.2)' }}
+                >
                   <div className="h-full bg-blue transition-all duration-500" style={{ width: '0%' }} />
                 </div>
               </div>
@@ -117,7 +120,10 @@ export const Intel = () => {
                   <span className="text-2xl font-bold font-mono text-zinc-400">0.0</span>
                 </div>
                 {/* Graph Container - Pinned to bottom, full width */}
-                <div className="absolute bottom-0 left-0 right-0 h-[60px] w-full z-0 opacity-50">
+                <div
+                  className="absolute left-0 right-0 w-full z-0 opacity-50"
+                  style={{ bottom: 0, height: '60px' }}
+                >
                   <Sparkline data={[]} height={60} showLabels={false} showDots={false} lineColor="rgba(255,255,255,0.1)" fillColor="transparent" className="w-full h-full" />
                 </div>
               </div>
@@ -138,27 +144,19 @@ export const Intel = () => {
         )}
 
         <div className="flex flex-col gap-2">
-          {/* Note: In a real implementation, we would transform 'widgets' or use specific logic for StackedBar.
-              Here we assume 'widgets' contains formatted data for charts or we fallback to empty if none.
-              For phase 2.9, we explicitly render StackedBar if data exists or skeleton.
-          */}
-          {hasData ? (
-             <Glass>
-               {/* We find the stackedbar widget data if it exists, else mock or use the component directly */}
-               {(() => {
-                  const sbWidget = widgets.find(w => w.type === 'stackedbar');
-                  if(sbWidget) {
-                      return <StackedBar data={sbWidget.data.entries} colors={sbWidget.data.colors} title={sbWidget.title} />;
-                  }
-                  // Fallback if no specific widget generated but we have data
-                  return <StackedBar data={[]} />;
-               })()}
-             </Glass>
-          ) : (
-            <Glass>
-                 <StackedBar data={[]} />
-            </Glass>
-          )}
+          <Glass className="!p-4 !flex !flex-col !gap-4">
+             <div className="flex justify-between items-start">
+                <span className="text-xs font-bold text-secondary uppercase tracking-wide">Activity Volume</span>
+                <span className="text-xs text-secondary">Last 7 Days</span>
+             </div>
+             {(() => {
+                const sbWidget = hasData ? widgets.find(w => w.type === 'stackedbar') : null;
+                if(sbWidget) {
+                    return <StackedBar data={sbWidget.data.entries} colors={sbWidget.data.colors} title={sbWidget.title} />;
+                }
+                return <StackedBar data={[]} />;
+             })()}
+          </Glass>
         </div>
 
         <ReportGenerator segment={segment} />
