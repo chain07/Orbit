@@ -185,7 +185,7 @@ export const TimeTracker = ({ metricId }) => {
   };
 
   return (
-    <div className="flex flex-col w-full gap-4">
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '1rem' }}>
       
       {/* 1. Mode Toggle */}
       <SegmentedControl
@@ -195,18 +195,27 @@ export const TimeTracker = ({ metricId }) => {
       />
 
       {/* 2. Activity Selector */}
-      <div className="flex flex-col gap-1">
-        <label className="text-xs font-bold text-secondary uppercase ml-1">Activity</label>
-        <div className="relative">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <label className="text-secondary uppercase" style={{ fontSize: '12px', fontWeight: 'bold', marginLeft: '4px' }}>Activity</label>
+        <div style={{ position: 'relative' }}>
           <select
             value={selectedMetricId}
             onChange={(e) => setSelectedMetricId(e.target.value)}
-            className="w-full p-3 bg-bg-color border border-separator rounded-[14px] font-bold text-lg outline-none focus:border-blue"
+            className="input-standard"
             style={{
+              width: '100%',
+              padding: '12px',
+              backgroundColor: 'var(--bg-color)',
+              border: '1px solid var(--separator)',
+              borderRadius: '14px',
+              fontWeight: 'bold',
+              fontSize: '1.125rem',
+              outline: 'none',
               appearance: 'none',
               WebkitAppearance: 'none',
+              MozAppearance: 'none',
               backgroundImage: 'none',
-              backgroundColor: 'transparent'
+              paddingRight: '24px'
             }}
           >
             <option value="">Select Activity...</option>
@@ -218,39 +227,53 @@ export const TimeTracker = ({ metricId }) => {
               <option value="" disabled>No activities - Create below ↓</option>
             )}
           </select>
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-secondary">
+          <div style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-secondary)' }}>
             <Icons.ChevronDown size={14} />
           </div>
         </div>
       </div>
 
       {/* 3. Main Interface */}
-      <div className="flex flex-col items-center justify-center p-6 bg-bg-color border border-separator border-dashed rounded-[14px] min-h-[220px]">
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1.5rem',
+          backgroundColor: 'var(--bg-color)',
+          border: '1px dashed var(--separator)',
+          borderRadius: '14px',
+          minHeight: '220px'
+        }}
+      >
         
         {mode === 'timer' ? (
           <>
             {/* Timer Display */}
             <div
-              className="text-6xl font-black tracking-tighter mb-8"
               style={{
                 fontFamily: 'monospace',
                 fontVariantNumeric: 'tabular-nums',
                 textAlign: 'center',
                 width: '100%',
-                fontSize: '3.5rem'
+                fontSize: '3.5rem',
+                fontWeight: '900',
+                letterSpacing: '-0.05em',
+                marginBottom: '2rem'
               }}
             >
               {formatTimer(elapsed)}
             </div>
             
             {/* Controls */}
-            <div className="flex w-full gap-3">
+            <div style={{ display: 'flex', width: '100%', gap: '12px' }}>
               {elapsed === 0 ? (
                 <OrbitButton
                   onClick={() => setRunning(true)}
                   variant="primary"
-                  className="flex-1 !shadow-none"
-                  style={{ '--color-primary': 'var(--green)' }}
+                  className="!shadow-none"
+                  style={{ flex: 1, '--color-primary': 'var(--green)' }}
                 >
                   Start
                 </OrbitButton>
@@ -259,8 +282,8 @@ export const TimeTracker = ({ metricId }) => {
                   <OrbitButton
                     onClick={() => setRunning(!running)}
                     variant="primary"
-                    className="flex-1 !text-white !shadow-none"
-                    style={{ '--color-primary': running ? 'var(--orange)' : 'var(--green)' }}
+                    className="!text-white !shadow-none"
+                    style={{ flex: 1, '--color-primary': running ? 'var(--orange)' : 'var(--green)' }}
                   >
                     {running ? 'Pause' : 'Resume'}
                   </OrbitButton>
@@ -269,7 +292,7 @@ export const TimeTracker = ({ metricId }) => {
                     <OrbitButton
                       onClick={handleSave}
                       variant="primary"
-                      className="flex-1"
+                      style={{ flex: 1 }}
                     >
                       Save
                     </OrbitButton>
@@ -279,8 +302,8 @@ export const TimeTracker = ({ metricId }) => {
                     <OrbitButton
                       onClick={() => { setElapsed(0); setStartTime(null); }}
                       variant="secondary"
-                      className="!w-12 !px-0"
                       icon={<Icons.RotateCcw size={20} />}
+                      style={{ width: '48px', padding: 0 }}
                     />
                   )}
                 </>
@@ -289,33 +312,53 @@ export const TimeTracker = ({ metricId }) => {
           </>
         ) : (
           /* Manual Entry Inputs - Refactored Layout */
-          <div className="flex flex-col w-full">
+          <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              <div className="flex flex-col gap-1" style={{ minWidth: 0 }}>
-                <label className="text-xs font-bold text-secondary uppercase ml-1">Start Time</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
+                <label className="text-secondary uppercase" style={{ fontSize: '12px', fontWeight: 'bold', marginLeft: '4px' }}>Start Time</label>
                 <input
                   type="datetime-local"
                   value={manualStartTime}
                   onChange={(e) => setManualStartTime(e.target.value)}
-                  className="w-full p-3 bg-card border border-separator rounded-[14px] font-bold text-sm outline-none focus:border-blue"
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    backgroundColor: 'var(--card-bg)',
+                    border: '1px solid var(--separator)',
+                    borderRadius: '14px',
+                    fontWeight: 'bold',
+                    fontSize: '0.875rem',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
                 />
               </div>
 
-              <div className="flex flex-col gap-1" style={{ minWidth: 0 }}>
-                <label className="text-xs font-bold text-secondary uppercase ml-1">End Time</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
+                <label className="text-secondary uppercase" style={{ fontSize: '12px', fontWeight: 'bold', marginLeft: '4px' }}>End Time</label>
                 <input
                   type="datetime-local"
                   value={manualEndTime}
                   onChange={(e) => setManualEndTime(e.target.value)}
-                  className="w-full p-3 bg-card border border-separator rounded-[14px] font-bold text-sm outline-none focus:border-blue"
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    backgroundColor: 'var(--card-bg)',
+                    border: '1px solid var(--separator)',
+                    borderRadius: '14px',
+                    fontWeight: 'bold',
+                    fontSize: '0.875rem',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
                 />
               </div>
             </div>
 
             {/* Calculated/Editable Duration Field */}
-            <div className="flex flex-col gap-1" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
-               <label className="text-xs font-bold text-secondary uppercase ml-1">Duration (Hours/Mins)</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '16px' }}>
+               <label className="text-secondary uppercase" style={{ fontSize: '12px', fontWeight: 'bold', marginLeft: '4px' }}>Duration (Hours/Mins)</label>
                <input
                  type="text"
                  value={durationDisplay}
@@ -323,15 +366,25 @@ export const TimeTracker = ({ metricId }) => {
                  onFocus={() => setIsDurationFocused(true)}
                  onBlur={() => setIsDurationFocused(false)}
                  placeholder="e.g. 1.5, 90m, 1:30"
-                 className="w-full p-3 bg-bg-color border border-separator rounded-[14px] font-mono text-lg text-primary outline-none focus:border-blue"
+                 style={{
+                    width: '100%',
+                    padding: '12px',
+                    backgroundColor: 'var(--bg-color)',
+                    border: '1px solid var(--separator)',
+                    borderRadius: '14px',
+                    fontFamily: 'monospace',
+                    fontSize: '1.125rem',
+                    color: 'var(--text-primary)',
+                    outline: 'none'
+                 }}
                />
             </div>
             
-            <div className="overflow-hidden rounded-[14px] w-full">
+            <div style={{ overflow: 'hidden', borderRadius: '14px', width: '100%' }}>
               <OrbitButton
                 onClick={handleSave}
                 variant="primary"
-                className="w-full"
+                style={{ width: '100%' }}
               >
                 Log Session
               </OrbitButton>
@@ -342,12 +395,22 @@ export const TimeTracker = ({ metricId }) => {
 
       {/* 4. Notes Field */}
       <div>
-          <label className="text-xs font-bold text-secondary uppercase ml-1">Notes</label>
+          <label className="text-secondary uppercase" style={{ fontSize: '12px', fontWeight: 'bold', marginLeft: '4px' }}>Notes</label>
           <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Session notes..."
-              className="w-full p-3 mt-1 bg-bg-color border border-separator rounded-[14px] outline-none focus:border-blue min-h-[80px]"
+              style={{
+                  width: '100%',
+                  padding: '12px',
+                  marginTop: '4px',
+                  backgroundColor: 'var(--bg-color)',
+                  border: '1px solid var(--separator)',
+                  borderRadius: '14px',
+                  outline: 'none',
+                  minHeight: '80px',
+                  fontFamily: 'inherit'
+              }}
           />
       </div>
     </div>

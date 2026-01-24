@@ -31,7 +31,7 @@ export const ActivityManager = () => {
       label: name,
       color: color,
       goal: finalGoal,
-      frequency: 'daily', // Default frequency
+      frequency: 'daily',
       status: 'active'
     });
 
@@ -44,15 +44,15 @@ export const ActivityManager = () => {
   };
 
   return (
-    <Glass className="p-4 flex flex-col gap-4">
+    <Glass className="p-4" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h3 className="font-bold text-lg text-primary">Manage Activities</h3>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <h3 style={{ fontWeight: 'bold', fontSize: '1.125rem', color: 'var(--text-primary)', margin: 0 }}>Manage Activities</h3>
         {!isCreating && (
           <OrbitButton
             onClick={() => setIsCreating(true)}
             variant="secondary"
-            className="!w-auto !h-8 !px-3 text-xs"
+            style={{ width: 'auto', height: '32px', padding: '0 12px', fontSize: '0.75rem' }}
           >
             New
           </OrbitButton>
@@ -61,32 +61,31 @@ export const ActivityManager = () => {
 
       {/* List or Form */}
       {isCreating ? (
-        <div className="flex flex-col gap-4 p-4 bg-bg-color rounded-[14px] border border-separator">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1rem', backgroundColor: 'var(--bg-color)', borderRadius: '14px', border: '1px solid var(--separator)' }}>
           {/* 1. Name */}
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-bold text-secondary uppercase ml-1">Activity Name</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)', textTransform: 'uppercase', marginLeft: '4px' }}>Activity Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Coding, Reading"
-              className="w-full p-3 bg-card border border-separator rounded-[14px] font-bold text-lg outline-none focus:border-blue"
+              style={{ width: '100%', padding: '12px', backgroundColor: 'var(--card-bg)', border: '1px solid var(--separator)', borderRadius: '14px', fontWeight: 'bold', fontSize: '1.125rem', outline: 'none' }}
             />
           </div>
 
           {/* 2. Color */}
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-bold text-secondary uppercase ml-1">Color</label>
-            <div className="relative w-full h-12">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)', textTransform: 'uppercase', marginLeft: '4px' }}>Color</label>
+            <div style={{ position: 'relative', width: '100%', height: '48px' }}>
                <input
                   type="color"
                   value={color}
                   onChange={(e) => setColor(e.target.value)}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 10 }}
                />
                <div
-                  className="w-full h-full rounded-[14px] border border-separator flex items-center justify-center font-bold text-white shadow-sm"
-                  style={{ backgroundColor: color }}
+                  style={{ width: '100%', height: '100%', borderRadius: '14px', border: '1px solid var(--separator)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: 'white', backgroundColor: color, textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}
                >
                   {color.toUpperCase()}
                </div>
@@ -94,28 +93,45 @@ export const ActivityManager = () => {
           </div>
 
           {/* 3. Goal Toggle */}
-          <div className="flex flex-col gap-3">
-             <div className="flex items-center justify-between">
-                <span className="font-bold text-primary">Track as Goal?</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>Track as Goal?</span>
                 <div
                   onClick={() => setHasGoal(!hasGoal)}
-                  className={`w-12 h-7 rounded-full relative transition-colors cursor-pointer ${hasGoal ? 'bg-green' : 'bg-separator'}`}
-                  style={{ backgroundColor: hasGoal ? 'var(--green)' : 'var(--separator)' }}
+                  style={{
+                    width: '48px',
+                    height: '28px',
+                    borderRadius: '9999px',
+                    position: 'relative',
+                    transition: 'background-color 0.2s',
+                    cursor: 'pointer',
+                    backgroundColor: hasGoal ? 'var(--green)' : 'var(--separator)'
+                  }}
                 >
                    <div
-                      className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow-sm transition-transform ${hasGoal ? 'left-6' : 'left-1'}`}
+                      style={{
+                        position: 'absolute',
+                        top: '4px',
+                        width: '20px',
+                        height: '20px',
+                        backgroundColor: 'white',
+                        borderRadius: '50%',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                        transition: 'transform 0.2s',
+                        transform: hasGoal ? 'translateX(24px)' : 'translateX(4px)'
+                      }}
                    />
                 </div>
              </div>
 
              {hasGoal && (
-               <div className="flex flex-col gap-1 fade-in">
-                 <label className="text-xs font-bold text-secondary uppercase ml-1">Daily Goal (Hours)</label>
+               <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                 <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)', textTransform: 'uppercase', marginLeft: '4px' }}>Daily Goal (Hours)</label>
                  <input
                    type="number"
                    value={goalValue}
                    onChange={(e) => setGoalValue(e.target.value)}
-                   className="w-full p-3 bg-card border border-separator rounded-[14px] font-mono text-lg outline-none focus:border-blue"
+                   style={{ width: '100%', padding: '12px', backgroundColor: 'var(--card-bg)', border: '1px solid var(--separator)', borderRadius: '14px', fontFamily: 'monospace', fontSize: '1.125rem', outline: 'none' }}
                    step="0.1"
                    min="0"
                  />
@@ -124,18 +140,19 @@ export const ActivityManager = () => {
           </div>
 
           {/* Actions */}
-          <div className="flex gap-2 mt-2">
+          <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
              <OrbitButton
                onClick={() => setIsCreating(false)}
                variant="secondary"
-               className="flex-1"
+               style={{ flex: 1 }}
              >
                Cancel
              </OrbitButton>
              <OrbitButton
                onClick={handleSave}
                variant="primary"
-               className="flex-1"
+               style={{ flex: 1 }}
+               type="button"
              >
                Save Activity
              </OrbitButton>
@@ -143,28 +160,27 @@ export const ActivityManager = () => {
         </div>
       ) : (
         /* Activity List */
-        <div className="flex flex-col gap-2">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
            {activities.length === 0 ? (
-             <div className="p-4 text-center text-secondary text-sm bg-bg-color rounded-[14px] border border-dashed border-separator">
+             <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.875rem', backgroundColor: 'var(--bg-color)', borderRadius: '14px', border: '1px dashed var(--separator)' }}>
                No activities found. Create one to start tracking time.
              </div>
            ) : (
              activities.map(act => (
-               <div key={act.id} className="flex items-center justify-between p-3 bg-bg-color rounded-[14px] border border-separator">
-                  <div className="flex items-center gap-3">
+               <div key={act.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', backgroundColor: 'var(--bg-color)', borderRadius: '14px', border: '1px solid var(--separator)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                      <div
-                       className="w-3 h-3 rounded-full"
-                       style={{ backgroundColor: act.color }}
+                       style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: act.color }}
                      />
-                     <span className="font-bold text-primary">{act.label}</span>
+                     <span style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{act.label}</span>
                   </div>
 
                   {act.goal > 0 ? (
-                    <div className="px-2 py-1 bg-blue/10 text-blue text-xs font-bold rounded-md" style={{ color: 'var(--blue)', backgroundColor: 'rgba(0,122,255,0.1)' }}>
+                    <div style={{ padding: '4px 8px', backgroundColor: 'rgba(0,122,255,0.1)', color: 'var(--blue)', fontSize: '0.75rem', fontWeight: 'bold', borderRadius: '6px' }}>
                       Target: {act.goal}h
                     </div>
                   ) : (
-                    <div className="px-2 py-1 bg-separator/20 text-secondary text-xs font-bold rounded-md">
+                    <div style={{ padding: '4px 8px', backgroundColor: 'rgba(60,60,67,0.1)', color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 'bold', borderRadius: '6px' }}>
                       Passive
                     </div>
                   )}

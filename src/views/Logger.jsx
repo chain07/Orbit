@@ -32,7 +32,7 @@ export const Logger = ({ initialMetricId = null }) => {
   return (
     <div className="layout-padding fade-in">
       <div className="view-header-stack">
-        <h1 className="text-3xl font-extrabold tracking-tight">Logger</h1>
+        <h1 style={{ margin: 0, lineHeight: 1 }}>Logger</h1>
         <p className="text-secondary font-medium">Input engine.</p>
         <div className="system-toggle-wrapper">
           <SegmentedControl
@@ -46,7 +46,7 @@ export const Logger = ({ initialMetricId = null }) => {
         </div>
       </div>
 
-      <div className="layout-content flex flex-col gap-6">
+      <div className="layout-content" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         <div className="fade-in">
           {activeMode === 'checkin' ? (
             !hasMetrics ? (
@@ -60,7 +60,7 @@ export const Logger = ({ initialMetricId = null }) => {
             )
           ) : (
             <>
-              <Glass className="p-4">
+              <Glass className="p-4" style={{ padding: '1rem' }}>
                  <TimeTracker metricId={initialMetricId} />
               </Glass>
               <div style={{ height: '24px' }} />
@@ -70,8 +70,8 @@ export const Logger = ({ initialMetricId = null }) => {
         </div>
 
         {hasMetrics && (
-          <div className="flex flex-col gap-2 mt-4">
-            <div className="section-label px-1 text-secondary font-bold text-xs uppercase">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
+            <div className="section-label" style={{ padding: '0 4px', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
               Today's Timeline
             </div>
             <Timeline />
