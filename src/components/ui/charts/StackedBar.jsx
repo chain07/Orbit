@@ -1,188 +1,190 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 
 /**
- * StackedBar
- * iOS-style horizontal stacked bars for multiple categories.
- * Renders bars vertically over time (e.g., last 7 days).
+ * StackedBar Chart
+ * Ported from WeeklyBarChartV3.html
+ *
+ * Props:
+ * - data: Array of objects { label: string, values: { [category]: number } }
+ * - colors: Object mapping category names to hex colors
+ * - title: string
+ * - subtitle: string
  */
-export const StackedBar = ({
-  data = [],
-  colors = {},
-  maxValue,
-  height = 220,
-}) => {
-  const [state, setState] = useState({
-    cats: {},
-    max: 0,
-    total: 0,
-    avg: 0,
-    sel: null,
-  });
+export const StackedBar = ({ data = [], colors = {}, title = "Activity", subtitle = "Last 7 Days" }) => {
+  const [selectedIdx, setSelectedIdx] = useState(null);
 
-  useEffect(() => {
-    init();
-  }, [data, maxValue]);
+  // Memoized Calculations
+  const { processedData, max, total, avg, categories } = useMemo(() => {
+    if (!data || data.length === 0) {
+      return { processedData: [], max: 0, total: 0, avg: 0, categories: [] };
+    }
 
-  const init = () => {
-    let cats = {};
+    // Calculate total from data unconditionally as per requirement
+    const calculatedTotal = data.reduce((sum, day) => {
+        const dayTotal = Object.values(day.values || {}).reduce((a, b) => a + b, 0);
+        return sum + dayTotal;
+    }, 0);
+
     let grandSum = 0;
     let maxDaily = 0;
+    const cats = new Set();
 
-    data.forEach(day => {
+    const proc = data.map(day => {
       let dSum = 0;
-      if (day.values) {
-        for (let [k, v] of Object.entries(day.values)) {
-          if (!cats[k]) cats[k] = { sum: 0, col: colors[k] || '#8E8E93' };
-          cats[k].sum += v;
+      // Filter out zero values and collect categories
+      const dayValues = {};
+      Object.entries(day.values || {}).forEach(([k, v]) => {
+        if (v > 0) {
+          dayValues[k] = v;
+          cats.add(k);
           dSum += v;
         }
-      }
-      day.sum = dSum;
+      });
       grandSum += dSum;
       if (dSum > maxDaily) maxDaily = dSum;
+
+      return { ...day, values: dayValues, sum: dSum };
     });
 
-    // Calculate dynamic max with 10% headroom
-    // Ensure min of 10 if data is empty/low
-    const computedMax = maxValue || (maxDaily > 0 ? Math.ceil(maxDaily * 1.1) : 10);
+    // Smart Scale: Round up to nearest even number, minimum 4
+    const computedMax = Math.max(4, Math.ceil(maxDaily / 2) * 2);
+    const computedTotal = calculatedTotal; // Use strict total calculation
+    const computedAvg = data.length ? calculatedTotal / data.length : 0;
 
-    setState({
-      cats,
+    // Convert Set to Array and Sort by Total Sum Descending for Legend
+    const catArray = Array.from(cats).map(k => {
+       const sum = proc.reduce((acc, d) => acc + (d.values[k] || 0), 0);
+       return { key: k, sum, color: colors[k] || '#8E8E93' };
+    }).sort((a, b) => b.sum - a.sum);
+
+    return {
+      processedData: proc,
       max: computedMax,
-      total: grandSum,
-      avg: data.length ? grandSum / data.length : 0,
-      sel: null,
-    });
+      total: computedTotal,
+      avg: computedAvg,
+      categories: catArray
+    };
+  }, [data, colors]);
+
+  // Handle Tap
+  const handleTap = (idx) => {
+    if (selectedIdx === idx) {
+      setSelectedIdx(null);
+    } else {
+      setSelectedIdx(idx);
+    }
   };
 
-  const handleSelect = (idx) => {
-    setState(prev => ({
-      ...prev,
-      sel: prev.sel === idx ? null : idx,
-    }));
-  };
-
-  if (!data || data.length === 0) return null;
+  // UI Values based on Selection
+  // Requirement: "Total Logs" and Math.round(total)
+  const footerLabel = selectedIdx === null ? "Total Logs" : `Total for ${processedData[selectedIdx]?.label}`;
+  const footerValue = selectedIdx === null
+    ? Math.round(total)
+    : `${processedData[selectedIdx]?.sum.toFixed(1)}h`;
 
   return (
-    <div className="flex flex-col w-full select-none">
+    <div className={`chart-interactive w-full ${selectedIdx !== null ? 'has-select' : ''}`}>
       
-      {/* HEADER */}
-      <div className="flex justify-between items-baseline mb-4">
-        <div className="text-sm font-bold text-secondary uppercase tracking-wide">Activity</div>
-        <div className="text-xs text-secondary font-medium">Last {data.length} Days</div>
-      </div>
+      {/* Chart Wrapper */}
+      <div className="chart-wrapper">
+        <div className="chart-frame">
+           {/* Grids */}
+           <div className="grid-lines-bg">
+              {[0, 1, 2, 3, 4].map(i => <div key={i} className="h-line" />)}
+           </div>
 
-      <div className="flex flex-row" style={{ height }}>
-        
-        {/* CHART BODY */}
-        <div className="flex-1 relative mr-2">
-            {/* Grid Lines (Dashed, Proper Opacity) */}
-            {[0, 1, 2, 3, 4].map((i) => (
-                <div 
-                    key={i}
-                    className="absolute left-0 right-0 border-t border-dashed border-separator opacity-30"
-                    style={{ top: `${i * 25}%` }} 
-                />
-            ))}
-
-            {/* Average Line */}
-            {state.avg > 0 && (
-                <div 
-                  className="absolute left-0 right-0 z-10 pointer-events-none border-t-2 border-dashed border-green opacity-80"
-                  style={{ bottom: `${(state.avg / state.max) * 100}%` }}
-                >
-                  <div className="absolute right-0 -top-5 text-[9px] font-bold text-green bg-bg-color px-1.5 py-0.5 rounded shadow-sm border border-separator/20">
-                    AVG {state.avg.toFixed(1)}
-                  </div>
-                </div>
-            )}
-
-            {/* Bars Container */}
-            <div className="absolute inset-0 flex items-end justify-between px-2">
-                {data.map((day, idx) => {
-                    const isSelected = state.sel === idx;
-                    const opacity = state.sel !== null && !isSelected ? 0.4 : 1;
-                    
-                    return (
-                        <div 
-                            key={idx}
-                            onClick={() => handleSelect(idx)}
-                            className="flex-1 h-full flex flex-col justify-end items-center cursor-pointer group"
-                            style={{ opacity, transition: 'opacity 0.2s' }}
-                        >
-                            {/* Bar Stack */}
-                            <div className="w-[70%] max-w-[32px] flex flex-col-reverse relative transition-transform duration-200"
-                                 style={{ height: '100%', transform: isSelected ? 'scaleX(1.05)' : 'none' }}>
-                                
-                                {Object.entries(day.values || {}).map(([cat, val], i, arr) => {
-                                    if (val <= 0) return null;
-                                    const hPercent = (val / state.max) * 100;
-                                    
-                                    // Border Radius Logic: 
-                                    // Only round the very top corners of the top segment 
-                                    // and very bottom of the bottom segment.
-                                    const isBottom = i === 0;
-                                    const isTop = i === arr.length - 1;
-                                    
-                                    const radiusClass = arr.length === 1 ? 'rounded' :
-                                                        isBottom ? 'rounded-b' :
-                                                        isTop ? 'rounded-t' :
-                                                        'rounded-none';
-
-                                    return (
-                                        <div
-                                            key={cat}
-                                            className={radiusClass}
-                                            style={{
-                                                height: `${hPercent}%`,
-                                                backgroundColor: state.cats[cat]?.col || '#8E8E93',
-                                                width: '100%',
-                                                marginBottom: '1px' // 1px separator
-                                            }}
-                                        />
-                                    );
-                                })}
-                            </div>
-
-                            {/* X Label (Positioned Below) */}
-                            <div className={`absolute -bottom-6 text-[10px] font-medium whitespace-nowrap ${isSelected ? 'text-primary font-bold' : 'text-secondary'}`}>
-                                {day.label}
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-        </div>
-
-        {/* Y-Axis Labels (Right Side) */}
-        <div className="flex flex-col justify-between h-full py-0 w-8 text-right">
-             {[4, 3, 2, 1, 0].map(i => (
-                 <div key={i} className="text-[9px] text-secondary font-mono h-0 flex items-center justify-end">
-                     {Math.round((state.max / 4) * i)}
-                 </div>
+           {/* Vertical Grid Lines (Background) */}
+           {/* Vertical Grid Lines (Background) */}
+           <div className="absolute inset-0 flex justify-between pointer-events-none z-0" style={{ width: '100%' }}>
+             {Array.from({ length: 7 }).map((_, i) => (
+               <div
+                 key={i}
+                 style={{
+                   flex: 1,
+                   borderRight: '1px solid rgba(128, 128, 128, 0.1)',
+                   height: '100%'
+                 }}
+               />
              ))}
+           </div>
+
+           {/* Avg Line */}
+           <div
+             className="avg-line"
+             style={{ bottom: `${(avg / max) * 100}%` }}
+           >
+             <div className="avg-tag">AVG</div>
+           </div>
+
+           {/* Bars */}
+           {processedData.map((day, idx) => (
+             <div
+               key={idx}
+               className={`col-group ${selectedIdx === idx ? 'active' : ''}`}
+               onClick={() => handleTap(idx)}
+             >
+                <div className="bar-stack">
+                  {Object.entries(day.values).map(([key, val], i, arr) => {
+                     const h = (val / max) * 100;
+                     const isTop = i === arr.length - 1;
+                     const isBottom = i === 0;
+                     return (
+                       <div
+                         key={key}
+                         className={`bar-seg ${isTop ? 'is-top' : ''} ${isBottom ? 'is-bottom' : ''}`}
+                         style={{
+                           height: `${h}%`,
+                           backgroundColor: colors[key] || '#8E8E93'
+                         }}
+                       />
+                     );
+                  })}
+                </div>
+                <div className="x-lbl">
+                  {/* Assumption: Label is "Mon", "Tue" or date. Use first letter or short value */}
+                  {day.label.length > 3 ? day.label.slice(0, 3) : day.label}
+                </div>
+             </div>
+           ))}
         </div>
 
+        {/* Y Axis */}
+        <div className="y-axis-col">
+           {[0, 1, 2, 3, 4].map(i => {
+             const val = Math.round((max / 4) * i);
+             return <div key={i} className="y-lbl">{val === 0 ? "" : val}</div>
+           })}
+        </div>
       </div>
-      
-      {/* Spacer for X-labels to prevent clipping */}
-      <div className="h-6"></div>
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-x-4 gap-y-2 mt-2 pt-3 border-t border-separator border-opacity-20">
-        {Object.keys(state.cats).sort((a,b) => state.cats[b].sum - state.cats[a].sum).map(cat => (
-          <div key={cat} className="flex items-center gap-1.5 text-xs font-medium text-secondary">
-            <div 
-                className="w-2 h-2 rounded-full" 
-                style={{ backgroundColor: state.cats[cat].col }} 
-            />
-            <span className={state.sel !== null && (!data[state.sel].values || !data[state.sel].values[cat]) ? "opacity-30" : ""}>
-                {cat}
-            </span>
-          </div>
-        ))}
+      <div className="legend">
+        {categories.map(cat => {
+           const isDim = selectedIdx !== null && (!processedData[selectedIdx].values[cat.key]);
+           const val = selectedIdx !== null && processedData[selectedIdx].values[cat.key]
+             ? processedData[selectedIdx].values[cat.key]
+             : 0;
+
+           return (
+             <div key={cat.key} className={`leg-item ${isDim ? 'dim' : ''}`}>
+               <div className="leg-dot" style={{ backgroundColor: cat.color }}></div>
+               <span>{cat.key}</span>
+               <span className="leg-val">{val.toFixed(1)}h</span>
+             </div>
+           )
+        })}
       </div>
+
+      {/* Footer */}
+      <div className="flex justify-between items-end mt-4 border-t pt-3" style={{ borderColor: 'rgba(128, 128, 128, 0.1)' }}>
+          <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>
+              Total Logs
+          </span>
+          <span style={{ fontSize: '26px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1 }}>
+              {Math.round(total)}
+          </span>
+      </div>
+
     </div>
   );
 };

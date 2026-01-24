@@ -22,6 +22,7 @@ export const RingChart = ({
   bgColor = '#e5e7eb',
   label = '',
   className = '',
+  children,
 }) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -56,9 +57,9 @@ export const RingChart = ({
           }}
         />
       </svg>
-      {label && (
-        <div className="absolute text-center text-sm font-medium text-gray-700 dark:text-gray-200">
-          {label}
+      {(label || children) && (
+        <div className="absolute text-center text-sm font-medium text-gray-700 dark:text-gray-200 pointer-events-none flex items-center justify-center inset-0">
+          {children ? children : label}
         </div>
       )}
     </div>

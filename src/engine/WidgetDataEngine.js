@@ -66,6 +66,10 @@ export const WidgetDataEngine = {
             data = WidgetDataEngine.historyData(metric, metricLogs);
             break;
 
+          case 'stackedbar':
+            data = WidgetDataEngine.stackedBarData(metric, metricLogs, segment);
+            break;
+
           default:
             data = { error: 'Unknown widget type' };
         }
@@ -228,6 +232,46 @@ export const WidgetDataEngine = {
 
     return {
       data: recent
+    };
+  },
+
+  /**
+   * Stacked Bar Data
+   * Returns: { entries: Array<{ label: string, values: Object }>, colors: Object }
+   */
+  stackedBarData: (metric, logs, segment = 'Weekly') => {
+    // This is a stub implementation to ensure data flows to the component.
+    // In a real implementation, this would aggregate based on segment.
+
+    // For now, we return empty structure or mock based on segment to verify UI switching.
+    // Daily: 6 buckets (4h)
+    // Weekly: 7 days
+    // Monthly: 4 weeks
+
+    let entries = [];
+    if (segment === 'Daily') {
+        entries = [
+            { label: '4AM', values: {} }, { label: '8AM', values: {} },
+            { label: '12PM', values: {} }, { label: '4PM', values: {} },
+            { label: '8PM', values: {} }, { label: '12AM', values: {} }
+        ];
+    } else if (segment === 'Weekly') {
+        entries = [
+            { label: 'Mon', values: {} }, { label: 'Tue', values: {} },
+            { label: 'Wed', values: {} }, { label: 'Thu', values: {} },
+            { label: 'Fri', values: {} }, { label: 'Sat', values: {} },
+            { label: 'Sun', values: {} }
+        ];
+    } else { // Monthly
+        entries = [
+            { label: 'W1', values: {} }, { label: 'W2', values: {} },
+            { label: 'W3', values: {} }, { label: 'W4', values: {} }
+        ];
+    }
+
+    return {
+        entries,
+        colors: { [metric.label]: metric.color || '#007AFF' } // Simple mapping
     };
   }
 };

@@ -1,0 +1,139 @@
+/* src/styles/charts.css */
+
+/* --- CHART AREA --- */
+.chart-wrapper {
+  display: flex;
+  height: 220px;
+  margin-top: 6px;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+/* FRAME: The Box */
+.chart-frame {
+  flex: 1;
+  border: 1px solid rgba(128, 128, 128, 0.2);
+  border-radius: 10px; /* --radius-frame */
+  overflow: hidden; /* Clips content to corners */
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  margin-right: 10px; /* Space for Axis */
+  background: transparent; /* Clean look */
+}
+
+/* GRID: Horizontal */
+.grid-lines-bg {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 0;
+  display: flex; flex-direction: column; justify-content: space-between;
+  pointer-events: none;
+}
+.h-line { width: 100%; height: 1px; background: rgba(128, 128, 128, 0.2); }
+.h-line:first-child, .h-line:last-child { opacity: 0; } /* Hide border overlaps */
+
+/* GRID: Vertical */
+.v-lines-bg {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 0;
+  display: flex; justify-content: space-between;
+  pointer-events: none;
+}
+.v-line { width: 1px; height: 100%; background: rgba(128, 128, 128, 0.2); }
+.v-line:first-child, .v-line:last-child { opacity: 0; }
+
+/* AVG LINE */
+.avg-line {
+  position: absolute; left: 0; right: 0;
+  border-top: 2px dashed var(--green); /* --c-avg-line */
+  z-index: 50; /* Above bars (10) and grid (0) */
+  pointer-events: none;
+  opacity: 1;
+  transition: bottom 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
+}
+.avg-tag {
+  position: absolute; right: 4px; top: -15px;
+  font-size: 10px; font-weight: 700; color: var(--green);
+  background: var(--card-bg); padding: 0 4px; border-radius: 4px;
+  letter-spacing: -0.2px;
+}
+
+/* BARS */
+.col-group {
+  flex: 1; height: 100%;
+  position: relative; cursor: pointer;
+  z-index: 10;
+  display: flex; justify-content: center;
+}
+.bar-stack {
+  width: 55%; max-width: 36px;
+  height: 100%;
+  display: flex; flex-direction: column-reverse;
+  justify-content: flex-start;
+  transition: opacity 0.2s;
+}
+.bar-seg {
+  width: 100%;
+  margin-top: 1px; /* Crisp 1px separation */
+  transition: height 0.6s cubic-bezier(0.33, 1, 0.68, 1); /* Apple easing */
+}
+.bar-seg.is-top { border-top-left-radius: 4px; border-top-right-radius: 4px; }
+.bar-seg.is-bottom { border-bottom-left-radius: 2px; border-bottom-right-radius: 2px; }
+
+/* AXIS LABELS */
+.y-axis-col {
+  width: 26px;
+  display: flex; flex-direction: column-reverse; justify-content: space-between;
+}
+.y-lbl {
+  font-size: 11px; color: var(--text-secondary); font-weight: 500;
+  text-align: left; height: 10px; line-height: 10px;
+  position: relative; top: 5px;
+  font-variant-numeric: tabular-nums;
+}
+.y-lbl:first-child { top: 0; }
+.y-lbl:last-child { top: 10px; }
+
+.x-lbl {
+  position: absolute; bottom: -24px; width: 100%;
+  text-align: center;
+  font-size: 11px; color: var(--text-secondary); font-weight: 500;
+  white-space: nowrap; letter-spacing: -0.1px;
+}
+
+/* INTERACTION */
+.chart-interactive.has-select .bar-stack { opacity: 0.2; filter: grayscale(20%); }
+.chart-interactive.has-select .col-group.active .bar-stack { opacity: 1; filter: none; transform: scaleY(1.02); }
+.chart-interactive.has-select .col-group.active .x-lbl { color: var(--text-primary); font-weight: 600; }
+
+/* LEGEND */
+.legend {
+  display: flex; flex-wrap: wrap; gap: 8px 14px;
+  margin-top: 12px; padding: 0 2px;
+}
+.leg-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--text-secondary); font-weight: 500;
+  transition: opacity 0.2s;
+}
+.leg-dot { width: 8px; height: 8px; border-radius: 2px; }
+.leg-val { color: var(--text-primary); font-weight: 600; display: none; margin-left: 2px; }
+
+.chart-interactive.has-select .leg-val { display: block; }
+.chart-interactive.has-select .leg-item.dim { opacity: 0.2; }
+
+/* FOOTER */
+.chart-footer {
+  border-top: 0.5px solid var(--separator);
+  padding-top: 14px; margin-top: 2px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.tot-lbl {
+  font-size: 13px; color: var(--text-secondary); font-weight: 500;
+}
+.tot-val {
+  font-size: 26px; font-weight: 700; color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.5px;
+}

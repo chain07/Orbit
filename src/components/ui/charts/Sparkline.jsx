@@ -22,6 +22,8 @@ export const Sparkline = ({
   lineColor = '#4f46e5',
   fillColor = 'rgba(79, 70, 229, 0.3)',
   showDots = true,
+  showLabels = true,
+  className = '',
 }) => {
   // 1. Calculations & Normalization
   const { points, comparisonPoints, max, min, normalizedData, stepX } = useMemo(() => {
@@ -73,22 +75,26 @@ export const Sparkline = ({
   const uniqueId = React.useId(); // Unique ID for gradient definition
 
   return (
-    <div className="w-full flex flex-col select-none group" style={{ height: 'auto' }}>
+    <div className={`w-full flex flex-col select-none group ${className}`} style={{ height: className.includes('h-full') ? '100%' : 'auto' }}>
       
       {/* Chart Container */}
-      <div className="relative w-full flex" style={{ height }}>
+      <div className="relative w-full flex" style={{ height: className.includes('h-full') ? '100%' : height }}>
         
         {/* Y-Axis Labels (Left side overlay or separate column) */}
-        <div className="absolute left-0 top-0 bottom-6 flex flex-col justify-between text-[9px] font-mono text-secondary pointer-events-none z-10 transition-opacity duration-300 opacity-50 group-hover:opacity-100">
-          <span>{Math.round(max)}</span>
-          <span className="opacity-50">{Math.round((max + min) / 2)}</span>
-          <span>{Math.round(min)}</span>
-        </div>
+        {showLabels && (
+          <div className="absolute left-0 top-0 bottom-6 flex flex-col justify-between text-[9px] font-mono text-secondary pointer-events-none z-10 transition-opacity duration-300 opacity-50 group-hover:opacity-100">
+            <span>{Math.round(max)}</span>
+            <span className="opacity-50">{Math.round((max + min) / 2)}</span>
+            <span>{Math.round(min)}</span>
+          </div>
+        )}
 
         {/* The Graph */}
-        <div className="flex-1 ml-6 relative">
+        <div className={`flex-1 relative ${showLabels ? 'ml-6' : ''}`}>
             <svg 
               viewBox="0 0 100 100" 
+              width="100%"
+              height="100%"
               className="w-full h-full overflow-visible" 
               preserveAspectRatio="none"
             >
