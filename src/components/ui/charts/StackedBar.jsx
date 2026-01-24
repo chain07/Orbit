@@ -101,7 +101,7 @@ export const StackedBar = ({ data = [], colors = {}, title = "Activity", subtitl
                  key={i}
                  style={{
                    flex: 1,
-                   borderRight: '1px dashed rgba(128, 128, 128, 0.3)',
+                   borderRight: '1px solid rgba(128, 128, 128, 0.1)',
                    height: '100%'
                  }}
                />

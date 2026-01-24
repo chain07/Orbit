@@ -90,8 +90,7 @@ export const Intel = () => {
                 <div className="flex justify-between items-start">
                   <span className="text-xs font-bold text-secondary uppercase tracking-wide">System Health</span>
                   <div className="text-right">
-                    <span className="text-2xl font-bold block leading-none" style={{ marginBottom: '8px' }}>0%</span>
-                    <span className="text-xs text-secondary mt-1 block">Awaiting Data</span>
+                    <span className="text-2xl font-bold block leading-none">0%</span>
                   </div>
                 </div>
                 <div
