@@ -8,13 +8,12 @@ export const HorizonAgent = {
    * Generates a rich set of statistics for a single metric
    * used to feed the Recipe engine.
    */
-  calculateStats: (metric, logs, allLogs, allMetrics) => {
+  calculateStats: (metric, logs, allLogs, allMetrics, precalculatedCorrelations = null) => {
     // Defensive checks
     if (!metric || !logs) return null;
 
     const metricLogs = logs.filter(l => l.metricId === metric.id);
     const today = new Date();
-    const todayStr = today.toDateString();
     
     // Core Stats (with safety checks for MetricEngine)
     const streak = MetricEngine.currentStreak ? MetricEngine.currentStreak(logs, metric.id) : 0;
@@ -34,9 +33,7 @@ export const HorizonAgent = {
       ? Math.floor((today - new Date(lastLog.timestamp)) / (1000 * 60 * 60 * 24)) 
       : 999;
 
-    // FIX: Inline calculation for "Today's Value" since MetricEngine.getTodayValue is missing
-    const todayLogs = metricLogs.filter(l => new Date(l.timestamp).toDateString() === todayStr);
-    const todayValue = todayLogs.reduce((acc, curr) => acc + (parseFloat(curr.value) || 0), 0);
+    const todayValue = MetricEngine.getTodayValue(metricLogs);
 
     // Correlations (expensive, only run if engines available and data sufficient)
     let maxCorr = 0;
@@ -44,7 +41,9 @@ export const HorizonAgent = {
 
     if (CorrelationEngine && CorrelationEngine.pairwiseCorrelations && allLogs.length > 50) {
       try {
-        const correlations = CorrelationEngine.pairwiseCorrelations(allMetrics, allLogs, 0);
+        // OPTIMIZATION: Use precalculated correlations if available to avoid O(N^2) loop
+        const correlations = precalculatedCorrelations || CorrelationEngine.pairwiseCorrelations(allMetrics, allLogs, 0);
+
         for (const key in correlations) {
           if (key.includes(metric.id)) {
             const val = correlations[key];
@@ -87,10 +86,20 @@ export const HorizonAgent = {
 
     if (!metrics || !Array.isArray(metrics)) return {};
 
+    // OPTIMIZATION: Pre-calculate correlations once instead of per-metric
+    let globalCorrelations = null;
+    if (CorrelationEngine && CorrelationEngine.pairwiseCorrelations && logs.length > 50) {
+      try {
+        globalCorrelations = CorrelationEngine.pairwiseCorrelations(metrics, logs, 0);
+      } catch (err) {
+        console.warn("Global correlation calc failed:", err);
+      }
+    }
+
     metrics.forEach(metric => {
       try {
         // 1. Calculate Stats Context
-        const stats = HorizonAgent.calculateStats(metric, logs, logs, metrics);
+        const stats = HorizonAgent.calculateStats(metric, logs, logs, metrics, globalCorrelations);
         if (!stats) return;
 
         const metricInsights = [];

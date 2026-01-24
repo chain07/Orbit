@@ -111,8 +111,6 @@ export const WidgetDataEngine = {
       ? MetricEngine.getLastNDaysValues(logs, days)
       : new Array(days).fill(0);
 
-    // FIX: Return raw values so the Sparkline component can handle scaling correctly.
-    // Previously returned 0-1 normalized values, which caused flatlining or incorrect axis.
     const currentVal = MetricEngine.getTodayValue ? MetricEngine.getTodayValue(logs) : 0;
 
     return {
@@ -143,15 +141,14 @@ export const WidgetDataEngine = {
         const dayLogs = logsByDate[date];
         let dayValue = 0;
 
+        let rawValue = 0;
         if (metric.type === MetricType.BOOLEAN) {
-             const hasTrue = dayLogs.some(l => l.value);
-             dayValue = hasTrue ? 1 : 0;
+             rawValue = dayLogs.some(l => l.value);
         } else {
-             const total = dayLogs.reduce((sum, l) => sum + (parseFloat(l.value) || 0), 0);
-             // FIX: Return 0-100 percentage or raw-ish value for intensity.
-             // Previous was 0-1. We multiply by 100 to match Ring/Chart standard scale.
-             dayValue = MetricEngine.normalizeValue(metric, total) * 100;
+             rawValue = dayLogs.reduce((sum, l) => sum + (parseFloat(l.value) || 0), 0);
         }
+        // Normalize to 0-100 scale for consistency across widget types
+        dayValue = MetricEngine.normalizeValue(metric, rawValue) * 100;
         values[date] = dayValue;
     });
 
@@ -174,17 +171,21 @@ export const WidgetDataEngine = {
       : 0;
 
     // OPTIMIZED: Is Active Check
-    // Avoid toLocaleDateString inside loop.
+    // Use ISO string comparison to avoid Date object creation in loop
     let isActive = false;
     const now = new Date();
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime();
+
+    // Get local midnight and next midnight
+    const startOfLocalDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const endOfLocalDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+
+    // Convert to ISO string (UTC) to match log format
+    const startIso = startOfLocalDay.toISOString();
+    const endIso = endOfLocalDay.toISOString();
 
     // 1. Get today's logs for this metric
-    // Use simple numeric timestamp check
     const todayLogs = logs.filter(l => {
-       const t = new Date(l.timestamp).getTime();
-       return t >= startOfDay && t < endOfDay;
+       return l.timestamp >= startIso && l.timestamp < endIso;
     });
 
     if (metric.type === MetricType.BOOLEAN) {

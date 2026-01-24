@@ -72,8 +72,8 @@ export const AnalyticsEngine = {
     // Normalize dates to start of day for cleaner comparison?
     // Or just use timestamps. Timestamps are fine for rolling windows.
 
-    const currentWindowStart = new Date(today.getTime() - windowDays * 24 * 60 * 60 * 1000);
-    const previousWindowStart = new Date(today.getTime() - 2 * windowDays * 24 * 60 * 60 * 1000);
+    const currentWindowStart = new Date(today.getTime() - windowDays * 24 * 60 * 60 * 1000).toISOString();
+    const previousWindowStart = new Date(today.getTime() - 2 * windowDays * 24 * 60 * 60 * 1000).toISOString();
 
     // Pre-group logs by metricId for O(1) lookup
     const logsByMetric = new Map();
@@ -86,11 +86,11 @@ export const AnalyticsEngine = {
       const metricLogs = logsByMetric.get(metric.id) || [];
 
       // Sort logs by timestamp ascending
-      metricLogs.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      metricLogs.sort((a, b) => (a.timestamp < b.timestamp ? -1 : (a.timestamp > b.timestamp ? 1 : 0)));
 
-      const currentWindowLogs = metricLogs.filter(l => new Date(l.timestamp) >= currentWindowStart);
+      const currentWindowLogs = metricLogs.filter(l => l.timestamp >= currentWindowStart);
       const previousWindowLogs = metricLogs.filter(l => {
-        const ts = new Date(l.timestamp);
+        const ts = l.timestamp;
         return ts >= previousWindowStart && ts < currentWindowStart;
       });
 
@@ -221,9 +221,14 @@ export const AnalyticsEngine = {
   // ----------------------
   windowComparisons: (metrics = [], logs = [], windowDays = 7) => {
     const comparisons = {};
+
+    // OPTIMIZED: Calculate averages for all metrics in one pass per window
+    const currentAverages = AnalyticsEngine.rollingAverages(metrics, logs, windowDays);
+    const previousAverages = AnalyticsEngine.rollingAverages(metrics, logs, 2 * windowDays);
+
     metrics.forEach(metric => {
-      const avgCurrent = AnalyticsEngine.rollingAverages([metric], logs, windowDays)[metric.id];
-      const avgPrevious = AnalyticsEngine.rollingAverages([metric], logs, 2 * windowDays)[metric.id];
+      const avgCurrent = currentAverages[metric.id];
+      const avgPrevious = previousAverages[metric.id];
       comparisons[metric.id] = {
         current: avgCurrent,
         previous: avgPrevious,
@@ -246,36 +251,55 @@ export const AnalyticsEngine = {
 
     const now = new Date();
 
+    // OPTIMIZATION: Pre-calculate timestamps and ISO strings for filtering
+    const nowTime = now.getTime();
+    const dayMs = 1000 * 60 * 60 * 24;
+
+    const limit1Time = nowTime - (days * dayMs);
+    const limit2Time = nowTime - (days * 2 * dayMs);
+
+    // We assume logs typically use UTC ISO strings (ending in 'Z')
+    // This allows for extremely fast lexicographical string comparison
+    const limit1ISO = new Date(limit1Time).toISOString();
+    const limit2ISO = new Date(limit2Time).toISOString();
+
     // Filter logs for current window
+    // Uses hybrid approach: fast string comparison if Z-suffixed, fallback to Date.parse
     const currentLogs = logs.filter(l => {
-      const d = new Date(l.timestamp);
-      const diff = (now - d) / (1000 * 60 * 60 * 24);
-      return diff <= days;
+      if (l.timestamp.endsWith('Z')) {
+        return l.timestamp >= limit1ISO;
+      }
+      return Date.parse(l.timestamp) >= limit1Time;
     });
 
     // Filter logs for previous window (for trend comparison)
     const prevLogs = logs.filter(l => {
-      const d = new Date(l.timestamp);
-      const diff = (now - d) / (1000 * 60 * 60 * 24);
-      return diff > days && diff <= (days * 2);
+      if (l.timestamp.endsWith('Z')) {
+        return l.timestamp < limit1ISO && l.timestamp >= limit2ISO;
+      }
+      const t = Date.parse(l.timestamp);
+      return t < limit1Time && t >= limit2Time;
     });
+
+    // Only count metrics that have a real goal (> 0)
+    const scoredMetrics = metrics.filter(m => m.goal > 0);
 
     // 1. Reliability (Average Goal Completion)
     let totalCompletion = 0;
-    metrics.forEach(m => {
+    scoredMetrics.forEach(m => {
        // MetricEngine.goalCompletion handles 0-100 logic
        const comp = MetricEngine.goalCompletion ? MetricEngine.goalCompletion(m, currentLogs) : 0;
        totalCompletion += Math.min(comp, 100); // Cap individual impact at 100%
     });
-    const reliability = Math.round(totalCompletion / (metrics.length || 1));
+    const reliability = Math.round(totalCompletion / (scoredMetrics.length || 1));
 
     // 2. Trend Calculation
     let prevTotal = 0;
-    metrics.forEach(m => {
+    scoredMetrics.forEach(m => {
        const comp = MetricEngine.goalCompletion ? MetricEngine.goalCompletion(m, prevLogs) : 0;
        prevTotal += Math.min(comp, 100);
     });
-    const prevReliability = Math.round(prevTotal / (metrics.length || 1));
+    const prevReliability = Math.round(prevTotal / (scoredMetrics.length || 1));
     const trendVal = reliability - prevReliability;
     const trend = trendVal >= 0 ? `+${trendVal}%` : `${trendVal}%`;
 
