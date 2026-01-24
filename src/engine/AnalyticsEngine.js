@@ -251,18 +251,34 @@ export const AnalyticsEngine = {
 
     const now = new Date();
 
+    // OPTIMIZATION: Pre-calculate timestamps and ISO strings for filtering
+    const nowTime = now.getTime();
+    const dayMs = 1000 * 60 * 60 * 24;
+
+    const limit1Time = nowTime - (days * dayMs);
+    const limit2Time = nowTime - (days * 2 * dayMs);
+
+    // We assume logs typically use UTC ISO strings (ending in 'Z')
+    // This allows for extremely fast lexicographical string comparison
+    const limit1ISO = new Date(limit1Time).toISOString();
+    const limit2ISO = new Date(limit2Time).toISOString();
+
     // Filter logs for current window
+    // Uses hybrid approach: fast string comparison if Z-suffixed, fallback to Date.parse
     const currentLogs = logs.filter(l => {
-      const d = new Date(l.timestamp);
-      const diff = (now - d) / (1000 * 60 * 60 * 24);
-      return diff <= days;
+      if (l.timestamp.endsWith('Z')) {
+        return l.timestamp >= limit1ISO;
+      }
+      return Date.parse(l.timestamp) >= limit1Time;
     });
 
     // Filter logs for previous window (for trend comparison)
     const prevLogs = logs.filter(l => {
-      const d = new Date(l.timestamp);
-      const diff = (now - d) / (1000 * 60 * 60 * 24);
-      return diff > days && diff <= (days * 2);
+      if (l.timestamp.endsWith('Z')) {
+        return l.timestamp < limit1ISO && l.timestamp >= limit2ISO;
+      }
+      const t = Date.parse(l.timestamp);
+      return t < limit1Time && t >= limit2Time;
     });
 
     // 1. Reliability (Average Goal Completion)
