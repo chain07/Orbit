@@ -8,7 +8,7 @@ export const HorizonAgent = {
    * Generates a rich set of statistics for a single metric
    * used to feed the Recipe engine.
    */
-  calculateStats: (metric, logs, allLogs, allMetrics) => {
+  calculateStats: (metric, logs, allLogs, allMetrics, precalculatedTrend = null) => {
     // Defensive checks
     if (!metric || !logs) return null;
 
@@ -23,7 +23,9 @@ export const HorizonAgent = {
     
     // Trend Calculation
     let trend = 0;
-    if (AnalyticsEngine && AnalyticsEngine.trendDeltas) {
+    if (precalculatedTrend !== null) {
+        trend = precalculatedTrend;
+    } else if (AnalyticsEngine && AnalyticsEngine.trendDeltas) {
         const trends = AnalyticsEngine.trendDeltas([metric], allLogs, 7);
         trend = trends[metric.id] || 0;
     }
@@ -87,10 +89,22 @@ export const HorizonAgent = {
 
     if (!metrics || !Array.isArray(metrics)) return {};
 
+    // Optimization: Calculate trends for all metrics in one pass
+    let trendMap = {};
+    if (AnalyticsEngine && AnalyticsEngine.trendDeltas) {
+        trendMap = AnalyticsEngine.trendDeltas(metrics, logs, 7);
+    }
+
     metrics.forEach(metric => {
       try {
         // 1. Calculate Stats Context
-        const stats = HorizonAgent.calculateStats(metric, logs, logs, metrics);
+        const stats = HorizonAgent.calculateStats(
+            metric,
+            logs,
+            logs,
+            metrics,
+            trendMap[metric.id] || 0
+        );
         if (!stats) return;
 
         const metricInsights = [];
