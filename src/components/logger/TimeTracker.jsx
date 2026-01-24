@@ -330,14 +330,16 @@ export const TimeTracker = ({ metricId }) => {
                   onChange={(e) => setManualStartTime(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '12px',
-                    backgroundColor: 'var(--card-bg)',
-                    border: '1px solid var(--separator)',
-                    borderRadius: '14px',
+                    minWidth: 0,
+                    boxSizing: 'border-box',
+                    height: '44px',
+                    padding: '0 12px',
+                    borderRadius: '10px',
+                    border: '1px solid rgba(0,0,0,0.1)',
+                    backgroundColor: 'transparent',
+                    fontSize: '16px',
                     fontWeight: 'bold',
-                    fontSize: '0.875rem',
-                    outline: 'none',
-                    boxSizing: 'border-box'
+                    outline: 'none'
                   }}
                 />
               </div>
@@ -350,14 +352,16 @@ export const TimeTracker = ({ metricId }) => {
                   onChange={(e) => setManualEndTime(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '12px',
-                    backgroundColor: 'var(--card-bg)',
-                    border: '1px solid var(--separator)',
-                    borderRadius: '14px',
+                    minWidth: 0,
+                    boxSizing: 'border-box',
+                    height: '44px',
+                    padding: '0 12px',
+                    borderRadius: '10px',
+                    border: '1px solid rgba(0,0,0,0.1)',
+                    backgroundColor: 'transparent',
+                    fontSize: '16px',
                     fontWeight: 'bold',
-                    fontSize: '0.875rem',
-                    outline: 'none',
-                    boxSizing: 'border-box'
+                    outline: 'none'
                   }}
                 />
               </div>

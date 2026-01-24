@@ -20,30 +20,30 @@ export const ActivityManager = () => {
   const activities = metrics.filter(m => m.type === 'duration');
 
   const handleSave = () => {
-    if (!name.trim()) {
-      alert("Please enter an activity name.");
-      return;
-    }
+    if (!name.trim()) return;
 
-    const finalGoal = hasGoal ? parseFloat(goalValue) : 0;
+    const newMetric = {
+        id: crypto.randomUUID(), // Explicit ID generation
+        label: name.trim(),
+        name: name.trim().toLowerCase().replace(/\s+/g, '_'),
+        type: 'duration',
+        goal: hasGoal ? parseFloat(goalValue) : 0,
+        frequency: hasGoal ? frequency : 'daily', // 'daily' or 'weekly'
+        color: color,
+        widgetType: 'sparkline', // Default visualization
+        dashboardVisible: false, // Hidden from Horizon by default
+        created: new Date().toISOString()
+    };
 
-    addMetric({
-      type: 'duration',
-      name: name,
-      label: name,
-      color: color,
-      goal: finalGoal,
-      frequency: hasGoal ? frequency : 'daily',
-      status: 'active'
-    });
+    addMetric(newMetric);
 
-    // Reset and close
+    // Reset Form
+    setIsCreating(false);
     setName('');
     setColor('#007AFF');
     setHasGoal(false);
     setGoalValue(0);
     setFrequency('daily');
-    setIsCreating(false);
   };
 
   return (
@@ -52,22 +52,21 @@ export const ActivityManager = () => {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <h3 style={{ fontWeight: 'bold', fontSize: '1.125rem', color: 'var(--text-primary)', margin: 0 }}>Manage Activities</h3>
         {!isCreating && (
-          <OrbitButton
+          <button
             onClick={() => setIsCreating(true)}
-            variant="secondary"
             style={{
-              width: 'auto',
-              height: 'auto',
-              padding: '4px 10px',
-              fontSize: '11px',
+              background: 'rgba(0,0,0,0.05)',
+              border: 'none',
               borderRadius: '20px',
-              backgroundColor: 'rgba(0,0,0,0.05)',
+              padding: '4px 12px',
+              fontSize: '11px',
               fontWeight: '600',
-              whiteSpace: 'nowrap'
+              color: 'var(--text-secondary)',
+              cursor: 'pointer'
             }}
           >
             New
-          </OrbitButton>
+          </button>
         )}
       </div>
 
