@@ -14,7 +14,6 @@ export const HorizonAgent = {
 
     const metricLogs = logs.filter(l => l.metricId === metric.id);
     const today = new Date();
-    const todayStr = today.toDateString();
     
     // Core Stats (with safety checks for MetricEngine)
     const streak = MetricEngine.currentStreak ? MetricEngine.currentStreak(logs, metric.id) : 0;
@@ -34,9 +33,7 @@ export const HorizonAgent = {
       ? Math.floor((today - new Date(lastLog.timestamp)) / (1000 * 60 * 60 * 24)) 
       : 999;
 
-    // FIX: Inline calculation for "Today's Value" since MetricEngine.getTodayValue is missing
-    const todayLogs = metricLogs.filter(l => new Date(l.timestamp).toDateString() === todayStr);
-    const todayValue = todayLogs.reduce((acc, curr) => acc + (parseFloat(curr.value) || 0), 0);
+    const todayValue = MetricEngine.getTodayValue(metricLogs);
 
     // Correlations (expensive, only run if engines available and data sufficient)
     let maxCorr = 0;
