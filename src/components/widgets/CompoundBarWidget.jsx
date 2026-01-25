@@ -44,21 +44,31 @@ export const CompoundBarWidget = ({ data }) => {
             color: 'var(--text-secondary)',
             textTransform: 'uppercase',
             position: 'absolute',
-            top: '12px',
-            left: '14px',
+            top: '10px',
+            left: '10px',
             zIndex: 2
         }}>
             {data.label || 'Breakdown'}
         </div>
 
-        {/* Bar Container */}
-        <div style={{ width: '100%', marginTop: '24px' }}>
+        {/* Inset Card Container */}
+        <div style={{
+            backgroundColor: 'rgba(0,0,0,0.03)',
+            borderRadius: '12px',
+            padding: '16px',
+            marginTop: '24px',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px'
+        }}>
+            {/* Bar */}
             <div style={{
                 display: 'flex',
                 width: '100%',
-                height: '12px',
+                height: '16px',
                 background: 'rgba(0,0,0,0.05)',
-                borderRadius: '6px',
+                borderRadius: '8px',
                 overflow: 'hidden'
             }}>
                 {segments.map((seg, i) => (
@@ -70,21 +80,22 @@ export const CompoundBarWidget = ({ data }) => {
                     }} />
                 ))}
             </div>
-        </div>
 
-        {/* Legend */}
-        <div style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '12px',
-            marginTop: '16px'
-        }}>
-            {segments.map((seg, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <div style={{ width: '8px', height: '8px', borderRadius: '2px', flexShrink: 0, backgroundColor: seg.color }} />
-                    <span style={{ fontSize: '12px', fontWeight: '500', color: 'var(--text-primary)' }}>{seg.label}</span>
-                </div>
-            ))}
+            {/* Legend */}
+            <div style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '12px',
+            }}>
+                {segments.map((seg, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <div style={{ width: '8px', height: '8px', borderRadius: '2px', flexShrink: 0, backgroundColor: seg.color }} />
+                        <span style={{ fontSize: '12px', fontWeight: '500', color: 'var(--text-primary)' }}>
+                           {seg.label} <span style={{ opacity: 0.5 }}>({seg.value})</span>
+                        </span>
+                    </div>
+                ))}
+            </div>
         </div>
     </div>
   );

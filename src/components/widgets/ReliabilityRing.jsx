@@ -15,7 +15,13 @@ export const ReliabilityRing = ({ data }) => {
   // Guard clause for missing data
   if (!data) return null;
 
-  const { value = 0, label = '', color = '#4f46e5' } = data;
+  const { value = 0, label = '' } = data;
+
+  // Traffic Light Logic
+  let ringColor = '#34C759'; // Green (76-100)
+  if (value <= 25) ringColor = '#FF3B30'; // Red
+  else if (value <= 50) ringColor = '#FF9500'; // Orange
+  else if (value <= 75) ringColor = '#FFCC00'; // Yellow
 
   return (
     <div style={{
@@ -27,7 +33,7 @@ export const ReliabilityRing = ({ data }) => {
         width: '100%',
         position: 'relative'
     }}>
-      <div style={{ position: 'absolute', top: '12px', left: '14px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-secondary)', zIndex: 2 }}>
+      <div style={{ position: 'absolute', top: '10px', left: '10px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-secondary)', zIndex: 2 }}>
         {label}
       </div>
 
@@ -36,7 +42,7 @@ export const ReliabilityRing = ({ data }) => {
             value={value}
             size={140}
             strokeWidth={12}
-            color={color}
+            color={ringColor}
             label={null}
           />
           <div style={{

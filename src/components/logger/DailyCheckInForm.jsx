@@ -75,6 +75,7 @@ export const DailyCheckInForm = () => {
           disabled={status === 'success' || metrics.length === 0}
           variant="primary"
           className={`w-full ${status === 'success' ? '!bg-green !shadow-none !text-white' : ''}`}
+          style={{ marginTop: '24px' }}
         >
           {status === 'success' ? 'Check-In Saved ✓' : 'Save Check-In'}
         </OrbitButton>

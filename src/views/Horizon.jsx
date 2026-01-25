@@ -197,15 +197,15 @@ export const Horizon = () => {
           }}>
             {orderedWidgets.map((widget, idx) => {
               const WidgetComponent = getWidgetComponent(widget.widgetType);
-              const isFullWidth = widget.widgetType === 'stackedbar' || widget.widgetType === 'sparkline' || widget.widgetType === 'heatmap';
+              const isFullWidth = widget.widgetType === 'stackedbar' || widget.widgetType === 'sparkline' || widget.widgetType === 'heatmap' || widget.widgetType === 'progress' || widget.widgetType === 'compound';
 
               return (
                 <Glass
                   key={widget.id || idx}
                   className={`relative overflow-hidden transition-transform ${isEditing ? 'border-blue border-opacity-50' : ''}`}
                   style={{
-                    gridColumn: isFullWidth ? '1 / -1' : 'span 1',
-                    aspectRatio: isFullWidth || isEditing ? 'auto' : '1 / 1',
+                    gridColumn: isFullWidth ? 'span 2' : 'span 1',
+                    aspectRatio: isFullWidth && !isEditing ? '2 / 1' : isEditing ? 'auto' : '1 / 1',
                     minHeight: isEditing ? '80px' : 'auto'
                   }}
                 >

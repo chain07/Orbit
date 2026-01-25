@@ -15,21 +15,23 @@ export const ProgressBarWidget = ({ data }) => {
 
   return (
     <div style={{ position: 'relative', height: '100%', width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '16px' }}>
-      <div style={{ position: 'absolute', top: '12px', left: '14px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-secondary)', zIndex: 2 }}>
+      <div style={{ position: 'absolute', top: '10px', left: '10px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-secondary)', zIndex: 2 }}>
         {label}
       </div>
 
-      <div style={{ position: 'absolute', top: '12px', right: '14px', fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', zIndex: 2 }}>
-        {value} <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: '500' }}>{unit}</span>
-      </div>
-
-      <div style={{ width: '100%', height: '12px', backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: '6px', overflow: 'hidden', marginTop: '32px' }}>
-          <div style={{
-              height: '100%',
-              width: `${percent}%`,
-              backgroundColor: color || 'var(--blue)',
-              transition: 'width 0.5s ease-out'
-          }} />
+      {/* Bar Container */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '16px' }}>
+          <div style={{ flex: 1, height: '16px', backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: '8px', overflow: 'hidden' }}>
+              <div style={{
+                  height: '100%',
+                  width: `${percent}%`,
+                  backgroundColor: color || 'var(--blue)',
+                  transition: 'width 0.5s ease-out'
+              }} />
+          </div>
+          <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+            {value} / {max} {unit}
+          </div>
       </div>
     </div>
   );

@@ -66,7 +66,7 @@ export const TrendSparkline = ({ data }) => {
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr', gap: '10px', alignItems: 'center', height: '100%', width: '100%', padding: '16px', position: 'relative' }}>
-       <div style={{ position: 'absolute', top: '12px', left: '14px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-secondary)', zIndex: 2 }}>
+       <div style={{ position: 'absolute', top: '10px', left: '10px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-secondary)', zIndex: 2 }}>
          {label || 'Trend'}
        </div>
 
@@ -77,10 +77,12 @@ export const TrendSparkline = ({ data }) => {
        </div>
        {/* Right Column: Graph */}
        <div style={{ position: 'relative', width: '100%', height: '60px', marginTop: '16px' }}>
-           {/* Background Lines (Max, Mid, Min) - Dashed, Opacity 0.2 */}
-           <div style={{ position: 'absolute', top: 0, width: '100%', borderTop: '1px dashed currentColor', opacity: 0.1 }} />
+           {/* 5 Background Lines (0, 25, 50, 75, 100%) */}
+           <div style={{ position: 'absolute', top: '0%', width: '100%', borderTop: '1px dashed currentColor', opacity: 0.1 }} />
+           <div style={{ position: 'absolute', top: '25%', width: '100%', borderTop: '1px dashed currentColor', opacity: 0.1 }} />
            <div style={{ position: 'absolute', top: '50%', width: '100%', borderTop: '1px dashed currentColor', opacity: 0.1 }} />
-           <div style={{ position: 'absolute', bottom: 0, width: '100%', borderTop: '1px dashed currentColor', opacity: 0.1 }} />
+           <div style={{ position: 'absolute', top: '75%', width: '100%', borderTop: '1px dashed currentColor', opacity: 0.1 }} />
+           <div style={{ position: 'absolute', bottom: '0%', width: '100%', borderTop: '1px dashed currentColor', opacity: 0.1 }} />
 
            {/* Axis Labels */}
            <div style={{ position: 'absolute', top: '-14px', right: 0, fontSize: '10px', color: 'var(--text-secondary)' }}>Max</div>
