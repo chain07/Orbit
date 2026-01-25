@@ -9,6 +9,8 @@ import { CurrentStreak } from './CurrentStreak';
 import { NumberWidget } from './NumberWidget';
 import { RecentHistory } from './RecentHistory';
 import { SegmentedBarWidget } from './SegmentedBarWidget';
+import { CompoundBarWidget } from './CompoundBarWidget';
+import { ProgressBarWidget } from './ProgressBarWidget';
 
 /**
  * WidgetRegistry
@@ -20,6 +22,8 @@ export const WidgetRegistry = {
   sparkline: TrendSparkline,
   heatmap: ConsistencyHeatmap,
   stackedbar: SegmentedBarWidget,
+  compound: CompoundBarWidget,
+  progress: ProgressBarWidget,
   
   // Data Displays
   streak: CurrentStreak,

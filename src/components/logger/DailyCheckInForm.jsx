@@ -53,7 +53,7 @@ export const DailyCheckInForm = () => {
   return (
     <Glass>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div style={{ borderRadius: '12px', overflow: 'hidden', border: '0.5px solid rgba(0,0,0,0.1)' }} className="flex flex-col">
+        <div style={{ backgroundColor: 'var(--card-bg)', borderRadius: '16px', overflow: 'hidden', border: '0.5px solid rgba(0,0,0,0.1)' }} className="flex flex-col">
             {metrics.length === 0 ? (
             <div className="text-center text-secondary py-4 italic text-sm p-4 bg-card">
                 No metrics defined. Go to System to add metrics.

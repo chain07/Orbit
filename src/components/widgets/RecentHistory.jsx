@@ -32,34 +32,29 @@ export const RecentHistory = ({ data }) => {
   };
 
   return (
-    <div className="flex flex-col h-full w-full">
-      <div className="text-sm font-bold text-secondary uppercase tracking-wide mb-3">
-        Recent Activity
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', padding: '16px' }}>
+      <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>
+        History
       </div>
 
-      <div className="flex flex-col gap-2 overflow-y-auto">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {recentItems.length === 0 ? (
-          <div className="text-sm text-secondary italic opacity-60 text-center py-4">
-            No recent activity
+          <div style={{ fontSize: '13px', color: 'var(--text-secondary)', fontStyle: 'italic', opacity: 0.6 }}>
+            No recent entries
           </div>
         ) : (
           recentItems.map((entry, idx) => (
             <div 
               key={entry.id || idx} 
-              className="flex justify-between items-center py-2 border-b border-separator border-opacity-10 last:border-0"
+              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
             >
-              <div className="flex flex-col">
-                <span className="text-xs font-bold text-secondary">
-                  {formatDate(entry.timestamp)}
-                </span>
-                <span className="text-[10px] text-secondary opacity-60">
-                  {formatTime(entry.timestamp)}
-                </span>
-              </div>
+              <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '500' }}>
+                {formatDate(entry.timestamp)}
+              </span>
               
-              <div className="font-mono font-medium text-sm">
-                {entry.value} <span className="text-xs text-secondary">{unit}</span>
-              </div>
+              <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)' }}>
+                {entry.value} {unit}
+              </span>
             </div>
           ))
         )}

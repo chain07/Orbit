@@ -19,7 +19,7 @@ export const CurrentStreak = ({ data, title }) => {
 
   return (
     <div style={{ position: 'relative', height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ position: 'absolute', top: '12px', left: '12px', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+      <div style={{ position: 'absolute', top: '12px', left: '14px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-secondary)', zIndex: 2 }}>
         {title || 'Streak'}
       </div>
 
@@ -31,7 +31,7 @@ export const CurrentStreak = ({ data, title }) => {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 10 }}>
-        <span style={{ fontSize: '32px', fontWeight: '800', color: 'var(--text-primary)', lineHeight: 1 }}>
+        <span style={{ fontSize: '42px', fontWeight: '800', color: 'var(--text-primary)', lineHeight: 1 }}>
           {current}
         </span>
         <span style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-secondary)', textTransform: 'uppercase', marginTop: '4px' }}>

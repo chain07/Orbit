@@ -73,19 +73,22 @@ export const Horizon = () => {
       // Get base widgets
       const baseWidgets = WidgetDataEngine.generateWidgets(metrics, allLogs, segment);
 
+      // Filter out widgets for metrics that no longer exist
+      const validWidgets = baseWidgets.filter(w => metrics.some(m => m.id === w.id));
+
       // If no layout saved, return base
       const layoutOrder = widgetLayout?.Horizon;
-      if (!layoutOrder || !Array.isArray(layoutOrder)) return baseWidgets;
+      if (!layoutOrder || !Array.isArray(layoutOrder)) return validWidgets;
 
       // Map base widgets by ID for quick lookup
-      const widgetMap = new Map(baseWidgets.map(w => [w.id, w]));
+      const widgetMap = new Map(validWidgets.map(w => [w.id, w]));
 
       // Reorder based on layout
       const ordered = layoutOrder.map(id => widgetMap.get(id)).filter(Boolean);
 
       // Append any new metrics that aren't in the layout yet
       const processedIds = new Set(ordered.map(w => w.id));
-      const remaining = baseWidgets.filter(w => !processedIds.has(w.id));
+      const remaining = validWidgets.filter(w => !processedIds.has(w.id));
 
       return [...ordered, ...remaining];
   }, [metrics, allLogs, segment, widgetLayout]);
@@ -131,7 +134,7 @@ export const Horizon = () => {
         </div>
       </div>
 
-      <div className="layout-content">
+      <div className="layout-content" style={{ boxSizing: 'border-box', width: '100vw', overflowX: 'hidden' }}>
         <UpdateManager />
 
         {!hasMetrics && (
@@ -152,82 +155,76 @@ export const Horizon = () => {
           </div>
         )}
 
-        <Glass className="p-4 border-l-4 border-blue mb-4">
-          <div className="flex flex-col justify-center gap-2 min-h-[80px]">
-            <div className="text-xs font-bold text-blue uppercase tracking-wider flex items-center gap-2">
-              <Icons.Activity className="text-blue" size={14} /> DAILY BRIEFING
+        {!isEditing && (
+            <Glass className="p-4 border-l-4 border-blue mb-4">
+            <div className="flex flex-col justify-center gap-2 min-h-[80px]">
+                <div className="text-xs font-bold text-blue uppercase tracking-wider flex items-center gap-2">
+                <Icons.Activity className="text-blue" size={14} /> DAILY BRIEFING
+                </div>
+                <div className="text-md font-medium text-primary leading-relaxed">
+                {hasMetrics && topInsights.length > 0 ? (
+                    topInsights.map((insight, idx) => (
+                    <div key={idx}>
+                        {insight.message}
+                    </div>
+                    ))
+                ) : (
+                    "Good morning. I'll scan your data for actionable tactical moves and insights once you start logging."
+                )}
+                </div>
             </div>
-            <div className="text-md font-medium text-primary leading-relaxed">
-              {hasMetrics && topInsights.length > 0 ? (
-                topInsights.map((insight, idx) => (
-                  <div key={idx}>
-                    {insight.message}
-                  </div>
-                ))
-              ) : (
-                "Good morning. I'll scan your data for actionable tactical moves and insights once you start logging."
-              )}
-            </div>
-          </div>
-        </Glass>
+            </Glass>
+        )}
 
         {hasMetrics && (
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
+            display: isEditing ? 'flex' : 'grid',
+            flexDirection: isEditing ? 'column' : 'initial',
+            gridTemplateColumns: isEditing ? 'none' : '1fr 1fr',
             gap: '16px',
             padding: '16px',
             paddingBottom: '100px'
           }}>
             {orderedWidgets.map((widget, idx) => {
               const WidgetComponent = getWidgetComponent(widget.widgetType);
-              const isFullWidth = widget.widgetType === 'stackedbar' || widget.widgetType === 'sparkline';
+              const isFullWidth = widget.widgetType === 'stackedbar' || widget.widgetType === 'sparkline' || widget.widgetType === 'heatmap';
 
               return (
                 <Glass
                   key={widget.id || idx}
-                  className={`relative overflow-hidden transition-transform ${isEditing ? 'scale-[0.98] border-blue border-opacity-50' : ''}`}
+                  className={`relative overflow-hidden transition-transform ${isEditing ? 'border-blue border-opacity-50' : ''}`}
                   style={{
                     gridColumn: isFullWidth ? '1 / -1' : 'span 1',
-                    aspectRatio: isFullWidth ? 'auto' : '1 / 1'
+                    aspectRatio: isFullWidth || isEditing ? 'auto' : '1 / 1',
+                    minHeight: isEditing ? '80px' : 'auto'
                   }}
                 >
                    <WidgetErrorBoundary>
+                     {/* In Edit Mode, simplify or block interaction? For now, render fully but overlay blocks clicks */}
                      <WidgetComponent data={widget.data} title={widget.title} />
                    </WidgetErrorBoundary>
 
                    {isEditing && (
-                       <div className="absolute inset-0 bg-black/5 z-50 flex items-center justify-center gap-4">
-                           <button
-                             onClick={() => moveWidget(idx, -1)}
-                             disabled={idx === 0}
-                             className="w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center disabled:opacity-30 active:scale-95 transition-all"
-                             style={{
-                               position: 'absolute',
-                               left: '12px',
-                               top: '50%',
-                               transform: 'translateY(-50%)'
-                             }}
-                           >
-                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                 <polyline points="15 18 9 12 15 6"></polyline>
-                               </svg>
-                           </button>
-                           <button
-                             onClick={() => moveWidget(idx, 1)}
-                             disabled={idx === orderedWidgets.length - 1}
-                             className="w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center disabled:opacity-30 active:scale-95 transition-all"
-                             style={{
-                               position: 'absolute',
-                               right: '12px',
-                               top: '50%',
-                               transform: 'translateY(-50%)'
-                             }}
-                           >
-                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                 <polyline points="9 18 15 12 9 6"></polyline>
-                               </svg>
-                           </button>
+                       <div className="absolute inset-0 bg-black/5 z-50 flex items-center justify-between px-6 backdrop-blur-[1px]">
+                           <span className="font-bold text-primary">{widget.title || 'Widget'}</span>
+                           <div className="flex gap-4">
+                               <button
+                                onClick={() => moveWidget(idx, -1)}
+                                disabled={idx === 0}
+                                className="w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center disabled:opacity-30 active:scale-95 transition-all"
+                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                               >
+                                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                               </button>
+                               <button
+                                onClick={() => moveWidget(idx, 1)}
+                                disabled={idx === orderedWidgets.length - 1}
+                                className="w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center disabled:opacity-30 active:scale-95 transition-all"
+                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                               >
+                                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                               </button>
+                           </div>
                        </div>
                    )}
                 </Glass>

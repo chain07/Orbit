@@ -49,76 +49,150 @@ export const MetricInput = ({ metric, value, onChange }) => {
 
         case MetricType.RANGE:
             return (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                   <span style={{ fontSize: '12px', color: 'var(--text-secondary)', minWidth: '12px' }}>{metric.range?.min || 1}</span>
-                   <input
-                        type="range"
-                        min={metric.range?.min || 1}
-                        max={metric.range?.max || 10}
-                        step={metric.range?.step || 1}
-                        value={value || metric.range?.min || 0}
-                        onChange={handleChange}
-                        style={{ width: '120px', accentColor: '#007AFF' }}
-                    />
-                    <span style={{ fontSize: '12px', color: 'var(--text-secondary)', minWidth: '12px', textAlign: 'right' }}>{metric.range?.max || 10}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ fontSize: '15px', fontWeight: '400', color: 'var(--blue)' }}>
+                        {value || metric.range?.min || 0}/{metric.range?.max || 10}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <input
+                            type="range"
+                            min={metric.range?.min || 1}
+                            max={metric.range?.max || 10}
+                            step={metric.range?.step || 1}
+                            value={value || metric.range?.min || 0}
+                            onChange={handleChange}
+                            style={{ width: '120px', accentColor: 'var(--blue)' }}
+                        />
+                    </div>
                 </div>
             );
 
         case MetricType.SELECT:
             return (
-                <select
-                    value={value}
-                    onChange={handleChange}
-                    style={{
-                        padding: '8px',
-                        borderRadius: '8px',
-                        border: '1px solid rgba(0,0,0,0.1)',
-                        backgroundColor: 'var(--bg-color)',
-                        fontSize: '14px'
-                    }}
-                >
-                    <option value="" disabled>Select</option>
-                    {(metric.options || []).map(opt => (
-                        <option key={opt} value={opt}>{opt}</option>
-                    ))}
-                </select>
+                <div style={{ position: 'relative', width: '100%' }}>
+                    <select
+                        value={value}
+                        onChange={handleChange}
+                        style={{
+                            appearance: 'none',
+                            WebkitAppearance: 'none',
+                            width: '100%',
+                            backgroundColor: 'var(--bg-color)',
+                            border: 'none',
+                            borderRadius: '12px',
+                            padding: '14px 32px 14px 16px', // Right padding for icon
+                            fontSize: '16px',
+                            color: 'var(--text-primary)',
+                            fontFamily: 'inherit'
+                        }}
+                    >
+                        <option value="" disabled>Select</option>
+                        {(metric.options || []).map(opt => (
+                            <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                    </select>
+                    <div style={{
+                        position: 'absolute',
+                        right: '16px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        pointerEvents: 'none',
+                        color: 'var(--text-secondary)'
+                    }}>
+                        <svg width="12" height="8" viewBox="0 0 12 8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 1L6 6L11 1"/></svg>
+                    </div>
+                </div>
+            );
+
+        case MetricType.DURATION:
+            // Split Duration (Hrs / Mins) if it was implemented fully, for now reusing Stepper but cleaner
+            // Or ideally use the reference layout: 2 boxes.
+            // Simplified for reliability: Single Number Stepper but with Duration Label
+            return (
+               <div style={{ display: 'flex', alignItems: 'center', backgroundColor: 'var(--bg-color)', borderRadius: '12px', padding: '4px' }}>
+                   <button
+                     type="button"
+                     onClick={() => onChange(Math.max(0, (parseFloat(value) || 0) - 0.5))}
+                     style={{
+                         width: '40px', height: '36px', borderRadius: '8px', border: 'none',
+                         backgroundColor: 'var(--card-bg)', color: 'var(--text-primary)',
+                         fontSize: '20px', fontWeight: '500', cursor: 'pointer',
+                         boxShadow: '0 2px 5px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                     }}
+                   >
+                       −
+                   </button>
+                   <div style={{ minWidth: '50px', textAlign: 'center', fontSize: '17px', fontWeight: '600' }}>
+                       {value || 0}<span style={{fontSize: '11px', color: 'var(--text-secondary)', marginLeft: '2px'}}>hr</span>
+                   </div>
+                    <button
+                     type="button"
+                     onClick={() => onChange((parseFloat(value) || 0) + 0.5)}
+                     style={{
+                         width: '40px', height: '36px', borderRadius: '8px', border: 'none',
+                         backgroundColor: 'var(--card-bg)', color: 'var(--text-primary)',
+                         fontSize: '20px', fontWeight: '500', cursor: 'pointer',
+                         boxShadow: '0 2px 5px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                     }}
+                   >
+                       ＋
+                   </button>
+               </div>
             );
 
         case MetricType.NUMBER:
-        case MetricType.DURATION:
             return (
-               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+               <div style={{ display: 'flex', alignItems: 'center', backgroundColor: 'var(--bg-color)', borderRadius: '12px', padding: '4px' }}>
                    <button
                      type="button"
                      onClick={() => onChange(Math.max(0, (parseFloat(value) || 0) - 1))}
                      style={{
-                         width: '28px', height: '28px', borderRadius: '50%',
-                         border: '1px solid rgba(0,0,0,0.1)',
-                         backgroundColor: 'var(--bg-color)',
-                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                         fontSize: '18px', color: '#007AFF', cursor: 'pointer'
+                         width: '40px', height: '36px', borderRadius: '8px', border: 'none',
+                         backgroundColor: 'var(--card-bg)', color: 'var(--text-primary)',
+                         fontSize: '20px', fontWeight: '500', cursor: 'pointer',
+                         boxShadow: '0 2px 5px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center'
                      }}
                    >
-                       -
+                       −
                    </button>
-                   <span style={{ fontSize: '16px', fontWeight: '600', minWidth: '24px', textAlign: 'center' }}>
+                   <div style={{ minWidth: '50px', textAlign: 'center', fontSize: '17px', fontWeight: '600' }}>
                        {value || 0}
-                   </span>
+                   </div>
                     <button
                      type="button"
                      onClick={() => onChange((parseFloat(value) || 0) + 1)}
                      style={{
-                         width: '28px', height: '28px', borderRadius: '50%',
-                         border: '1px solid rgba(0,0,0,0.1)',
-                         backgroundColor: 'var(--bg-color)',
-                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                         fontSize: '18px', color: '#007AFF', cursor: 'pointer'
+                         width: '40px', height: '36px', borderRadius: '8px', border: 'none',
+                         backgroundColor: 'var(--card-bg)', color: 'var(--text-primary)',
+                         fontSize: '20px', fontWeight: '500', cursor: 'pointer',
+                         boxShadow: '0 2px 5px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center'
                      }}
                    >
-                       +
+                       ＋
                    </button>
                </div>
             );
+
+        case MetricType.TEXT:
+             return (
+                 <textarea
+                     value={value}
+                     onChange={handleChange}
+                     placeholder="Notes..."
+                     style={{
+                         width: '100%',
+                         backgroundColor: 'var(--bg-color)',
+                         border: 'none',
+                         borderRadius: '12px',
+                         padding: '14px',
+                         fontSize: '16px',
+                         color: 'var(--text-primary)',
+                         fontFamily: 'inherit',
+                         resize: 'vertical',
+                         minHeight: '80px'
+                     }}
+                 />
+             );
 
         default:
             return (
@@ -146,7 +220,7 @@ export const MetricInput = ({ metric, value, onChange }) => {
         alignItems: 'center',
         padding: '16px',
         borderBottom: '0.5px solid rgba(0,0,0,0.1)',
-        backgroundColor: 'var(--card-bg)'
+        minHeight: '56px'
     }}>
       <div style={{ display: 'flex', flexDirection: 'column' }}>
           <span style={{ fontSize: '16px', fontWeight: '500' }}>{metric.label}</span>
