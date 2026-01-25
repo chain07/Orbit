@@ -30,21 +30,21 @@ export const ConsistencyHeatmap = ({ data }) => {
     };
   }, [data.startDate, data.endDate]);
 
-  // Custom color scale based on the metric's primary color
-  // We can create a simple opacity-based scale or use the passed color
+  // Custom color scale
   const colorScale = (value) => {
-    if (!value) return 'bg-gray-100 dark:bg-white/5'; // Empty state
+    if (value === null || value === undefined || value === 0) return 'bg-gray-100 dark:bg-white/5';
     
-    // If specific classes aren't available, we fallback to styles (though HeatMap expects classes usually)
-    // Here we map normalized values to opacity buckets if using Tailwind classes
-    // Assuming the parent passes a base color class is tricky in Tailwind without safelisting.
-    // Instead, we will rely on the HeatMap's default scale or allow injection.
-    
-    // For now, let's use the HeatMap's default scale but strictly mapped
-    if (value >= 1) return 'bg-green-500';
-    if (value >= 0.75) return 'bg-green-400';
-    if (value >= 0.5) return 'bg-green-300';
-    if (value > 0) return 'bg-green-200';
+    // Check if it's potentially a non-boolean scalar (e.g. 5, 8, or 100) or normalized
+    // If it's effectively > 0, we color it.
+    if (value > 0) {
+        // Simple heuristic: if it's big, it's 100%. If normalized 0-1, map to buckets.
+        const n = value > 1 ? value / 100 : value; // normalize to 0-1 if > 1
+
+        if (n >= 0.8) return 'bg-green-500';
+        if (n >= 0.5) return 'bg-green-400';
+        if (n >= 0.2) return 'bg-green-300';
+        return 'bg-green-200';
+    }
     return 'bg-gray-100 dark:bg-white/5';
   };
 

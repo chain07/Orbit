@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { StorageContext } from '../../context/StorageContext';
 import { Glass } from '../../components/ui/Glass';
 
@@ -8,33 +8,57 @@ export const Timeline = () => {
   // Refactored to use standard metricId mapping
   const metricMap = metrics.reduce((acc, m) => ({ ...acc, [m.id]: m }), {});
 
-  const sortedLogs = [...logEntries].sort(
-    (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
-  );
+  const groupedLogs = useMemo(() => {
+      const groups = {};
+      [...logEntries].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+      .forEach(log => {
+          const dateKey = new Date(log.timestamp).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+          if (!groups[dateKey]) groups[dateKey] = [];
+          groups[dateKey].push(log);
+      });
+      return groups;
+  }, [logEntries]);
+
+  if (logEntries.length === 0) {
+      return (
+        <div className="text-center text-secondary py-8 italic text-sm opacity-60">
+          No logs recorded yet.
+        </div>
+      );
+  }
 
   return (
-    <div className="flex flex-col gap-3">
-      {sortedLogs.length === 0 ? (
-        <div className="text-center text-secondary py-4 italic text-sm">
-          No logs found for today.
-        </div>
-      ) : (
-        sortedLogs.map((log, idx) => {
-          // Lookup using metricId strictly
-          const metric = metricMap[log.metricId];
-          return (
-            <Glass key={idx}>
-              <div className="flex justify-between">
-                <span className="font-bold">{metric?.label || 'Unknown Metric'}</span>
-                <span className="font-mono">{log.value}</span>
+    <div className="flex flex-col gap-6 pb-20">
+      {Object.entries(groupedLogs).map(([date, logs]) => (
+          <div key={date} className="flex flex-col gap-2">
+              <div className="text-xs font-bold text-secondary uppercase tracking-wide px-4 sticky top-0 bg-bg-color z-10 py-2">
+                  {date}
               </div>
-              <div className="text-xs text-secondary mt-1">
-                {new Date(log.timestamp).toLocaleString()}
+              <div className="bg-card rounded-xl border border-separator overflow-hidden mx-2 shadow-sm">
+                  {logs.map((log, idx) => {
+                      const metric = metricMap[log.metricId];
+                      const isLast = idx === logs.length - 1;
+                      return (
+                          <div
+                            key={log.id || idx}
+                            className={`flex justify-between items-center p-4 bg-card ${!isLast ? 'border-b border-separator/50' : ''}`}
+                          >
+                              <div className="flex flex-col gap-1">
+                                  <span className="font-semibold text-primary">{metric?.label || 'Unknown Metric'}</span>
+                                  <span className="text-xs text-secondary">
+                                      {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                  </span>
+                              </div>
+                              <div className="font-mono font-medium text-primary bg-bg-color px-2 py-1 rounded text-sm">
+                                  {typeof log.value === 'boolean' ? (log.value ? 'Done' : 'Missed') : log.value}
+                                  {metric?.unit ? <span className="text-secondary ml-1 text-xs">{metric.unit}</span> : ''}
+                              </div>
+                          </div>
+                      );
+                  })}
               </div>
-            </Glass>
-          );
-        })
-      )}
+          </div>
+      ))}
     </div>
   );
 };

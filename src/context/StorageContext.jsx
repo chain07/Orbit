@@ -253,7 +253,8 @@ export const StorageProvider = ({ children }) => {
     importJSON: importData,
     exportData,
     exportJSON: exportData,
-    clearAllData
+    clearAllData,
+    updateWidgetLayout: setWidgetLayout
   }), [
     metrics,
     logEntries,

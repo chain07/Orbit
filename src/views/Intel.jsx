@@ -35,7 +35,23 @@ export const Intel = () => {
   [metrics, allLogs, segment]);
 
   const stats = useMemo(() => {
-    return AnalyticsEngine.calculateSystemHealth(metrics, allLogs, segment);
+    const health = AnalyticsEngine.calculateSystemHealth(metrics, allLogs, segment);
+
+    // Calculate Momentum (Daily Volume History for Sparkline)
+    // We want the last 7 days of total activity count
+    const momentumData = [];
+    const now = new Date();
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        const dayStr = d.toISOString().split('T')[0];
+
+        // Count logs for this day
+        const count = allLogs.filter(l => l.timestamp.startsWith(dayStr)).length;
+        momentumData.push(count);
+    }
+
+    return { ...health, momentumHistory: momentumData };
   }, [metrics, allLogs, segment]);
 
   const telemetrySubtitle = useMemo(() => {
@@ -96,9 +112,17 @@ export const Intel = () => {
                    }`}>{stats.intensity}</span>
                 </div>
                 <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-orange opacity-5 rounded-full blur-2xl"></div>
-                {/* Force Sparkline Rendering for Momentum if data exists - defaulting to dummy data for viz or real calculation if available */}
+                {/* Momentum Sparkline using real history */}
                 <div className="w-full h-[60px] relative mt-auto">
-                   <Sparkline data={[10, 20, 15, 30, 25, 40, 35]} height={60} showLabels={false} showDots={false} lineColor="rgba(255,165,0,0.5)" fillColor="transparent" className="w-full h-full opacity-50" />
+                   <Sparkline
+                     data={stats.momentumHistory}
+                     height={60}
+                     showLabels={false}
+                     showDots={false}
+                     lineColor="rgba(255,165,0,0.5)"
+                     fillColor="transparent"
+                     className="w-full h-full opacity-50"
+                   />
                    <div className="text-xs text-secondary text-center opacity-80 absolute bottom-2 w-full">Status: {stats.status}</div>
                 </div>
               </>
@@ -120,12 +144,12 @@ export const Intel = () => {
 
         {insights.length > 0 && (
           <div className="flex flex-col gap-2">
-            <div className="section-label px-1 text-secondary font-bold text-xs uppercase">Horizon Agent</div>
-            {insights.slice(0, 3).map((insight, idx) => (
-              <Glass key={idx} className="flex flex-col gap-1 border-l-4 border-purple/50">
-                <div className="text-sm font-bold text-primary">{insight.message}</div>
-              </Glass>
-            ))}
+             <Glass className="flex flex-col gap-2 border-l-4 border-purple/50">
+                <div className="section-label px-0 text-secondary font-bold text-xs uppercase mb-0">Horizon Agent</div>
+                {insights.slice(0, 1).map((insight, idx) => (
+                    <div key={idx} className="text-sm font-bold text-primary">{insight.message}</div>
+                ))}
+             </Glass>
           </div>
         )}
 

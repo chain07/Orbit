@@ -17,41 +17,30 @@ export const NumberWidget = ({ data }) => {
 
   const { value, label, unit = '', trend, trendDirection = 'neutral' } = data;
 
-  // Determine trend color
-  const getTrendColor = () => {
-    if (trendDirection === 'up') return 'text-green';
-    if (trendDirection === 'down') return 'text-red';
-    return 'text-secondary';
-  };
-
-  const trendIcon = trendDirection === 'up' ? '↑' : trendDirection === 'down' ? '↓' : '→';
+  // Flame Icon SVG
+  const FlameIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange">
+        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 17c1.38 0 2.5-1.12 2.5-2.5 0-1.38-1.12-2.5-2.5-2.5 0-.7.7-1.33 1.5-1.75C13.5 10 14 9 14 8c0-2.5-2-3.5-2.5-4C10 5.5 8 8 8 10c0 1.5 1 3 2 4 .5.5.5 1.5 0 2z"/>
+    </svg>
+  );
 
   return (
-    <div className="flex flex-col h-full w-full justify-between p-1 aspect-square">
-      <div className="text-sm font-bold text-secondary uppercase tracking-wide">
+    <div className="flex flex-col h-full w-full justify-center items-center relative p-1" style={{ aspectRatio: '1/1' }}>
+      <div className="absolute top-3 right-3 text-xs font-bold text-secondary">
         {label}
       </div>
 
-      <div className="flex flex-col gap-1 my-auto">
-        <div className="flex items-baseline gap-1">
-          <span className="text-4xl font-bold tracking-tight">
+      <div className="flex items-center gap-2">
+          <FlameIcon />
+          <span className="text-5xl font-bold tracking-tight">
             {value}
           </span>
-          {unit && (
-            <span className="text-lg text-secondary font-medium">
-              {unit}
-            </span>
-          )}
-        </div>
       </div>
 
-      {/* Footer / Trend Info */}
-      {trend != null && (
-        <div className={`flex items-center gap-1 text-xs font-bold ${getTrendColor()}`}>
-          <span>{trendIcon}</span>
-          <span>{Math.abs(trend)}%</span>
-          <span className="text-secondary font-medium opacity-70 ml-1">vs last period</span>
-        </div>
+      {unit && (
+        <span className="text-xs text-secondary font-bold uppercase tracking-wider mt-1">
+          {unit}
+        </span>
       )}
     </div>
   );

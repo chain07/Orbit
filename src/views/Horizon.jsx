@@ -3,15 +3,12 @@ import { StorageContext } from '../context/StorageContext';
 import { NavigationContext } from '../context/NavigationContext';
 import { WidgetDataEngine } from '../engine/WidgetDataEngine';
 import { HorizonAgent } from '../lib/horizonAgent';
-import SegmentedControl from '../components/ui/SegmentedControl';
 import Glass from '../components/ui/Glass';
 import { getWidgetComponent } from '../components/widgets/WidgetRegistry';
-import { EditLayoutModal } from '../components/horizon/EditLayoutModal';
 import { EmptyState } from '../components/ui/EmptyState';
 import UpdateManager from '../components/system/UpdateManager';
 import { OnboardingWizard } from '../components/system/OnboardingWizard';
 import { Icons } from '../components/ui/Icons';
-import { OrbitButton } from '../components/ui/OrbitButton';
 import '../styles/motion.css';
 
 class WidgetErrorBoundary extends React.Component {
@@ -38,11 +35,10 @@ class WidgetErrorBoundary extends React.Component {
 }
 
 export const Horizon = () => {
-  const { metrics, logEntries, allLogs, onboardingComplete } = useContext(StorageContext);
+  const { metrics, logEntries, allLogs, updateWidgetLayout, widgetLayout } = useContext(StorageContext);
   const { setActiveTab } = useContext(NavigationContext);
   const [segment, setSegment] = useState('Weekly');
   const [isEditing, setIsEditing] = useState(false);
-  const [isNudgeDismissed, setIsNudgeDismissed] = useState(false);
   const [showWizard, setShowWizard] = useState(false);
   
   const todayDate = new Date().toLocaleDateString('en-US', { 
@@ -72,27 +68,45 @@ export const Horizon = () => {
     }
   }, [metrics, allLogs]);
 
-  const widgets = useMemo(() => {
-    try {
-      return WidgetDataEngine.generateWidgets
-        ? WidgetDataEngine.generateWidgets(metrics, allLogs, segment)
-        : [];
-    } catch (e) {
-      return [];
-    }
-  }, [metrics, allLogs, segment]);
+  // Merge layout order with metrics data
+  const orderedWidgets = useMemo(() => {
+      // Get base widgets
+      const baseWidgets = WidgetDataEngine.generateWidgets(metrics, allLogs, segment);
+
+      // If no layout saved, return base
+      const layoutOrder = widgetLayout?.Horizon;
+      if (!layoutOrder || !Array.isArray(layoutOrder)) return baseWidgets;
+
+      // Map base widgets by ID for quick lookup
+      const widgetMap = new Map(baseWidgets.map(w => [w.id, w]));
+
+      // Reorder based on layout
+      const ordered = layoutOrder.map(id => widgetMap.get(id)).filter(Boolean);
+
+      // Append any new metrics that aren't in the layout yet
+      const processedIds = new Set(ordered.map(w => w.id));
+      const remaining = baseWidgets.filter(w => !processedIds.has(w.id));
+
+      return [...ordered, ...remaining];
+  }, [metrics, allLogs, segment, widgetLayout]);
 
   const hasMetrics = metrics && metrics.length > 0;
 
-  const showNudge = useMemo(() => {
-      if (!hasMetrics) return false;
-      if (isNudgeDismissed) return false;
+  const moveWidget = (index, direction) => {
+      if (!updateWidgetLayout) return;
 
-      const metricCount = metrics.length;
-      const hasGoal = metrics.some(m => m.goal !== null && m.goal !== undefined && m.goal > 0);
+      const newOrder = [...orderedWidgets];
+      const targetIndex = index + direction;
 
-      return metricCount < 3 || !hasGoal;
-  }, [metrics, hasMetrics, isNudgeDismissed]);
+      if (targetIndex < 0 || targetIndex >= newOrder.length) return;
+
+      // Swap
+      [newOrder[index], newOrder[targetIndex]] = [newOrder[targetIndex], newOrder[index]];
+
+      // Save ID list
+      const newLayoutIds = newOrder.map(w => w.id);
+      updateWidgetLayout(prev => ({ ...prev, Horizon: newLayoutIds }));
+  };
 
   return (
     <div className="layout-padding fade-in">
@@ -108,10 +122,10 @@ export const Horizon = () => {
           </h1>
           {hasMetrics && (
             <button
-              onClick={() => setIsEditing(true)}
-              className="text-xs font-medium text-secondary hover:text-primary transition-colors mb-1"
+              onClick={() => setIsEditing(!isEditing)}
+              className={`text-xs font-medium transition-colors mb-1 ${isEditing ? 'text-blue' : 'text-secondary hover:text-primary'}`}
             >
-              Edit
+              {isEditing ? 'Done' : 'Edit'}
             </button>
           )}
         </div>
@@ -138,36 +152,6 @@ export const Horizon = () => {
           </div>
         )}
 
-        {showNudge && (
-            <Glass
-              className="relative mb-6"
-              style={{
-                background: 'linear-gradient(to right, rgba(0,122,255,0.1), rgba(175,82,222,0.1))',
-                borderColor: 'rgba(0,122,255,0.2)'
-              }}
-            >
-                <OrbitButton
-                    onClick={() => setIsNudgeDismissed(true)}
-                    variant="secondary"
-                    className="absolute top-2 right-2 !w-8 !h-8 !p-0"
-                    icon={<Icons.X size={14} />}
-                />
-                <div className="flex justify-between items-center pr-6">
-                    <div>
-                        <div className="font-bold text-blue">Complete Your Orbit</div>
-                        <div className="text-xs text-secondary mt-1">Add at least 3 metrics and 1 goal for better insights.</div>
-                    </div>
-                    <OrbitButton
-                      onClick={() => setActiveTab('System')}
-                      variant="primary"
-                      className="!w-auto !h-8 !px-4 !text-xs"
-                    >
-                        Setup
-                    </OrbitButton>
-                </div>
-            </Glass>
-        )}
-
         <Glass className="p-4 border-l-4 border-blue mb-4">
           <div className="flex flex-col justify-center gap-2 min-h-[80px]">
             <div className="text-xs font-bold text-blue uppercase tracking-wider flex items-center gap-2">
@@ -190,24 +174,38 @@ export const Horizon = () => {
         {hasMetrics && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              {widgets.map((widget, idx) => {
+              {orderedWidgets.map((widget, idx) => {
                 const WidgetComponent = getWidgetComponent(widget.widgetType);
                 return (
-                  <Glass key={widget.id || idx} className="relative overflow-hidden">
+                  <Glass key={widget.id || idx} className={`relative overflow-hidden transition-transform ${isEditing ? 'scale-[0.98] border-blue border-opacity-50' : ''}`}>
                      <WidgetErrorBoundary>
                        <WidgetComponent data={widget.data} title={widget.title} />
                      </WidgetErrorBoundary>
+
+                     {isEditing && (
+                         <div className="absolute inset-0 bg-black/5 z-50 flex items-center justify-center gap-4">
+                             <button
+                               onClick={() => moveWidget(idx, -1)}
+                               disabled={idx === 0}
+                               className="w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center disabled:opacity-30 active:scale-95 transition-all text-xl"
+                             >
+                                 ◀
+                             </button>
+                             <button
+                               onClick={() => moveWidget(idx, 1)}
+                               disabled={idx === orderedWidgets.length - 1}
+                               className="w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center disabled:opacity-30 active:scale-95 transition-all text-xl"
+                             >
+                                 ▶
+                             </button>
+                         </div>
+                     )}
                   </Glass>
                 );
               })}
             </div>
           </>
         )}
-
-        <EditLayoutModal
-          isOpen={isEditing}
-          onClose={() => setIsEditing(false)}
-        />
       </div>
     </div>
   );

@@ -53,20 +53,22 @@ export const DailyCheckInForm = () => {
   return (
     <Glass>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        {metrics.length === 0 ? (
-           <div className="text-center text-secondary py-4 italic text-sm">
-             No metrics defined. Go to System to add metrics.
-           </div>
-        ) : (
-          metrics.map(metric => (
-            <MetricInput
-              key={metric.id}
-              metric={metric}
-              value={entries[metric.id] || ''}
-              onChange={(val) => handleChange(metric.id, val)}
-            />
-          ))
-        )}
+        <div style={{ background: 'var(--bg-color)', borderRadius: '12px', padding: '16px' }} className="flex flex-col gap-4 border border-separator/50">
+            {metrics.length === 0 ? (
+            <div className="text-center text-secondary py-4 italic text-sm">
+                No metrics defined. Go to System to add metrics.
+            </div>
+            ) : (
+            metrics.map(metric => (
+                <MetricInput
+                key={metric.id}
+                metric={metric}
+                value={entries[metric.id] || ''}
+                onChange={(val) => handleChange(metric.id, val)}
+                />
+            ))
+            )}
+        </div>
         
         <OrbitButton
           type="submit" 
