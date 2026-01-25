@@ -18,19 +18,43 @@ export const ReliabilityRing = ({ data }) => {
   const { value = 0, label = '', color = '#4f46e5' } = data;
 
   return (
-    <div className="flex items-center justify-center h-full w-full relative" style={{ aspectRatio: '1/1' }}>
-      <div className="absolute top-3 right-3 text-xs font-bold text-secondary">
-          {label}
+    <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100%',
+        width: '100%'
+    }}>
+      <div style={{ position: 'relative', width: '110px', height: '110px' }}>
+          <RingChart
+            value={value}
+            size={110}
+            strokeWidth={12}
+            color={color}
+            label={null}
+          />
+          <div style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              pointerEvents: 'none'
+          }}>
+              <span style={{ fontSize: '18px', fontWeight: '700', fill: 'var(--text-primary)' }}>
+                {Math.round(value)}%
+              </span>
+          </div>
       </div>
-      <RingChart
-        value={value}
-        size={110}
-        strokeWidth={12}
-        color={color}
-        label={null}
-      />
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <span className="text-3xl font-bold tracking-tighter">{Math.round(value)}%</span>
+      <div style={{
+          marginTop: '8px',
+          fontSize: '12px',
+          color: 'var(--text-secondary)',
+          fontWeight: '600',
+          textTransform: 'uppercase'
+      }}>
+          {label}
       </div>
     </div>
   );

@@ -25,23 +25,21 @@ export const NumberWidget = ({ data }) => {
   );
 
   return (
-    <div className="flex flex-col h-full w-full justify-center items-center relative p-1" style={{ aspectRatio: '1/1' }}>
-      <div className="absolute top-3 right-3 text-xs font-bold text-secondary">
+    <div style={{ position: 'relative', height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ position: 'absolute', top: '12px', left: '12px', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
         {label}
       </div>
 
-      <div className="flex items-center gap-2">
-          <FlameIcon />
-          <span className="text-5xl font-bold tracking-tight">
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <span style={{ fontSize: '32px', fontWeight: '800', color: 'var(--text-primary)', lineHeight: 1 }}>
             {value}
           </span>
+          {unit && (
+            <span style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-secondary)', textTransform: 'uppercase', marginTop: '4px' }}>
+              {unit}
+            </span>
+          )}
       </div>
-
-      {unit && (
-        <span className="text-xs text-secondary font-bold uppercase tracking-wider mt-1">
-          {unit}
-        </span>
-      )}
     </div>
   );
 };

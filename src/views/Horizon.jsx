@@ -172,39 +172,68 @@ export const Horizon = () => {
         </Glass>
 
         {hasMetrics && (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              {orderedWidgets.map((widget, idx) => {
-                const WidgetComponent = getWidgetComponent(widget.widgetType);
-                return (
-                  <Glass key={widget.id || idx} className={`relative overflow-hidden transition-transform ${isEditing ? 'scale-[0.98] border-blue border-opacity-50' : ''}`}>
-                     <WidgetErrorBoundary>
-                       <WidgetComponent data={widget.data} title={widget.title} />
-                     </WidgetErrorBoundary>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '16px',
+            padding: '16px',
+            paddingBottom: '100px'
+          }}>
+            {orderedWidgets.map((widget, idx) => {
+              const WidgetComponent = getWidgetComponent(widget.widgetType);
+              const isFullWidth = widget.widgetType === 'stackedbar' || widget.widgetType === 'sparkline';
 
-                     {isEditing && (
-                         <div className="absolute inset-0 bg-black/5 z-50 flex items-center justify-center gap-4">
-                             <button
-                               onClick={() => moveWidget(idx, -1)}
-                               disabled={idx === 0}
-                               className="w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center disabled:opacity-30 active:scale-95 transition-all text-xl"
-                             >
-                                 ◀
-                             </button>
-                             <button
-                               onClick={() => moveWidget(idx, 1)}
-                               disabled={idx === orderedWidgets.length - 1}
-                               className="w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center disabled:opacity-30 active:scale-95 transition-all text-xl"
-                             >
-                                 ▶
-                             </button>
-                         </div>
-                     )}
-                  </Glass>
-                );
-              })}
-            </div>
-          </>
+              return (
+                <Glass
+                  key={widget.id || idx}
+                  className={`relative overflow-hidden transition-transform ${isEditing ? 'scale-[0.98] border-blue border-opacity-50' : ''}`}
+                  style={{
+                    gridColumn: isFullWidth ? '1 / -1' : 'span 1',
+                    aspectRatio: isFullWidth ? 'auto' : '1 / 1'
+                  }}
+                >
+                   <WidgetErrorBoundary>
+                     <WidgetComponent data={widget.data} title={widget.title} />
+                   </WidgetErrorBoundary>
+
+                   {isEditing && (
+                       <div className="absolute inset-0 bg-black/5 z-50 flex items-center justify-center gap-4">
+                           <button
+                             onClick={() => moveWidget(idx, -1)}
+                             disabled={idx === 0}
+                             className="w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center disabled:opacity-30 active:scale-95 transition-all"
+                             style={{
+                               position: 'absolute',
+                               left: '12px',
+                               top: '50%',
+                               transform: 'translateY(-50%)'
+                             }}
+                           >
+                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                 <polyline points="15 18 9 12 15 6"></polyline>
+                               </svg>
+                           </button>
+                           <button
+                             onClick={() => moveWidget(idx, 1)}
+                             disabled={idx === orderedWidgets.length - 1}
+                             className="w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center disabled:opacity-30 active:scale-95 transition-all"
+                             style={{
+                               position: 'absolute',
+                               right: '12px',
+                               top: '50%',
+                               transform: 'translateY(-50%)'
+                             }}
+                           >
+                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                 <polyline points="9 18 15 12 9 6"></polyline>
+                               </svg>
+                           </button>
+                       </div>
+                   )}
+                </Glass>
+              );
+            })}
+          </div>
         )}
       </div>
     </div>

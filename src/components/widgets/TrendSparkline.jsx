@@ -18,28 +18,27 @@ export const TrendSparkline = ({ data }) => {
   const { data: values = [], current = 0, color = '#4f46e5', label = '', trendLabel = '' } = data;
 
   return (
-    <div className="flex flex-col h-full w-full justify-between relative">
-      <div className="absolute top-3 left-3 text-sm font-bold text-secondary uppercase tracking-wide z-10">
-          {label}
-      </div>
-      
-      <div className="absolute top-3 right-3 text-2xl font-bold z-10">
-          {Math.round(current)}
-      </div>
-
-      <div className="w-full h-full absolute inset-0">
-          <Sparkline
-            data={values}
-            width={300}
-            height={100}
-            lineColor={color}
-            fillColor={color}
-            strokeWidth={3}
-            showDots={false}
-            showLabels={false}
-            className="w-full h-full"
-          />
-      </div>
+    <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr', padding: '16px', alignItems: 'center', gap: '10px', height: '100%', width: '100%' }}>
+        {/* Left Col: Data */}
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontSize: '32px', fontWeight: '700', lineHeight: '1', color: 'var(--text-primary)' }}>{Math.round(current)}%</span>
+            <span style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>Current</span>
+        </div>
+        {/* Right Col: SVG */}
+        <div style={{ height: '50px', width: '100%' }}>
+            <Sparkline
+                data={values}
+                width={200}
+                height={50}
+                lineColor={color}
+                fillColor="transparent"
+                strokeWidth={3}
+                showDots={false}
+                showLabels={false}
+                preserveAspectRatio="none"
+                className="w-full h-full"
+            />
+        </div>
     </div>
   );
 };

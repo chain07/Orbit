@@ -15,35 +15,52 @@ export const MetricInput = ({ metric, value, onChange }) => {
   const renderInput = () => {
     switch (metric.type) {
         case MetricType.BOOLEAN:
+            // Toggle Switch
             return (
-                <div className="flex items-center gap-3">
+                <label style={{ position: 'relative', display: 'inline-block', width: '51px', height: '31px' }}>
                     <input
                         type="checkbox"
                         checked={!!value}
                         onChange={handleChange}
-                        className="w-6 h-6 rounded border-gray-300 text-blue focus:ring-blue"
+                        style={{ opacity: 0, width: 0, height: 0 }}
                     />
-                    <span className="text-sm text-secondary">{value ? 'Done' : 'Not Done'}</span>
-                </div>
+                    <span style={{
+                        position: 'absolute',
+                        cursor: 'pointer',
+                        top: 0, left: 0, right: 0, bottom: 0,
+                        backgroundColor: value ? '#34C759' : '#e9e9ea',
+                        borderRadius: '34px',
+                        transition: '.4s'
+                    }}></span>
+                    <span style={{
+                        position: 'absolute',
+                        height: '27px',
+                        width: '27px',
+                        left: '2px',
+                        bottom: '2px',
+                        backgroundColor: 'white',
+                        borderRadius: '50%',
+                        transition: '.4s',
+                        transform: value ? 'translateX(20px)' : 'translateX(0)',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                    }}></span>
+                </label>
             );
 
         case MetricType.RANGE:
             return (
-                <div className="flex flex-col gap-2 w-full">
-                    <div className="flex justify-between text-xs text-secondary">
-                        <span>{metric.range?.min || 1}</span>
-                        <span className="font-bold text-primary text-lg">{value || metric.range?.min || 0}</span>
-                        <span>{metric.range?.max || 10}</span>
-                    </div>
-                    <input
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                   <span style={{ fontSize: '12px', color: 'var(--text-secondary)', minWidth: '12px' }}>{metric.range?.min || 1}</span>
+                   <input
                         type="range"
                         min={metric.range?.min || 1}
                         max={metric.range?.max || 10}
                         step={metric.range?.step || 1}
                         value={value || metric.range?.min || 0}
                         onChange={handleChange}
-                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                        style={{ width: '120px', accentColor: '#007AFF' }}
                     />
+                    <span style={{ fontSize: '12px', color: 'var(--text-secondary)', minWidth: '12px', textAlign: 'right' }}>{metric.range?.max || 10}</span>
                 </div>
             );
 
@@ -52,9 +69,15 @@ export const MetricInput = ({ metric, value, onChange }) => {
                 <select
                     value={value}
                     onChange={handleChange}
-                    className="w-full p-2 rounded border border-separator bg-transparent text-sm"
+                    style={{
+                        padding: '8px',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(0,0,0,0.1)',
+                        backgroundColor: 'var(--bg-color)',
+                        fontSize: '14px'
+                    }}
                 >
-                    <option value="" disabled>Select option</option>
+                    <option value="" disabled>Select</option>
                     {(metric.options || []).map(opt => (
                         <option key={opt} value={opt}>{opt}</option>
                     ))}
@@ -64,25 +87,33 @@ export const MetricInput = ({ metric, value, onChange }) => {
         case MetricType.NUMBER:
         case MetricType.DURATION:
             return (
-               <div className="flex items-center gap-2">
+               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                    <button
                      type="button"
                      onClick={() => onChange(Math.max(0, (parseFloat(value) || 0) - 1))}
-                     className="w-10 h-10 rounded border border-separator flex items-center justify-center text-lg font-bold active:bg-gray-100"
+                     style={{
+                         width: '28px', height: '28px', borderRadius: '50%',
+                         border: '1px solid rgba(0,0,0,0.1)',
+                         backgroundColor: 'var(--bg-color)',
+                         display: 'flex', alignItems: 'center', justifyContent: 'center',
+                         fontSize: '18px', color: '#007AFF', cursor: 'pointer'
+                     }}
                    >
                        -
                    </button>
-                   <input
-                        type="number"
-                        value={value}
-                        onChange={handleChange}
-                        placeholder="0"
-                        className="flex-1 p-2 text-center rounded border border-separator text-lg font-mono bg-transparent"
-                    />
+                   <span style={{ fontSize: '16px', fontWeight: '600', minWidth: '24px', textAlign: 'center' }}>
+                       {value || 0}
+                   </span>
                     <button
                      type="button"
                      onClick={() => onChange((parseFloat(value) || 0) + 1)}
-                     className="w-10 h-10 rounded border border-separator flex items-center justify-center text-lg font-bold active:bg-gray-100"
+                     style={{
+                         width: '28px', height: '28px', borderRadius: '50%',
+                         border: '1px solid rgba(0,0,0,0.1)',
+                         backgroundColor: 'var(--bg-color)',
+                         display: 'flex', alignItems: 'center', justifyContent: 'center',
+                         fontSize: '18px', color: '#007AFF', cursor: 'pointer'
+                     }}
                    >
                        +
                    </button>
@@ -95,20 +126,35 @@ export const MetricInput = ({ metric, value, onChange }) => {
                     type="text"
                     value={value}
                     onChange={handleChange}
-                    placeholder="Enter value"
-                    className="w-full p-2 rounded border border-separator text-sm bg-transparent"
+                    placeholder="Value"
+                    style={{
+                        padding: '8px',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(0,0,0,0.1)',
+                        width: '100px',
+                        textAlign: 'right'
+                    }}
                 />
             );
     }
   };
 
   return (
-    <div className="flex flex-col gap-2 p-3 border border-separator/50 rounded-xl bg-card/50">
-      <div className="flex justify-between items-center">
-          <label className="font-bold text-sm">{metric.label}</label>
-          {metric.unit && <span className="text-xs text-secondary">{metric.unit}</span>}
+    <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '16px',
+        borderBottom: '0.5px solid rgba(0,0,0,0.1)',
+        backgroundColor: 'var(--card-bg)'
+    }}>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span style={{ fontSize: '16px', fontWeight: '500' }}>{metric.label}</span>
+          {metric.unit && <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{metric.unit}</span>}
       </div>
-      {renderInput()}
+      <div>
+        {renderInput()}
+      </div>
     </div>
   );
 };
