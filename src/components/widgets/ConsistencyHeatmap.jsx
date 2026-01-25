@@ -33,7 +33,7 @@ export const ConsistencyHeatmap = ({ data }) => {
   }, [data.values]);
 
   const getColor = (value) => {
-      if (!value) return 'rgba(0,0,0,0.06)'; // Empty - Darker grey for visibility
+      if (!value) return 'rgba(0,0,0,0.08)'; // Empty - Increased contrast
       // Active - #34C759
       return '#34C759';
   };

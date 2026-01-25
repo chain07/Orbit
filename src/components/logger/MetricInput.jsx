@@ -105,44 +105,37 @@ export const MetricInput = ({ metric, value, onChange }) => {
             );
 
         case MetricType.DURATION:
-            // Split Duration (Hrs / Mins) if it was implemented fully, for now reusing Stepper but cleaner
-            // Or ideally use the reference layout: 2 boxes.
-            // Simplified for reliability: Single Number Stepper but with Duration Label
+            // "Split Box" container implementation
+            const hours = Math.floor(value || 0);
+            const mins = Math.round(((value || 0) - hours) * 60);
+
             return (
-               <div style={{ display: 'flex', alignItems: 'center', backgroundColor: 'var(--bg-color)', borderRadius: '12px', padding: '4px' }}>
-                   <button
-                     type="button"
-                     onClick={() => onChange(Math.max(0, (parseFloat(value) || 0) - 0.5))}
-                     style={{
-                         width: '40px', height: '36px', borderRadius: '8px', border: 'none',
-                         backgroundColor: 'var(--card-bg)', color: 'var(--text-primary)',
-                         fontSize: '20px', fontWeight: '500', cursor: 'pointer',
-                         boxShadow: '0 2px 5px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center'
-                     }}
-                   >
-                       −
-                   </button>
-                   <div style={{ minWidth: '50px', textAlign: 'center', fontSize: '17px', fontWeight: '600' }}>
-                       {value || 0}<span style={{fontSize: '11px', color: 'var(--text-secondary)', marginLeft: '2px'}}>hr</span>
+               <div style={{ display: 'flex', gap: '12px', width: '200px' }}>
+                   <div style={{ backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: '12px', padding: '10px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                       <input
+                           type="number"
+                           value={hours}
+                           onChange={(e) => onChange(parseFloat(e.target.value) + (mins/60))}
+                           style={{ fontSize: '20px', fontWeight: '600', textAlign: 'center', background: 'transparent', border: 'none', width: '100%', padding: 0 }}
+                       />
+                       <span style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Hours</span>
                    </div>
-                    <button
-                     type="button"
-                     onClick={() => onChange((parseFloat(value) || 0) + 0.5)}
-                     style={{
-                         width: '40px', height: '36px', borderRadius: '8px', border: 'none',
-                         backgroundColor: 'var(--card-bg)', color: 'var(--text-primary)',
-                         fontSize: '20px', fontWeight: '500', cursor: 'pointer',
-                         boxShadow: '0 2px 5px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center'
-                     }}
-                   >
-                       ＋
-                   </button>
+                   <div style={{ backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: '12px', padding: '10px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                       <input
+                           type="number"
+                           value={mins}
+                           max={59}
+                           onChange={(e) => onChange(hours + (parseFloat(e.target.value)/60))}
+                           style={{ fontSize: '20px', fontWeight: '600', textAlign: 'center', background: 'transparent', border: 'none', width: '100%', padding: 0 }}
+                       />
+                       <span style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Mins</span>
+                   </div>
                </div>
             );
 
         case MetricType.NUMBER:
             return (
-               <div style={{ display: 'flex', alignItems: 'center', backgroundColor: 'var(--bg-color)', borderRadius: '12px', padding: '4px' }}>
+               <div style={{ display: 'flex', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: '12px', padding: '4px' }}>
                    <button
                      type="button"
                      onClick={() => onChange(Math.max(0, (parseFloat(value) || 0) - 1))}
@@ -150,7 +143,7 @@ export const MetricInput = ({ metric, value, onChange }) => {
                          width: '40px', height: '36px', borderRadius: '8px', border: 'none',
                          backgroundColor: 'var(--card-bg)', color: 'var(--text-primary)',
                          fontSize: '20px', fontWeight: '500', cursor: 'pointer',
-                         boxShadow: '0 2px 5px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                         boxShadow: '0 2px 4px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center'
                      }}
                    >
                        −
@@ -165,7 +158,7 @@ export const MetricInput = ({ metric, value, onChange }) => {
                          width: '40px', height: '36px', borderRadius: '8px', border: 'none',
                          backgroundColor: 'var(--card-bg)', color: 'var(--text-primary)',
                          fontSize: '20px', fontWeight: '500', cursor: 'pointer',
-                         boxShadow: '0 2px 5px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                         boxShadow: '0 2px 4px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center'
                      }}
                    >
                        ＋
@@ -218,7 +211,8 @@ export const MetricInput = ({ metric, value, onChange }) => {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '16px',
+        paddingBottom: '24px',
+        marginBottom: '24px',
         borderBottom: '0.5px solid rgba(0,0,0,0.1)',
         minHeight: '56px'
     }}>
