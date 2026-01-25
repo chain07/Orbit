@@ -161,12 +161,12 @@ export const DataManagement = () => {
           const m1 = createMetric({ name: 'read_30', label: 'Read 30 mins', type: MetricType.BOOLEAN, color: '#34C759', widgetType: WidgetType.STREAK, goal: 1 });
           const m2 = createMetric({ name: 'water', label: 'Water (oz)', type: MetricType.NUMBER, color: '#007AFF', widgetType: WidgetType.RING, goal: 100, unit: 'oz' });
           // Coding -> Progress Bar
-          const m3 = createMetric({ name: 'coding', label: 'Coding', type: MetricType.DURATION, color: '#AF52DE', widgetType: 'progress', goal: 4, unit: 'hrs' });
+          const m3 = createMetric({ name: 'coding', label: 'Coding', type: MetricType.DURATION, color: '#AF52DE', widgetType: WidgetType.PROGRESS, goal: 4, unit: 'hrs' });
           const m4 = createMetric({ name: 'energy', label: 'Energy', type: MetricType.RANGE, color: '#FF9500', widgetType: WidgetType.HEATMAP, range: {min:1, max:10}, goal: 8 });
           // Mood -> Compound Bar
-          const m5 = createMetric({ name: 'mood', label: 'Mood', type: MetricType.SELECT, color: '#FF2D55', widgetType: 'compound', options: ['Good', 'Neutral', 'Bad'], goal: null });
+          const m5 = createMetric({ name: 'mood', label: 'Mood', type: MetricType.SELECT, color: '#FF2D55', widgetType: WidgetType.COMPOUND, options: ['Good', 'Neutral', 'Bad'], goal: null });
           // New Metric for History Widget testing
-          const m6 = createMetric({ name: 'journal', label: 'Journal', type: MetricType.TEXT, color: '#5AC8FA', widgetType: 'history', goal: null });
+          const m6 = createMetric({ name: 'journal', label: 'Journal', type: MetricType.TEXT, color: '#5AC8FA', widgetType: WidgetType.HISTORY, goal: null });
 
           const newMetrics = [m1, m2, m3, m4, m5, m6];
 

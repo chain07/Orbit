@@ -77,8 +77,8 @@ export const MetricInput = ({ metric, value, onChange }) => {
                             appearance: 'none',
                             WebkitAppearance: 'none',
                             width: '100%',
-                            backgroundColor: 'var(--bg-color)',
-                            border: 'none',
+                            backgroundColor: '#E5E5EA',
+                            border: '1px solid rgba(0,0,0,0.05)',
                             borderRadius: '12px',
                             padding: '14px 32px 14px 16px', // Right padding for icon
                             fontSize: '16px',
@@ -111,7 +111,7 @@ export const MetricInput = ({ metric, value, onChange }) => {
 
             return (
                <div style={{ display: 'flex', gap: '12px', width: '200px' }}>
-                   <div style={{ backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: '12px', padding: '10px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                   <div style={{ backgroundColor: '#E5E5EA', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '12px', padding: '10px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                        <input
                            type="number"
                            value={hours}
@@ -120,7 +120,7 @@ export const MetricInput = ({ metric, value, onChange }) => {
                        />
                        <span style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Hours</span>
                    </div>
-                   <div style={{ backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: '12px', padding: '10px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                   <div style={{ backgroundColor: '#E5E5EA', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '12px', padding: '10px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                        <input
                            type="number"
                            value={mins}
@@ -135,7 +135,7 @@ export const MetricInput = ({ metric, value, onChange }) => {
 
         case MetricType.NUMBER:
             return (
-               <div style={{ display: 'flex', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: '12px', padding: '4px' }}>
+               <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#E5E5EA', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '12px', padding: '4px' }}>
                    <button
                      type="button"
                      onClick={() => onChange(Math.max(0, (parseFloat(value) || 0) - 1))}

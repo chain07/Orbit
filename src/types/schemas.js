@@ -44,8 +44,8 @@ export const WidgetType = Object.freeze({
   STREAK: 'streak',
   NUMBER: 'number',
   HISTORY: 'history',
-  COMPOUND: 'compound',
-  PROGRESS: 'progress'
+  COMPOUND: 'compound', // Matches Seeder
+  PROGRESS: 'progress'  // Matches Seeder
 });
 
 /**

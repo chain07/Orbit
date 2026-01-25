@@ -33,13 +33,12 @@ export const ConsistencyHeatmap = ({ data }) => {
   }, [data.values]);
 
   const getColor = (value) => {
-      if (!value) return 'rgba(0,0,0,0.08)'; // Empty - Increased contrast
-      // Active - #34C759
+      if (!value) return '#E5E5EA';
       return '#34C759';
   };
 
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', alignContent: 'center', justifyContent: 'center', height: '100%', padding: '10px' }}>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', justifyContent: 'center', height: '100%', padding: '10px' }}>
       {days.map(day => (
         <div
             key={day.date}

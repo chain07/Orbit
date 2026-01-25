@@ -70,6 +70,14 @@ export const WidgetDataEngine = {
             data = WidgetDataEngine.stackedBarData(metric, metricLogs, segment);
             break;
 
+          case WidgetType.COMPOUND:
+            data = WidgetDataEngine.compoundBarData(metric, metricLogs);
+            break;
+
+          case WidgetType.PROGRESS:
+            data = WidgetDataEngine.progressBarData(metric, metricLogs);
+            break;
+
           default:
             data = { error: 'Unknown widget type' };
         }
@@ -272,6 +280,46 @@ export const WidgetDataEngine = {
     return {
         entries,
         colors: { [metric.label]: metric.color || '#007AFF' } // Simple mapping
+    };
+  },
+
+  /**
+   * Compound Bar Data (for Select metrics)
+   */
+  compoundBarData: (metric, logs) => {
+    // Frequency distribution
+    const counts = {};
+    logs.forEach(l => {
+        const val = String(l.value); // ensure string key
+        counts[val] = (counts[val] || 0) + 1;
+    });
+
+    const breakdown = Object.entries(counts).map(([label, value]) => ({
+        label,
+        value
+    }));
+
+    return {
+        breakdown,
+        label: metric.label
+    };
+  },
+
+  /**
+   * Progress Bar Data (for Duration/Range/Number)
+   */
+  progressBarData: (metric, logs) => {
+    const val = MetricEngine.getTodayValue ? MetricEngine.getTodayValue(logs) : 0;
+
+    // For Duration, val is in hours.
+    // For Number, val is number.
+
+    return {
+        value: Number(val.toFixed(1)), // clean formatting
+        max: metric.goal || 10,
+        label: metric.label,
+        unit: metric.unit,
+        color: metric.color
     };
   }
 };

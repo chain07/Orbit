@@ -112,7 +112,7 @@ export const Horizon = () => {
   };
 
   return (
-    <div className="layout-padding fade-in">
+    <div className="layout-padding fade-in" style={{ maxWidth: '100vw', overflowX: 'hidden' }}>
       
       {/* Header - Fixed Gap */}
       <div className="view-header-stack">
@@ -187,9 +187,9 @@ export const Horizon = () => {
           <div style={{
             display: isEditing ? 'flex' : 'grid',
             flexDirection: isEditing ? 'column' : 'initial',
-            gridTemplateColumns: isEditing ? 'none' : '1fr 1fr',
-            gap: '20px',
-            padding: '24px',
+            gridTemplateColumns: isEditing ? 'none' : 'repeat(2, minmax(0, 1fr))',
+            gap: '16px',
+            padding: '20px',
             width: '100%',
             boxSizing: 'border-box',
             overflowX: 'hidden',
