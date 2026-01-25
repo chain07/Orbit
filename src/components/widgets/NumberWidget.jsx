@@ -27,14 +27,14 @@ export const NumberWidget = ({ data }) => {
   const trendIcon = trendDirection === 'up' ? '↑' : trendDirection === 'down' ? '↓' : '→';
 
   return (
-    <div className="flex flex-col h-full w-full justify-between p-1">
+    <div className="flex flex-col h-full w-full justify-between p-1 aspect-square">
       <div className="text-sm font-bold text-secondary uppercase tracking-wide">
         {label}
       </div>
 
       <div className="flex flex-col gap-1 my-auto">
         <div className="flex items-baseline gap-1">
-          <span className="text-3xl font-bold tracking-tight">
+          <span className="text-4xl font-bold tracking-tight">
             {value}
           </span>
           {unit && (

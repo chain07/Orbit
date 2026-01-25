@@ -52,8 +52,8 @@ def verify_orbit(page: Page):
     page.wait_for_selector("text=Intelligence")
     expect(page.get_by_text("System Health", exact=True)).to_be_visible()
 
-    # Check for "Intensity" which is only visible when hasData
-    expect(page.get_by_text("Intensity")).to_be_visible()
+    # Check for "Momentum" which is only visible when hasData (renamed from Intensity)
+    expect(page.get_by_text("Momentum", exact=True)).to_be_visible()
 
     page.screenshot(path=f"{OUTPUT_DIR}/orbit_intel.png")
 

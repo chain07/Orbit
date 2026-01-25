@@ -18,17 +18,21 @@ export const ReliabilityRing = ({ data }) => {
   const { value = 0, label = '', color = '#4f46e5' } = data;
 
   return (
-    <div className="flex flex-col items-center justify-center h-full w-full py-2">
+    <div className="flex flex-row items-center justify-center h-full w-full gap-4 aspect-square">
       <RingChart
         value={value}
-        size={120}
-        strokeWidth={12}
+        size={90}
+        strokeWidth={10}
         color={color}
-        label={`${Math.round(value)}%`}
-        className="mb-2"
+        label={null}
       />
-      <div className="text-sm font-medium text-secondary text-center">
-        {label}
+      <div className="flex flex-col">
+        <div className="text-2xl font-bold tracking-tight">
+          {Math.round(value)}%
+        </div>
+        <div className="text-xs font-medium text-secondary">
+          {label}
+        </div>
       </div>
     </div>
   );

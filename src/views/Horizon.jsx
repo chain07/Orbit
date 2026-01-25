@@ -66,7 +66,7 @@ export const Horizon = () => {
       return Object.values(allInsights || {}).flat()
         .filter(i => i.context === 'tactical')
         .sort((a, b) => (b.priority || 0) - (a.priority || 0))
-        .slice(0, 3);
+        .slice(0, 1);
     } catch (e) {
       return [];
     }
@@ -107,13 +107,12 @@ export const Horizon = () => {
             {greeting}
           </h1>
           {hasMetrics && (
-            <OrbitButton
+            <button
               onClick={() => setIsEditing(true)}
-              variant="secondary"
-              className="!w-auto !h-9 !px-4 !text-xs"
+              className="text-xs font-medium text-secondary hover:text-primary transition-colors mb-1"
             >
-              Edit Layout
-            </OrbitButton>
+              Edit
+            </button>
           )}
         </div>
       </div>
@@ -170,19 +169,19 @@ export const Horizon = () => {
         )}
 
         <Glass className="p-4 border-l-4 border-blue mb-4">
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col justify-center gap-2 min-h-[80px]">
             <div className="text-xs font-bold text-blue uppercase tracking-wider flex items-center gap-2">
               <Icons.Activity className="text-blue" size={14} /> DAILY BRIEFING
             </div>
-            <div className="text-secondary text-sm leading-relaxed">
+            <div className="text-md font-medium text-primary leading-relaxed">
               {hasMetrics && topInsights.length > 0 ? (
                 topInsights.map((insight, idx) => (
-                  <div key={idx} className="mb-1">
+                  <div key={idx}>
                     {insight.message}
                   </div>
                 ))
               ) : (
-                "Good morning. I'll scan your data for actionable tactical moves and insights once you start logging. For now, try adding a few metrics to get started."
+                "Good morning. I'll scan your data for actionable tactical moves and insights once you start logging."
               )}
             </div>
           </div>
@@ -190,12 +189,6 @@ export const Horizon = () => {
 
         {hasMetrics && (
           <>
-            <SegmentedControl
-              options={['Daily', 'Weekly', 'Monthly'].map(s => ({ label: s, value: s }))}
-              value={segment}
-              onChange={setSegment}
-            />
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               {widgets.map((widget, idx) => {
                 const WidgetComponent = getWidgetComponent(widget.widgetType);

@@ -266,7 +266,7 @@ export const DataManagement = () => {
       </OrbitButton>
 
       <div className="section-label section-export">Universal Export</div>
-      <div className="flex flex-col gap-3">
+      <div className="flex gap-3">
          <OrbitButton
             onClick={handleExportJSON}
             variant="primary"

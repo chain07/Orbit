@@ -15,22 +15,26 @@ import { Sparkline } from '../ui/charts/Sparkline';
 export const TrendSparkline = ({ data }) => {
   if (!data || !data.data) return null;
 
-  const { data: values = [], color = '#4f46e5', label = '', trendLabel = '' } = data;
+  const { data: values = [], current = 0, color = '#4f46e5', label = '', trendLabel = '' } = data;
 
   return (
-    <div className="flex flex-col h-full w-full justify-between">
-      <div className="flex justify-between items-baseline mb-2 px-1">
+    <div className="flex flex-col h-full w-full justify-between relative">
+      <div className="flex justify-between items-start mb-2 px-1 z-10">
         <span className="text-sm font-bold text-secondary uppercase tracking-wide">
           {label}
         </span>
-        {trendLabel && (
-          <span className="text-xs font-medium text-secondary">
-            {trendLabel}
-          </span>
-        )}
       </div>
       
-      <div className="flex-1 w-full min-h-[60px] relative">
+      <div className="absolute top-1 right-1 flex flex-col items-end z-10">
+          <span className="text-xl font-bold">{current}</span>
+          {trendLabel && (
+            <span className="text-[10px] font-medium text-secondary">
+                {trendLabel}
+            </span>
+          )}
+      </div>
+
+      <div className="flex-1 w-full min-h-[60px] relative mt-4">
         {/* We use a container to ensure the SVG scales correctly */}
         <div className="absolute inset-0">
           <Sparkline

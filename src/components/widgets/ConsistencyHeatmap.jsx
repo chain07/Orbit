@@ -16,14 +16,14 @@ import { dateUtils } from '../../lib/dateUtils';
 export const ConsistencyHeatmap = ({ data }) => {
   if (!data || !data.values) return null;
 
-  // Default to last 12 weeks/90 days if range not provided
+  // Default to last 35 days (7x5 grid)
   const { startDate, endDate } = useMemo(() => {
     if (data.startDate && data.endDate) {
       return { startDate: data.startDate, endDate: data.endDate };
     }
     const end = new Date();
     const start = new Date();
-    start.setDate(end.getDate() - 84); // 12 weeks approx
+    start.setDate(end.getDate() - 34); // 35 days total (including today)
     return {
       startDate: dateUtils.formatDate(start),
       endDate: dateUtils.formatDate(end)
@@ -55,17 +55,17 @@ export const ConsistencyHeatmap = ({ data }) => {
           Consistency
         </span>
         <span className="text-xs text-secondary opacity-70">
-          Last 90 Days
+          Last 5 Weeks
         </span>
       </div>
       
-      <div className="flex-1 overflow-x-auto overflow-y-hidden">
+      <div className="flex-1 overflow-hidden flex items-center justify-center">
         <HeatMap
           data={data.values}
           startDate={startDate}
           endDate={endDate}
-          size={14} // Slightly smaller squares for density
-          className="justify-start pb-2"
+          size={16}
+          className="justify-center"
           colorScale={colorScale}
         />
       </div>

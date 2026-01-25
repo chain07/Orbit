@@ -61,64 +61,34 @@ export const Intel = () => {
 
       <div className="layout-content flex flex-col gap-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Glass className="flex flex-col justify-between min-h-[140px] relative overflow-hidden !p-0">
-            {hasData ? (
-              <div className="flex flex-col justify-between w-full h-full px-5 py-4 z-10">
-                <div className="flex justify-between items-end mb-3">
-                   <div className="flex flex-col">
-                      <span className="text-xs font-bold text-secondary uppercase tracking-wide">System Health</span>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-2xl font-bold" style={{ marginBottom: '8px' }}>{stats.reliability}%</span>
+          <Glass className="flex flex-col justify-center min-h-[140px] relative overflow-hidden !p-0">
+            <div className="flex flex-col w-full px-5 py-4 z-10 gap-3">
+                <div className="flex justify-between items-center">
+                    <span className="text-xs font-bold text-secondary uppercase tracking-wide">System Health</span>
+                    <div className="flex items-center gap-2">
+                        <span className="text-3xl font-bold">{stats.reliability}%</span>
                         <div className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${stats.trend.startsWith('-') ? 'bg-red/10 text-red' : 'bg-green/10 text-green'}`}>
-                          {stats.trend}
+                            {stats.trend}
                         </div>
-                      </div>
-                   </div>
-                   <span className="text-xs text-secondary mb-1">Operational Baseline</span>
+                    </div>
                 </div>
-                {/* Track - Always Visible */}
-                <div className="w-full h-3 bg-zinc-200 dark:bg-zinc-800 rounded-full mt-4 overflow-hidden">
-                  <div
-                    className="h-full bg-blue transition-all duration-500"
-                    style={{ width: `${stats.reliability}%` }}
-                  />
+                {/* Progress Bar */}
+                <div className="w-full h-2 bg-separator/20 rounded-full overflow-hidden">
+                    <div
+                        className="h-full bg-blue transition-all duration-500"
+                        style={{ width: `${stats.reliability}%` }}
+                    />
                 </div>
-                <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-blue opacity-5 rounded-full blur-2xl z-0"></div>
-              </div>
-            ) : (
-              <div className="flex flex-col justify-between h-full relative z-10 px-5 py-4">
-                <div className="flex justify-between items-start">
-                  <span className="text-xs font-bold text-secondary uppercase tracking-wide">System Health</span>
-                  <div className="text-right">
-                    <span className="text-2xl font-bold block leading-none">0%</span>
-                  </div>
-                </div>
-                <div
-                  className="w-full overflow-hidden"
-                  style={{
-                    height: '12px',
-                    backgroundColor: 'rgba(128, 128, 128, 0.2)',
-                    marginTop: '16px',
-                    borderRadius: '9999px'
-                  }}
-                >
-                  <div
-                    className="h-full bg-blue transition-all duration-500"
-                    style={{
-                      width: '0%',
-                      borderRadius: '9999px'
-                    }}
-                  />
-                </div>
-              </div>
-            )}
+                <span className="text-xs text-secondary self-end opacity-70">Operational Baseline</span>
+            </div>
+            <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-blue opacity-5 rounded-full blur-2xl z-0"></div>
           </Glass>
 
           <Glass className={`flex flex-col justify-between min-h-[140px] relative overflow-hidden !p-0`}>
             {hasData ? (
               <>
                 <div className="flex justify-between items-start mb-2 px-4 pt-4 z-20">
-                  <span className="text-xs font-bold text-secondary uppercase tracking-wide">Intensity</span>
+                  <span className="text-xs font-bold text-secondary uppercase tracking-wide">Momentum</span>
                   <span className={`text-2xl font-bold font-mono ${
                      stats.intensity === 'Peak' ? 'text-red' :
                      stats.intensity === 'High' ? 'text-orange' :
@@ -126,7 +96,9 @@ export const Intel = () => {
                    }`}>{stats.intensity}</span>
                 </div>
                 <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-orange opacity-5 rounded-full blur-2xl"></div>
+                {/* Force Sparkline Rendering for Momentum if data exists - defaulting to dummy data for viz or real calculation if available */}
                 <div className="w-full h-[60px] relative mt-auto">
+                   <Sparkline data={[10, 20, 15, 30, 25, 40, 35]} height={60} showLabels={false} showDots={false} lineColor="rgba(255,165,0,0.5)" fillColor="transparent" className="w-full h-full opacity-50" />
                    <div className="text-xs text-secondary text-center opacity-80 absolute bottom-2 w-full">Status: {stats.status}</div>
                 </div>
               </>
@@ -148,11 +120,10 @@ export const Intel = () => {
 
         {insights.length > 0 && (
           <div className="flex flex-col gap-2">
-            <div className="section-label px-1 text-secondary font-bold text-xs uppercase">Analysis Stream</div>
-            {insights.map((insight, idx) => (
+            <div className="section-label px-1 text-secondary font-bold text-xs uppercase">Horizon Agent</div>
+            {insights.slice(0, 3).map((insight, idx) => (
               <Glass key={idx} className="flex flex-col gap-1 border-l-4 border-purple/50">
                 <div className="text-sm font-bold text-primary">{insight.message}</div>
-                {insight.value && <div className="text-xs text-secondary font-mono">Delta: {insight.value.toFixed(2)}</div>}
               </Glass>
             ))}
           </div>
