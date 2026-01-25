@@ -15,23 +15,17 @@ import React from 'react';
 export const NumberWidget = ({ data }) => {
   if (!data) return null;
 
-  const { value, label, unit = '', trend, trendDirection = 'neutral' } = data;
-
-  // Flame Icon SVG
-  const FlameIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange">
-        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 17c1.38 0 2.5-1.12 2.5-2.5 0-1.38-1.12-2.5-2.5-2.5 0-.7.7-1.33 1.5-1.75C13.5 10 14 9 14 8c0-2.5-2-3.5-2.5-4C10 5.5 8 8 8 10c0 1.5 1 3 2 4 .5.5.5 1.5 0 2z"/>
-    </svg>
-  );
+  const { value, label, unit = '' } = data;
 
   return (
     <div style={{ position: 'relative', height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ position: 'absolute', top: '12px', left: '14px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-secondary)', zIndex: 2 }}>
+      {/* Standard Header */}
+      <div style={{ position: 'absolute', top: '14px', left: '16px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-secondary)', zIndex: 10 }}>
         {label}
       </div>
 
-      {/* Background Icon */}
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.1, pointerEvents: 'none' }}>
+      {/* Background Icon - Kept for visual interest, adjusted opacity */}
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.05, pointerEvents: 'none' }}>
         <svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor" className="text-secondary">
            <path d="M8.5 14.5A2.5 2.5 0 0 0 11 17c1.38 0 2.5-1.12 2.5-2.5 0-1.38-1.12-2.5-2.5-2.5 0-.7.7-1.33 1.5-1.75C13.5 10 14 9 14 8c0-2.5-2-3.5-2.5-4C10 5.5 8 8 8 10c0 1.5 1 3 2 4 .5.5.5 1.5 0 2z"/>
         </svg>

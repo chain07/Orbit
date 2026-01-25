@@ -33,7 +33,8 @@ export const ReliabilityRing = ({ data }) => {
         width: '100%',
         position: 'relative'
     }}>
-      <div style={{ position: 'absolute', top: '10px', left: '10px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-secondary)', zIndex: 2 }}>
+      {/* Standard Header */}
+      <div style={{ position: 'absolute', top: '14px', left: '16px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-secondary)', zIndex: 10 }}>
         {label}
       </div>
 
@@ -54,7 +55,7 @@ export const ReliabilityRing = ({ data }) => {
               pointerEvents: 'none',
               paddingTop: '16px'
           }}>
-              <span style={{ fontSize: '24px', fontWeight: '800', fill: 'var(--text-primary)' }}>
+              <span style={{ fontSize: '28px', fontWeight: '800', color: 'var(--text-primary)' }}>
                 {Math.round(value)}%
               </span>
           </div>

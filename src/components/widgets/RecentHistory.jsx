@@ -1,19 +1,8 @@
 import React from 'react';
-import { dateUtils } from '../../lib/dateUtils'; // Assuming utility exists, or we use native Date
 
 /**
  * RecentHistory Widget
  * * Lists the last N entries for a metric.
- * * Expected data structure:
- * {
- * entries: Array<{
- * id: string,
- * value: number,
- * timestamp: string,
- * note: string (optional)
- * }>,
- * unit: string
- * }
  */
 export const RecentHistory = ({ data }) => {
   if (!data || !data.entries) return null;
@@ -26,18 +15,14 @@ export const RecentHistory = ({ data }) => {
     return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
   };
 
-  const formatTime = (isoString) => {
-    const d = new Date(isoString);
-    return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-  };
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', padding: '16px' }}>
-      <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>
+    <div style={{ position: 'relative', height: '100%', width: '100%', display: 'flex', flexDirection: 'column', padding: '16px' }}>
+      {/* Standard Header */}
+      <div style={{ position: 'absolute', top: '14px', left: '16px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-secondary)', zIndex: 10 }}>
         History
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '32px', overflowY: 'auto' }}>
         {recentItems.length === 0 ? (
           <div style={{ fontSize: '13px', color: 'var(--text-secondary)', fontStyle: 'italic', opacity: 0.6 }}>
             No recent entries

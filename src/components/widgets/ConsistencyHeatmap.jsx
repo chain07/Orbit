@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import { HeatMap } from '../ui/charts/Heatmap';
 import { dateUtils } from '../../lib/dateUtils';
 
 /**
@@ -13,7 +12,7 @@ import { dateUtils } from '../../lib/dateUtils';
  * color: string
  * }
  */
-export const ConsistencyHeatmap = ({ data }) => {
+export const ConsistencyHeatmap = ({ data, title }) => {
   if (!data || !data.values) return null;
 
   const days = useMemo(() => {
@@ -44,36 +43,66 @@ export const ConsistencyHeatmap = ({ data }) => {
   // Weekday labels (S, M, T, W, T, F, S)
   const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
+  // Calculate start day offset (0 = Sunday, ... 6 = Saturday)
+  const startDayIndex = new Date(days[0].date).getDay();
+  const offsetSlots = Array.from({ length: startDayIndex });
+
   return (
-    <div style={{ position: 'relative', height: '100%', width: '100%', padding: '10px' }}>
-        {/* Month Label */}
-        <div style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: '500' }}>
+    <div style={{ position: 'relative', height: '100%', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px' }}>
+
+        {/* Standard Header */}
+        <div style={{ position: 'absolute', top: '14px', left: '16px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-secondary)', zIndex: 10 }}>
+            {data.label || title || 'Consistency'}
+        </div>
+
+        {/* Context Label (Top Right) */}
+        <div style={{ position: 'absolute', top: '14px', right: '16px', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: '500', zIndex: 10 }}>
             {monthRange}
         </div>
 
-        {/* Grid */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', justifyContent: 'center', marginTop: '16px' }}>
-            {days.map(day => (
-                <div
-                    key={day.date}
-                    style={{
-                        width: '18px',
-                        height: '18px',
-                        borderRadius: '4px',
-                        backgroundColor: getColor(day.value)
-                    }}
-                    title={day.date}
-                />
-            ))}
-        </div>
+        {/* Grid Container */}
+        <div style={{
+            marginTop: '32px',
+            width: '100%',
+            maxWidth: '240px' // Limit width to keep squares reasonable
+        }}>
+            {/* Calendar Grid */}
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(7, 1fr)',
+                gap: '4px',
+                width: '100%'
+            }}>
+                {/* Empty slots for offset */}
+                {offsetSlots.map((_, i) => <div key={`empty-${i}`} />)}
 
-        {/* Weekday Row (Decorative bottom) */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginTop: '8px' }}>
-            {weekDays.map((d, i) => (
-                <div key={i} style={{ width: '18px', textAlign: 'center', fontSize: '9px', color: 'var(--text-secondary)', fontWeight: '600' }}>
-                    {d}
-                </div>
-            ))}
+                {/* Day Cells */}
+                {days.map(day => (
+                    <div
+                        key={day.date}
+                        style={{
+                            aspectRatio: '1/1',
+                            borderRadius: '4px',
+                            backgroundColor: getColor(day.value)
+                        }}
+                        title={day.date}
+                    />
+                ))}
+            </div>
+
+            {/* Sticky Day Labels */}
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(7, 1fr)',
+                gap: '4px',
+                marginTop: '8px'
+            }}>
+                {weekDays.map((d, i) => (
+                    <div key={i} style={{ textAlign: 'center', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: '600' }}>
+                        {d}
+                    </div>
+                ))}
+            </div>
         </div>
     </div>
   );

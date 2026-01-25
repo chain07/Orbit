@@ -4,24 +4,26 @@ import React, { useMemo } from 'react';
  * CompoundBarWidget
  * Use Case: For Select metrics.
  * Visual: Single bar, multi-colored segments. Legend below.
- * Reference: compoundbar.html
  */
 export const CompoundBarWidget = ({ data }) => {
   if (!data || !data.breakdown) return null;
 
   const { breakdown = [] } = data;
 
-  // Configuration - iOS Data Colors
-  // We can cycle these or match if data has color
+  // Extended iOS Palette (12 Colors)
   const palette = [
     '#007AFF', // Blue
     '#AF52DE', // Purple
-    '#FF9500', // Orange
     '#FF2D55', // Pink
+    '#FF3B30', // Red
+    '#FF9500', // Orange
+    '#FFCC00', // Yellow
     '#34C759', // Green
     '#5AC8FA', // Teal
-    '#FFCC00', // Yellow
-    '#C7C7CC', // Gray
+    '#32ADE6', // Cyan
+    '#5856D6', // Indigo
+    '#A2845E', // Brown
+    '#8E8E93'  // Gray
   ];
 
   const segments = useMemo(() => {
@@ -31,22 +33,23 @@ export const CompoundBarWidget = ({ data }) => {
 
     return sorted.map((item, idx) => ({
       ...item,
-      color: palette[idx % palette.length], // Assign color from palette
+      color: palette[idx % palette.length],
       percent: total > 0 ? (item.value / total) * 100 : 0
     })).filter(s => s.percent > 0);
   }, [breakdown]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', padding: '16px' }}>
+        {/* Standard Header */}
         <div style={{
             fontSize: '11px',
             fontWeight: '700',
             color: 'var(--text-secondary)',
             textTransform: 'uppercase',
             position: 'absolute',
-            top: '10px',
-            left: '10px',
-            zIndex: 2
+            top: '14px',
+            left: '16px',
+            zIndex: 10
         }}>
             {data.label || 'Breakdown'}
         </div>
@@ -54,9 +57,9 @@ export const CompoundBarWidget = ({ data }) => {
         {/* Inset Card Container */}
         <div style={{
             backgroundColor: 'rgba(0,0,0,0.03)',
-            borderRadius: '12px',
-            padding: '16px',
-            marginTop: '24px',
+            borderRadius: '16px',
+            padding: '20px',
+            marginTop: '32px',
             width: '100%',
             display: 'flex',
             flexDirection: 'column',

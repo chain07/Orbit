@@ -16,24 +16,23 @@ import { Icons } from '../ui/Icons';
 export const CurrentStreak = ({ data, title }) => {
   if (!data) return null;
 
-  const { current = 0, best = 0, isActive = false, unit = 'Days' } = data;
+  const { current = 0, unit = 'Days' } = data;
 
   return (
     <div style={{ position: 'relative', height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ position: 'absolute', top: '10px', left: '10px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-secondary)', zIndex: 2 }}>
+      {/* Standard Header */}
+      <div style={{ position: 'absolute', top: '14px', left: '16px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-secondary)', zIndex: 10 }}>
         {data.label || title || 'Streak'}
       </div>
 
-      {/* Background Icon */}
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.1, pointerEvents: 'none' }}>
-        <Icons.Flame size={80} className="text-orange" fill="currentColor" />
-      </div>
-
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 10 }}>
-        <span style={{ fontSize: '64px', fontWeight: '800', color: 'var(--text-primary)', lineHeight: 1 }}>
-          {current}
-        </span>
-        <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', marginTop: '4px', letterSpacing: '0.1em' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '56px', fontWeight: '800', color: 'var(--text-primary)', lineHeight: 1 }}>
+            {current}
+            </span>
+            <Icons.Flame size={24} color="#FF9500" fill="#FF9500" style={{ marginTop: '8px' }} />
+        </div>
+        <span style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', marginTop: '4px', letterSpacing: '1px' }}>
           {unit}
         </span>
       </div>

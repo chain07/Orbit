@@ -1,21 +1,13 @@
 import React from 'react';
-import { Sparkline } from '../ui/charts/Sparkline';
 
 /**
  * TrendSparkline Widget
  * * Displays a rolling window trend for a metric.
- * Expected data structure:
- * {
- * values: number[] (normalized 0-1),
- * color: string,
- * label: string,
- * trendLabel: string (optional, e.g. "+5% vs last week")
- * }
  */
 export const TrendSparkline = ({ data }) => {
   if (!data || !data.data) return null;
 
-  const { data: values = [], current = 0, color = '#4f46e5', label = '', trendLabel = '' } = data;
+  const { data: values = [], current = 0, color = '#4f46e5', label = '' } = data;
 
   // Calculate points for custom SVG render
   const svgWidth = 200;
@@ -25,7 +17,7 @@ export const TrendSparkline = ({ data }) => {
   let min = Math.min(...values);
   let max = Math.max(...values);
 
-  if (min === max) { min = 0; max = Math.max(100, max); } // Fallback for flat line
+  if (min === max) { min = 0; max = Math.max(10, max); } // Fallback for flat line
 
   const range = max - min;
   const padding = range * 0.1; // 10% padding
@@ -65,33 +57,36 @@ export const TrendSparkline = ({ data }) => {
   const pathD = getSplinePath(points);
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr', gap: '10px', alignItems: 'center', height: '100%', width: '100%', padding: '16px', position: 'relative' }}>
-       <div style={{ position: 'absolute', top: '10px', left: '10px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-secondary)', zIndex: 2 }}>
+    <div style={{ position: 'relative', height: '100%', width: '100%', padding: '16px' }}>
+       {/* Standard Header */}
+       <div style={{ position: 'absolute', top: '14px', left: '16px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-secondary)', zIndex: 10 }}>
          {label || 'Trend'}
        </div>
 
-       {/* Left Column: Stats */}
-       <div style={{ display: 'flex', flexDirection: 'column', paddingTop: '16px' }}>
-           <span style={{ fontSize: '32px', fontWeight: '800', lineHeight: 1 }}>{Math.round(current)}%</span>
-           <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Current</span>
+       {/* Current Value (Top Right) */}
+       <div style={{ position: 'absolute', top: '14px', right: '16px', fontSize: '24px', fontWeight: '800', lineHeight: 1, zIndex: 10 }}>
+           {typeof current === 'number' ? Math.round(current * 10) / 10 : current}
        </div>
-       {/* Right Column: Graph */}
-       <div style={{ position: 'relative', width: '100%', height: '60px', marginTop: '16px' }}>
+
+       {/* Graph Container */}
+       <div style={{ position: 'relative', width: '100%', height: '100%', paddingTop: '40px', paddingRight: '24px' }}>
            {/* 5 Background Lines (0, 25, 50, 75, 100%) */}
-           <div style={{ position: 'absolute', top: '0%', width: '100%', borderTop: '1px dashed currentColor', opacity: 0.1 }} />
-           <div style={{ position: 'absolute', top: '25%', width: '100%', borderTop: '1px dashed currentColor', opacity: 0.1 }} />
-           <div style={{ position: 'absolute', top: '50%', width: '100%', borderTop: '1px dashed currentColor', opacity: 0.1 }} />
-           <div style={{ position: 'absolute', top: '75%', width: '100%', borderTop: '1px dashed currentColor', opacity: 0.1 }} />
-           <div style={{ position: 'absolute', bottom: '0%', width: '100%', borderTop: '1px dashed currentColor', opacity: 0.1 }} />
+           <div style={{ position: 'absolute', top: '40px', width: '100%', borderTop: '1px dashed rgba(0,0,0,0.05)' }} />
+           <div style={{ position: 'absolute', top: 'calc(40px + 25% * (100% - 40px))', width: '100%', borderTop: '1px dashed rgba(0,0,0,0.05)' }} />
+           <div style={{ position: 'absolute', top: 'calc(40px + 50% * (100% - 40px))', width: '100%', borderTop: '1px dashed rgba(0,0,0,0.05)' }} />
+           <div style={{ position: 'absolute', top: 'calc(40px + 75% * (100% - 40px))', width: '100%', borderTop: '1px dashed rgba(0,0,0,0.05)' }} />
+           <div style={{ position: 'absolute', bottom: '0', width: '100%', borderTop: '1px dashed rgba(0,0,0,0.05)' }} />
 
-           {/* Axis Labels */}
-           <div style={{ position: 'absolute', top: '-14px', right: 0, fontSize: '10px', color: 'var(--text-secondary)' }}>Max</div>
-           <div style={{ position: 'absolute', bottom: '-14px', right: 0, fontSize: '10px', color: 'var(--text-secondary)' }}>0</div>
+           {/* Axis Labels (Outside Right) */}
+           <div style={{ position: 'absolute', top: '34px', right: 0, fontSize: '10px', color: 'var(--text-secondary)', textAlign: 'right' }}>{Math.round(max)}</div>
+           <div style={{ position: 'absolute', bottom: '-6px', right: 0, fontSize: '10px', color: 'var(--text-secondary)', textAlign: 'right' }}>{Math.round(min)}</div>
 
-           {/* The SVG */}
-           <svg width="100%" height="100%" viewBox={`0 0 ${svgWidth} ${svgHeight}`} preserveAspectRatio="none" style={{ overflow: 'visible' }}>
-               <path d={pathD} fill="none" stroke={color} strokeWidth="3" vectorEffect="non-scaling-stroke" />
-           </svg>
+           {/* The SVG - Height adjusted to fill remaining space */}
+           <div style={{ position: 'absolute', top: '40px', left: 0, right: '24px', bottom: 0 }}>
+                <svg width="100%" height="100%" viewBox={`0 0 ${svgWidth} ${svgHeight}`} preserveAspectRatio="none" style={{ overflow: 'visible' }}>
+                    <path d={pathD} fill="none" stroke={color} strokeWidth="3" vectorEffect="non-scaling-stroke" />
+                </svg>
+           </div>
        </div>
     </div>
   );

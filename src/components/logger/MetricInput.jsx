@@ -1,164 +1,78 @@
 import React from 'react';
 import { MetricType } from '../../types/schemas';
 
+/**
+ * MetricInput (CheckInRow)
+ * Implements the "iOS Inset Grouped" input row spec.
+ */
 export const MetricInput = ({ metric, value, onChange }) => {
-  const handleChange = (e) => {
-    let val = e.target.value;
-    if (metric.type === MetricType.NUMBER || metric.type === MetricType.RANGE) {
-        val = parseFloat(val);
-    } else if (metric.type === MetricType.BOOLEAN) {
-        val = e.target.checked;
-    }
+
+  const handleChange = (val) => {
     onChange(val);
   };
 
   const renderInput = () => {
     switch (metric.type) {
         case MetricType.BOOLEAN:
-            // Toggle Switch
             return (
-                <label style={{ position: 'relative', display: 'inline-block', width: '51px', height: '31px' }}>
-                    <input
-                        type="checkbox"
-                        checked={!!value}
-                        onChange={handleChange}
-                        style={{ opacity: 0, width: 0, height: 0 }}
-                    />
-                    <span style={{
-                        position: 'absolute',
+                <div
+                    onClick={() => handleChange(!value)}
+                    style={{
+                        width: '51px',
+                        height: '31px',
+                        backgroundColor: value ? '#34C759' : '#E9E9EA',
+                        borderRadius: '31px',
+                        position: 'relative',
                         cursor: 'pointer',
-                        top: 0, left: 0, right: 0, bottom: 0,
-                        backgroundColor: value ? '#34C759' : '#e9e9ea',
-                        borderRadius: '34px',
-                        transition: '.4s'
-                    }}></span>
-                    <span style={{
-                        position: 'absolute',
-                        height: '27px',
-                        width: '27px',
-                        left: '2px',
-                        bottom: '2px',
-                        backgroundColor: 'white',
-                        borderRadius: '50%',
-                        transition: '.4s',
-                        transform: value ? 'translateX(20px)' : 'translateX(0)',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                    }}></span>
-                </label>
-            );
-
-        case MetricType.RANGE:
-            return (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ fontSize: '15px', fontWeight: '400', color: 'var(--blue)' }}>
-                        {value || metric.range?.min || 0}/{metric.range?.max || 10}
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <input
-                            type="range"
-                            min={metric.range?.min || 1}
-                            max={metric.range?.max || 10}
-                            step={metric.range?.step || 1}
-                            value={value || metric.range?.min || 0}
-                            onChange={handleChange}
-                            style={{ width: '120px', accentColor: 'var(--blue)' }}
-                        />
-                    </div>
-                </div>
-            );
-
-        case MetricType.SELECT:
-            return (
-                <div style={{ position: 'relative', width: '100%' }}>
-                    <select
-                        value={value}
-                        onChange={handleChange}
-                        style={{
-                            appearance: 'none',
-                            WebkitAppearance: 'none',
-                            width: '100%',
-                            backgroundColor: '#E5E5EA',
-                            border: '1px solid rgba(0,0,0,0.05)',
-                            borderRadius: '12px',
-                            padding: '14px 32px 14px 16px', // Right padding for icon
-                            fontSize: '16px',
-                            color: 'var(--text-primary)',
-                            fontFamily: 'inherit'
-                        }}
-                    >
-                        <option value="" disabled>Select</option>
-                        {(metric.options || []).map(opt => (
-                            <option key={opt} value={opt}>{opt}</option>
-                        ))}
-                    </select>
+                        transition: 'background-color 0.2s ease-in-out'
+                    }}
+                >
                     <div style={{
+                        width: '27px',
+                        height: '27px',
+                        backgroundColor: '#FFFFFF',
+                        borderRadius: '50%',
                         position: 'absolute',
-                        right: '16px',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        pointerEvents: 'none',
-                        color: 'var(--text-secondary)'
-                    }}>
-                        <svg width="12" height="8" viewBox="0 0 12 8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 1L6 6L11 1"/></svg>
-                    </div>
+                        top: '2px',
+                        left: '2px',
+                        boxShadow: '0 3px 8px rgba(0,0,0,0.15), 0 3px 1px rgba(0,0,0,0.06)',
+                        transform: value ? 'translateX(20px)' : 'translateX(0)',
+                        transition: 'transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1)'
+                    }} />
                 </div>
-            );
-
-        case MetricType.DURATION:
-            // "Split Box" container implementation
-            const hours = Math.floor(value || 0);
-            const mins = Math.round(((value || 0) - hours) * 60);
-
-            return (
-               <div style={{ display: 'flex', gap: '12px', width: '200px' }}>
-                   <div style={{ backgroundColor: '#E5E5EA', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '12px', padding: '10px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                       <input
-                           type="number"
-                           value={hours}
-                           onChange={(e) => onChange(parseFloat(e.target.value) + (mins/60))}
-                           style={{ fontSize: '20px', fontWeight: '600', textAlign: 'center', background: 'transparent', border: 'none', width: '100%', padding: 0 }}
-                       />
-                       <span style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Hours</span>
-                   </div>
-                   <div style={{ backgroundColor: '#E5E5EA', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '12px', padding: '10px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                       <input
-                           type="number"
-                           value={mins}
-                           max={59}
-                           onChange={(e) => onChange(hours + (parseFloat(e.target.value)/60))}
-                           style={{ fontSize: '20px', fontWeight: '600', textAlign: 'center', background: 'transparent', border: 'none', width: '100%', padding: 0 }}
-                       />
-                       <span style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Mins</span>
-                   </div>
-               </div>
             );
 
         case MetricType.NUMBER:
-            return (
-               <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#E5E5EA', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '12px', padding: '4px' }}>
+             const numVal = parseFloat(value) || 0;
+             return (
+               <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#F2F2F7', borderRadius: '10px', padding: '2px' }}>
                    <button
                      type="button"
-                     onClick={() => onChange(Math.max(0, (parseFloat(value) || 0) - 1))}
+                     onClick={() => handleChange(Math.max(0, numVal - 1))}
                      style={{
-                         width: '40px', height: '36px', borderRadius: '8px', border: 'none',
-                         backgroundColor: 'var(--card-bg)', color: 'var(--text-primary)',
-                         fontSize: '20px', fontWeight: '500', cursor: 'pointer',
-                         boxShadow: '0 2px 4px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                         width: '44px', height: '32px', borderRadius: '8px', border: 'none',
+                         backgroundColor: '#FFFFFF', color: '#000000',
+                         fontSize: '20px', fontWeight: '400', cursor: 'pointer',
+                         boxShadow: '0 3px 8px rgba(0,0,0,0.12)', margin: '2px',
+                         display: 'flex', alignItems: 'center', justifyContent: 'center',
+                         touchAction: 'manipulation'
                      }}
                    >
                        −
                    </button>
-                   <div style={{ minWidth: '50px', textAlign: 'center', fontSize: '17px', fontWeight: '600' }}>
-                       {value || 0}
+                   <div style={{ minWidth: '40px', textAlign: 'center', fontSize: '17px', fontWeight: '600', color: '#000000' }}>
+                       {numVal}
                    </div>
                     <button
                      type="button"
-                     onClick={() => onChange((parseFloat(value) || 0) + 1)}
+                     onClick={() => handleChange(numVal + 1)}
                      style={{
-                         width: '40px', height: '36px', borderRadius: '8px', border: 'none',
-                         backgroundColor: 'var(--card-bg)', color: 'var(--text-primary)',
-                         fontSize: '20px', fontWeight: '500', cursor: 'pointer',
-                         boxShadow: '0 2px 4px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                         width: '44px', height: '32px', borderRadius: '8px', border: 'none',
+                         backgroundColor: '#FFFFFF', color: '#000000',
+                         fontSize: '20px', fontWeight: '400', cursor: 'pointer',
+                         boxShadow: '0 3px 8px rgba(0,0,0,0.12)', margin: '2px',
+                         display: 'flex', alignItems: 'center', justifyContent: 'center',
+                         touchAction: 'manipulation'
                      }}
                    >
                        ＋
@@ -166,43 +80,146 @@ export const MetricInput = ({ metric, value, onChange }) => {
                </div>
             );
 
+        case MetricType.RANGE:
+            // Custom Slider Style
+            const rangeVal = value !== undefined ? value : (metric.range?.min || 0);
+            return (
+                <div style={{ width: '100%', maxWidth: '200px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <style>{`
+                        .custom-range::-webkit-slider-thumb {
+                            -webkit-appearance: none;
+                            appearance: none;
+                            width: 28px;
+                            height: 28px;
+                            border-radius: 50%;
+                            background: #FFFFFF;
+                            cursor: pointer;
+                            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+                            margin-top: -12px;
+                        }
+                        .custom-range::-webkit-slider-runnable-track {
+                            width: 100%;
+                            height: 4px;
+                            background: #E5E5EA;
+                            border-radius: 2px;
+                        }
+                    `}</style>
+                    <input
+                        type="range"
+                        className="custom-range"
+                        min={metric.range?.min || 0}
+                        max={metric.range?.max || 10}
+                        step={metric.range?.step || 1}
+                        value={rangeVal}
+                        onChange={(e) => handleChange(parseFloat(e.target.value))}
+                        style={{
+                            width: '100%',
+                            appearance: 'none',
+                            background: 'transparent',
+                            outline: 'none',
+                            padding: '10px 0'
+                        }}
+                    />
+                    <span style={{ fontSize: '17px', fontWeight: '600', color: '#007AFF', minWidth: '24px', textAlign: 'right' }}>
+                        {rangeVal}
+                    </span>
+                </div>
+            );
+
+        case MetricType.SELECT:
+            return (
+                <div style={{ position: 'relative', width: '100%', minWidth: '160px' }}>
+                    <select
+                        value={value || ''}
+                        onChange={(e) => handleChange(e.target.value)}
+                        style={{
+                            appearance: 'none',
+                            WebkitAppearance: 'none',
+                            width: '100%',
+                            backgroundColor: '#F2F2F7',
+                            border: 'none',
+                            borderRadius: '12px',
+                            padding: '12px 40px 12px 16px',
+                            fontSize: '17px',
+                            color: '#000000',
+                            fontFamily: 'inherit',
+                            fontWeight: '400',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        <option value="" disabled>Select</option>
+                        {(metric.options || []).map(opt => (
+                            <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                    </select>
+                    {/* Custom Chevron */}
+                    <div style={{
+                        position: 'absolute',
+                        right: '16px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        pointerEvents: 'none',
+                        color: '#C7C7CC'
+                    }}>
+                        <svg width="14" height="9" viewBox="0 0 14 9" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="1 1 7 7 13 1" />
+                        </svg>
+                    </div>
+                </div>
+            );
+
+        case MetricType.DURATION:
+            const hours = Math.floor(value || 0);
+            const mins = Math.round(((value || 0) - hours) * 60);
+            return (
+               <div style={{ display: 'flex', gap: '8px' }}>
+                   <div style={{ backgroundColor: '#F2F2F7', borderRadius: '8px', padding: '8px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '70px' }}>
+                       <input
+                           type="number"
+                           value={hours}
+                           min={0}
+                           onChange={(e) => handleChange(parseFloat(e.target.value || 0) + (mins/60))}
+                           style={{ fontSize: '20px', fontWeight: '600', textAlign: 'center', background: 'transparent', border: 'none', width: '100%', padding: 0, color: '#000000' }}
+                       />
+                       <span style={{ fontSize: '10px', fontWeight: '600', color: '#8E8E93', textTransform: 'uppercase' }}>Hours</span>
+                   </div>
+                   <div style={{ backgroundColor: '#F2F2F7', borderRadius: '8px', padding: '8px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '70px' }}>
+                       <input
+                           type="number"
+                           value={mins}
+                           min={0}
+                           max={59}
+                           onChange={(e) => handleChange(hours + (parseFloat(e.target.value || 0)/60))}
+                           style={{ fontSize: '20px', fontWeight: '600', textAlign: 'center', background: 'transparent', border: 'none', width: '100%', padding: 0, color: '#000000' }}
+                       />
+                       <span style={{ fontSize: '10px', fontWeight: '600', color: '#8E8E93', textTransform: 'uppercase' }}>Mins</span>
+                   </div>
+               </div>
+            );
+
         case MetricType.TEXT:
              return (
                  <textarea
-                     value={value}
-                     onChange={handleChange}
-                     placeholder="Notes..."
+                     value={value || ''}
+                     onChange={(e) => handleChange(e.target.value)}
+                     placeholder="Add notes..."
                      style={{
                          width: '100%',
-                         backgroundColor: 'var(--bg-color)',
+                         backgroundColor: '#F2F2F7',
                          border: 'none',
                          borderRadius: '12px',
-                         padding: '14px',
+                         padding: '12px',
                          fontSize: '16px',
-                         color: 'var(--text-primary)',
+                         color: '#000000',
                          fontFamily: 'inherit',
-                         resize: 'vertical',
+                         resize: 'none',
                          minHeight: '80px'
                      }}
                  />
              );
 
         default:
-            return (
-                <input
-                    type="text"
-                    value={value}
-                    onChange={handleChange}
-                    placeholder="Value"
-                    style={{
-                        padding: '8px',
-                        borderRadius: '8px',
-                        border: '1px solid rgba(0,0,0,0.1)',
-                        width: '100px',
-                        textAlign: 'right'
-                    }}
-                />
-            );
+            return null;
     }
   };
 
@@ -210,17 +227,20 @@ export const MetricInput = ({ metric, value, onChange }) => {
     <div style={{
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingBottom: '24px',
-        marginBottom: '24px',
-        borderBottom: '0.5px solid rgba(0,0,0,0.1)',
-        minHeight: '56px'
+        alignItems: metric.type === MetricType.TEXT ? 'flex-start' : 'center',
+        padding: '24px 0',
+        borderBottom: '0.5px solid #C6C6C8',
+        minHeight: '60px'
     }}>
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <span style={{ fontSize: '16px', fontWeight: '500' }}>{metric.label}</span>
-          {metric.unit && <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{metric.unit}</span>}
+      <div style={{ display: 'flex', flexDirection: 'column', paddingRight: '16px' }}>
+          <span style={{ fontSize: '17px', fontWeight: '500', color: '#000000' }}>{metric.label}</span>
       </div>
-      <div>
+      <div style={{
+          flex: metric.type === MetricType.TEXT ? 1 : '0 0 auto',
+          display: 'flex',
+          justifyContent: 'flex-end',
+          maxWidth: metric.type === MetricType.TEXT ? '100%' : '60%'
+      }}>
         {renderInput()}
       </div>
     </div>
