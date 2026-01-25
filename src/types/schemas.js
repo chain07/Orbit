@@ -43,7 +43,9 @@ export const WidgetType = Object.freeze({
   STACKEDBAR: 'stackedbar',
   STREAK: 'streak',
   NUMBER: 'number',
-  HISTORY: 'history'
+  HISTORY: 'history',
+  COMPOUND: 'compound',
+  PROGRESS: 'progress'
 });
 
 /**

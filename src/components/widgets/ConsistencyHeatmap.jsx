@@ -33,17 +33,13 @@ export const ConsistencyHeatmap = ({ data }) => {
   }, [data.values]);
 
   const getColor = (value) => {
-      if (!value) return 'rgba(0,0,0,0.05)'; // Empty
+      if (!value) return 'rgba(0,0,0,0.06)'; // Empty - Darker grey for visibility
       // Active - #34C759
-      // Logic: if it's > 0, it's green. We can add opacity for intensity if needed,
-      // but spec says "Active: #34C759". I'll use opacity for gradients if strictly needed,
-      // otherwise simple boolean logic or mapped intensity.
-      // Assuming simple active/inactive for strict visual fidelity to "Active/Empty" spec.
       return '#34C759';
   };
 
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', alignContent: 'center', justifyContent: 'center', height: '100%' }}>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', alignContent: 'center', justifyContent: 'center', height: '100%', padding: '10px' }}>
       {days.map(day => (
         <div
             key={day.date}

@@ -126,7 +126,14 @@ export const Horizon = () => {
           {hasMetrics && (
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className={`text-xs font-medium transition-colors mb-1 ${isEditing ? 'text-blue' : 'text-secondary hover:text-primary'}`}
+              style={{
+                  color: 'var(--blue)',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer'
+              }}
             >
               {isEditing ? 'Done' : 'Edit'}
             </button>
@@ -181,8 +188,11 @@ export const Horizon = () => {
             display: isEditing ? 'flex' : 'grid',
             flexDirection: isEditing ? 'column' : 'initial',
             gridTemplateColumns: isEditing ? 'none' : '1fr 1fr',
-            gap: '16px',
+            gap: '12px',
             padding: '16px',
+            width: '100%',
+            boxSizing: 'border-box',
+            overflowX: 'hidden',
             paddingBottom: '100px'
           }}>
             {orderedWidgets.map((widget, idx) => {
@@ -211,18 +221,18 @@ export const Horizon = () => {
                                <button
                                 onClick={() => moveWidget(idx, -1)}
                                 disabled={idx === 0}
-                                className="w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center disabled:opacity-30 active:scale-95 transition-all"
+                                className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center disabled:opacity-30 active:scale-95 transition-all"
                                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                >
-                                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                                   <Icons.ChevronUp size={20} />
                                </button>
                                <button
                                 onClick={() => moveWidget(idx, 1)}
                                 disabled={idx === orderedWidgets.length - 1}
-                                className="w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center disabled:opacity-30 active:scale-95 transition-all"
+                                className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center disabled:opacity-30 active:scale-95 transition-all"
                                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                >
-                                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                   <Icons.ChevronDown size={20} />
                                </button>
                            </div>
                        </div>

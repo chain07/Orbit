@@ -55,3 +55,8 @@
 7:27:28 AM [vite] hmr update /src/components/logger/MetricInput.jsx
 7:27:35 AM [vite] hmr update /src/components/logger/MetricInput.jsx
 7:27:41 AM [vite] hmr update /src/components/logger/DailyCheckInForm.jsx
+9:30:13 AM [vite] hmr update /src/context/StorageContext.jsx, /src/views/Horizon.jsx, /src/views/Intel.jsx, /src/components/intel/ReportGenerator.jsx, /src/components/system/DataManagement.jsx, /src/components/logger/MetricInput.jsx
+9:30:36 AM [vite] hmr update /src/views/Horizon.jsx
+9:30:49 AM [vite] hmr update /src/views/Horizon.jsx
+9:31:16 AM [vite] hmr update /src/components/widgets/TrendSparkline.jsx
+9:31:38 AM [vite] hmr update /src/components/widgets/ConsistencyHeatmap.jsx

@@ -65,18 +65,27 @@ export const TrendSparkline = ({ data }) => {
   const pathD = getSplinePath(points);
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr', gap: '10px', alignItems: 'center', height: '100%', width: '100%', padding: '16px' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr', gap: '10px', alignItems: 'center', height: '100%', width: '100%', padding: '16px', position: 'relative' }}>
+       <div style={{ position: 'absolute', top: '12px', left: '14px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-secondary)', zIndex: 2 }}>
+         {label || 'Trend'}
+       </div>
+
        {/* Left Column: Stats */}
-       <div style={{ display: 'flex', flexDirection: 'column' }}>
+       <div style={{ display: 'flex', flexDirection: 'column', paddingTop: '16px' }}>
            <span style={{ fontSize: '32px', fontWeight: '800', lineHeight: 1 }}>{Math.round(current)}%</span>
            <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Current</span>
        </div>
        {/* Right Column: Graph */}
-       <div style={{ position: 'relative', width: '100%', height: '60px' }}>
+       <div style={{ position: 'relative', width: '100%', height: '60px', marginTop: '16px' }}>
            {/* Background Lines (Max, Mid, Min) - Dashed, Opacity 0.2 */}
            <div style={{ position: 'absolute', top: 0, width: '100%', borderTop: '1px dashed currentColor', opacity: 0.1 }} />
            <div style={{ position: 'absolute', top: '50%', width: '100%', borderTop: '1px dashed currentColor', opacity: 0.1 }} />
            <div style={{ position: 'absolute', bottom: 0, width: '100%', borderTop: '1px dashed currentColor', opacity: 0.1 }} />
+
+           {/* Axis Labels */}
+           <div style={{ position: 'absolute', top: '-14px', right: 0, fontSize: '10px', color: 'var(--text-secondary)' }}>Max</div>
+           <div style={{ position: 'absolute', bottom: '-14px', right: 0, fontSize: '10px', color: 'var(--text-secondary)' }}>0</div>
+
            {/* The SVG */}
            <svg width="100%" height="100%" viewBox={`0 0 ${svgWidth} ${svgHeight}`} preserveAspectRatio="none" style={{ overflow: 'visible' }}>
                <path d={pathD} fill="none" stroke={color} strokeWidth="3" vectorEffect="non-scaling-stroke" />
