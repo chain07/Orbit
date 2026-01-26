@@ -15,6 +15,7 @@ import { ProgressBarWidget } from './ProgressBarWidget';
 /**
  * WidgetRegistry
  * Maps string identifiers (stored in JSON/database) to actual React Components.
+ * Refactored Phase 4.13: Added aliases for robust rendering.
  */
 export const WidgetRegistry = {
   // Visual Charts
@@ -24,11 +25,13 @@ export const WidgetRegistry = {
   stackedbar: SegmentedBarWidget,
   compound: CompoundBarWidget,
   progress: ProgressBarWidget,
+  progressbar: ProgressBarWidget, // Alias
   
   // Data Displays
   streak: CurrentStreak,
   number: NumberWidget,
   history: RecentHistory,
+  journal: RecentHistory, // Alias
   
   // Fallback for development or broken types
   default: ({ data }) => (

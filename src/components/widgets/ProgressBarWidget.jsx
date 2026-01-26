@@ -3,9 +3,11 @@ import React from 'react';
 /**
  * ProgressBarWidget
  * * Restored "Normal" Progress Bar.
- * * Refactored Phase 4.9.4: Layout Calibration.
+ * * Refactored Phase 4.13: Global Color Fix, Empty Guard.
  */
 export const ProgressBarWidget = ({ data, title }) => {
+  // Guard Clause: Allow empty/0 but prevent crash if undefined object
+  // But render 0% if data is missing but expected
   const value = data?.value || 0;
   const max = data?.max || 100;
   const unit = data?.unit || '';
@@ -33,7 +35,7 @@ export const ProgressBarWidget = ({ data, title }) => {
             fontSize: '11px',
             fontWeight: '700',
             textTransform: 'uppercase',
-            color: 'var(--secondary)',
+            color: 'var(--text-secondary)', // Global Fix
             zIndex: 20
         }}>
             {title || data?.label}
@@ -57,7 +59,7 @@ export const ProgressBarWidget = ({ data, title }) => {
         <div style={{
             height: '16px',
             borderRadius: '8px',
-            backgroundColor: 'var(--bg-secondary)', // Use variable for theme compat (rgba(0,0,0,0.05) equiv)
+            backgroundColor: 'var(--bg-secondary)',
             marginTop: '0',
             width: '100%',
             overflow: 'hidden'

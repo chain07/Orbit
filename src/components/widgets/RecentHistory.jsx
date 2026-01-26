@@ -1,5 +1,10 @@
 import React from 'react';
 
+/**
+ * RecentHistory Widget
+ * * Displays a list of recent log entries for a metric.
+ * * Refactored Phase 4.13: Global Color Fix.
+ */
 export const RecentHistory = ({ data, title }) => {
   // If data is just the raw array (from engine), use it.
   // Otherwise try to extract from typical structure
@@ -26,7 +31,7 @@ export const RecentHistory = ({ data, title }) => {
         fontSize: '11px',
         fontWeight: '700',
         textTransform: 'uppercase',
-        color: 'var(--secondary)',
+        color: 'var(--text-secondary)', // Global Fix
         zIndex: 20
       }}>
         {title || 'History'}

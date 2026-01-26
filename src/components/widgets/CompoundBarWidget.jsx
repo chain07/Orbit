@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 /**
  * CompoundBarWidget
  * Use Case: For Select metrics.
- * Refactor Phase 4.12: Atomic Visual Fixes (Padding Removal).
+ * Refactor Phase 4.13: Global Color Fix.
  */
 export const CompoundBarWidget = ({ data, title }) => {
   if (!data || !data.breakdown) return null;
@@ -45,7 +45,7 @@ export const CompoundBarWidget = ({ data, title }) => {
         position: 'relative',
         // No outer padding
     }}>
-        {/* Atomic Header Fix: Strict Positioning */}
+        {/* Strict Header */}
         <div style={{
             position: 'absolute',
             top: '12px',
@@ -54,7 +54,7 @@ export const CompoundBarWidget = ({ data, title }) => {
             fontSize: '11px',
             fontWeight: '700',
             textTransform: 'uppercase',
-            color: 'var(--secondary)',
+            color: 'var(--text-secondary)', // Global Fix
             zIndex: 20
         }}>
             {title || data.label || 'Breakdown'}

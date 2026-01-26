@@ -1,10 +1,9 @@
 import React from 'react';
-import { Icons } from '../ui/Icons';
 
 /**
  * CurrentStreak Widget
  * * Displays the current active streak for a metric.
- * * Refactored Phase 4.95: Visual Polish (Icon Inline).
+ * * Refactored Phase 4.13: Icon Removal, Standard Layout, Global Color Fix.
  */
 export const CurrentStreak = ({ data, title }) => {
   if (!data) return null;
@@ -13,36 +12,28 @@ export const CurrentStreak = ({ data, title }) => {
 
   return (
     <div style={{ position: 'relative', height: '100%', width: '100%' }}>
-      {/* Header Container: Inline Icon & Label */}
+      {/* Strict Header (Standard Top-Left) */}
       <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
             position: 'absolute',
-            top: '16px', // Increased from 12px for breathing room
-            left: '20px', // Increased from 12px
-            zIndex: 20
-      }}>
-        {/* Flame Icon */}
-        <Icons.Flame size={16} color="#FF9500" fill="#FF9500" style={{ opacity: 1 }} />
-
-        {/* Label */}
-        <div style={{
+            top: '16px', // Standard Top
+            left: '20px', // Standard Left
+            margin: 0,
             fontSize: '11px',
             fontWeight: '700',
             textTransform: 'uppercase',
-            color: 'var(--secondary)',
-            margin: 0
-        }}>
-            {title || data.label || 'Streak'}
-        </div>
+            color: 'var(--text-secondary)', // Global Fix
+            zIndex: 20
+      }}>
+        {title || data.label || 'Streak'}
       </div>
+
+      {/* Flame Icon REMOVED per Phase 4.13 */}
 
       {/* Data Group - Bottom Left */}
       <div style={{
           position: 'absolute',
           bottom: '20px',
-          left: '20px', // Moved to left
+          left: '20px',
           zIndex: 10
       }}>
         <div style={{

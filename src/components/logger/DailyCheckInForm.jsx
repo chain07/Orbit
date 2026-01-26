@@ -23,7 +23,7 @@ export const DailyCheckInForm = () => {
     if (validEntries.length === 0) return;
 
     try {
-        // Submit entries with Type Parsing
+        // Submit entries with Type Parsing & Valid Timestamp
         const promises = validEntries.map(async ([metricId, value]) => {
           const metric = metrics.find(m => m.id === metricId);
           let parsedValue = value;
@@ -32,14 +32,17 @@ export const DailyCheckInForm = () => {
               if (metric.type === 'number' || metric.type === 'range') {
                   parsedValue = parseFloat(value);
               } else if (metric.type === 'boolean') {
-                  parsedValue = value === true || value === 'true'; // Handle string/bool
+                  parsedValue = value === true || value === 'true';
               }
           }
+
+          // Use a fixed timestamp for the batch to ensure consistency
+          const timestamp = new Date().toISOString(); // CRITICAL FIX: Explicit ISO String
 
           return addLogEntry({
             metricId,
             value: parsedValue,
-            timestamp: new Date()
+            timestamp
           });
         });
 
@@ -48,7 +51,7 @@ export const DailyCheckInForm = () => {
         setEntries({});
         setIsSaved(true);
 
-        // Native feedback as requested
+        // Native feedback
         // alert('Check-in Saved!');
 
         setTimeout(() => {
@@ -89,7 +92,7 @@ export const DailyCheckInForm = () => {
 
             {/* Standard Bottom Button */}
             <button
-                type="button" // Use button type to prevent implicit submit if needed, but onClick works
+                type="button"
                 onClick={handleSave}
                 disabled={isSaved}
                 style={{

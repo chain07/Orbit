@@ -3,7 +3,7 @@ import React from 'react';
 /**
  * TrendSparkline Widget
  * * Displays a rolling window trend for a metric.
- * * Refactored Phase 4.12: Atomic Visual Fixes (Padding Removal).
+ * * Refactored Phase 4.13: Global Color Fix.
  */
 export const TrendSparkline = ({ data, title }) => {
   if (!data || !data.data) return null;
@@ -59,7 +59,7 @@ export const TrendSparkline = ({ data, title }) => {
 
   return (
     <div style={{ position: 'relative', height: '100%', width: '100%' }}>
-       {/* Atomic Header Fix: Strict Positioning */}
+       {/* Strict Header */}
        <div style={{
             position: 'absolute',
             top: '12px',
@@ -68,7 +68,7 @@ export const TrendSparkline = ({ data, title }) => {
             fontSize: '11px',
             fontWeight: '700',
             textTransform: 'uppercase',
-            color: 'var(--secondary)',
+            color: 'var(--text-secondary)', // Global Fix
             zIndex: 20
        }}>
          {title || data.label || 'Trend'}

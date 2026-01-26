@@ -43,7 +43,7 @@ export const Timeline = () => {
                       backgroundColor: 'var(--bg-color)',
                       zIndex: 10,
                       borderBottom: '1px solid var(--separator)',
-                      listStyle: 'none' // Hide default arrow
+                      listStyle: 'none'
                   }}>
                       {date}
                   </summary>
@@ -59,38 +59,46 @@ export const Timeline = () => {
                           const metric = metricMap[log.metricId];
                           const isLast = idx === logs.length - 1;
                           return (
-                              <div
-                                key={log.id || idx}
-                                style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    padding: '16px',
-                                    backgroundColor: 'var(--card-bg)',
-                                    borderBottom: !isLast ? '1px solid var(--separator)' : 'none'
-                                }}
-                              >
-                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                      <span style={{ fontWeight: '600', color: 'var(--text-primary)', fontSize: '15px' }}>
-                                        {metric?.label || 'Unknown Metric'}
-                                      </span>
-                                      <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                                          {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                      </span>
+                              <React.Fragment key={log.id || idx}>
+                                  <div
+                                    style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        padding: '16px',
+                                        backgroundColor: 'var(--card-bg)'
+                                    }}
+                                  >
+                                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                          <span style={{ fontWeight: '600', color: 'var(--text-primary)', fontSize: '15px' }}>
+                                            {metric?.label || 'Unknown Metric'}
+                                          </span>
+                                          <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                                              {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                          </span>
+                                      </div>
+                                      <div style={{
+                                          fontFamily: 'ui-monospace, monospace',
+                                          fontWeight: '600',
+                                          color: 'var(--text-primary)',
+                                          backgroundColor: 'var(--bg-secondary)',
+                                          padding: '4px 8px',
+                                          borderRadius: '6px',
+                                          fontSize: '14px'
+                                      }}>
+                                          {typeof log.value === 'boolean' ? (log.value ? 'Done' : 'Missed') : log.value}
+                                          {metric?.unit ? <span style={{ color: 'var(--text-secondary)', marginLeft: '4px', fontSize: '12px' }}>{metric.unit}</span> : ''}
+                                      </div>
                                   </div>
-                                  <div style={{
-                                      fontFamily: 'ui-monospace, monospace',
-                                      fontWeight: '600',
-                                      color: 'var(--text-primary)',
-                                      backgroundColor: 'var(--bg-secondary)',
-                                      padding: '4px 8px',
-                                      borderRadius: '6px',
-                                      fontSize: '14px'
-                                  }}>
-                                      {typeof log.value === 'boolean' ? (log.value ? 'Done' : 'Missed') : log.value}
-                                      {metric?.unit ? <span style={{ color: 'var(--text-secondary)', marginLeft: '4px', fontSize: '12px' }}>{metric.unit}</span> : ''}
-                                  </div>
-                              </div>
+                                  {!isLast && (
+                                      <div style={{
+                                          height: '1px',
+                                          backgroundColor: 'rgba(0,0,0,0.1)', // Polished Separator
+                                          margin: '0 16px',
+                                          width: 'auto'
+                                      }} />
+                                  )}
+                              </React.Fragment>
                           );
                       })}
                   </div>

@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 /**
  * ConsistencyHeatmap Widget
  * * Displays a contribution-graph style heatmap for the current month.
- * * Refactored Phase 4.95: Visual Polish (Visible Empty States, Header Alignment).
+ * * Refactored Phase 4.13: Global Color Fix.
  */
 export const ConsistencyHeatmap = ({ data, title }) => {
   if (!data || !data.values) return null;
@@ -40,7 +40,7 @@ export const ConsistencyHeatmap = ({ data, title }) => {
       if (value >= 75) return 'rgba(52, 199, 89, 0.75)';
       if (value >= 50) return 'rgba(52, 199, 89, 0.5)';
       if (value > 0) return 'rgba(52, 199, 89, 0.25)';
-      return 'var(--bg-secondary)'; // Visible Empty Slots (using theme var, typically #F2F2F7 or #2C2C2E)
+      return 'var(--bg-secondary)'; // Visible Empty Slots
   };
 
   const monthName = today.toLocaleString('default', { month: 'long' });
@@ -67,7 +67,7 @@ export const ConsistencyHeatmap = ({ data, title }) => {
             fontSize: '11px',
             fontWeight: '700',
             textTransform: 'uppercase',
-            color: 'var(--secondary)',
+            color: 'var(--text-secondary)', // Global Fix
             zIndex: 20
         }}>
             {title || data.label || 'Consistency'}
@@ -107,7 +107,7 @@ export const ConsistencyHeatmap = ({ data, title }) => {
                             aspectRatio: '1/1',
                             borderRadius: '4px',
                             backgroundColor: getColor(day.value),
-                            // Ensure visibility for empty states if theme var is too subtle
+                            // Ensure visibility for empty states
                             boxShadow: day.value === 0 ? 'inset 0 0 0 1px rgba(0,0,0,0.03)' : 'none'
                         }}
                         title={`${day.date}: ${day.value}`}

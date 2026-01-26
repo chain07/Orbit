@@ -4,7 +4,7 @@ import { RingChart } from '../ui/charts/RingChart';
 /**
  * ReliabilityRing Widget
  * * Displays a metric's progress as a ring chart.
- * * Refactored Phase 4.95: Visual Polish (Label overlap fix).
+ * * Refactored Phase 4.13: Global Color Fix (text-secondary).
  */
 export const ReliabilityRing = ({ data, title }) => {
   if (!data) return null;
@@ -27,7 +27,7 @@ export const ReliabilityRing = ({ data, title }) => {
         width: '100%',
         position: 'relative'
     }}>
-      {/* Atomic Header Fix: Strict Positioning */}
+      {/* Strict Header */}
       <div style={{
             position: 'absolute',
             top: '12px',
@@ -36,7 +36,7 @@ export const ReliabilityRing = ({ data, title }) => {
             fontSize: '11px',
             fontWeight: '700',
             textTransform: 'uppercase',
-            color: 'var(--secondary)',
+            color: 'var(--text-secondary)', // Global Fix
             zIndex: 20
       }}>
         {title || data.label}
@@ -45,16 +45,16 @@ export const ReliabilityRing = ({ data, title }) => {
       {/* Ring Container with padding to clear header and reduced size */}
       <div style={{
           position: 'relative',
-          width: '80%', // Reduced from 100%
-          height: '80%', // Reduced from 100%
+          width: '80%',
+          height: '80%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          paddingTop: '20px' // Added top padding
+          paddingTop: '20px'
       }}>
           <RingChart
             value={value}
-            size={120} // Slightly reduced from 140
+            size={120}
             strokeWidth={12}
             color={ringColor}
             label={null}
@@ -66,7 +66,7 @@ export const ReliabilityRing = ({ data, title }) => {
               alignItems: 'center',
               justifyContent: 'center',
               pointerEvents: 'none',
-              paddingTop: '20px' // Match container padding
+              paddingTop: '20px'
           }}>
               <span style={{ fontSize: '28px', fontWeight: '800', color: 'var(--text-primary)' }}>
                 {Math.round(value)}%
