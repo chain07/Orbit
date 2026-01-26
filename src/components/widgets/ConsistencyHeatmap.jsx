@@ -44,26 +44,27 @@ export const ConsistencyHeatmap = ({ data, title }) => {
   return (
     <div style={{
         position: 'relative',
-        height: '100%',
+        height: 'auto',
+        minHeight: '100%',
         width: '100%',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         padding: '16px',
-        paddingBottom: '40px' // Increased padding as requested
+        paddingBottom: '20px'
     }}>
 
         {/* Atomic Header Fix */}
         <div style={{
             position: 'absolute',
-            top: '16px',
-            left: '20px',
-            margin: 0,
-            fontSize: '15px',
-            fontWeight: '600',
-            color: 'var(--text-secondary)', // #8E8E93
-            zIndex: 10,
-            letterSpacing: '-0.3px'
+            top: 0,
+            left: 0,
+            margin: '12px',
+            fontSize: '11px',
+            fontWeight: '700',
+            textTransform: 'uppercase',
+            color: 'var(--secondary)',
+            zIndex: 20
         }}>
             {title || data.label || 'Consistency'}
         </div>

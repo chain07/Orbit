@@ -53,14 +53,14 @@ export const CompoundBarWidget = ({ data, title }) => {
         {/* Atomic Header Fix */}
         <div style={{
             position: 'absolute',
-            top: '16px',
-            left: '20px',
-            margin: 0,
-            fontSize: '15px',
-            fontWeight: '600',
-            color: 'var(--text-secondary)', // #8E8E93
-            zIndex: 10,
-            letterSpacing: '-0.3px'
+            top: 0,
+            left: 0,
+            margin: '12px',
+            fontSize: '11px',
+            fontWeight: '700',
+            textTransform: 'uppercase',
+            color: 'var(--secondary)',
+            zIndex: 20
         }}>
             {title || data.label || 'Breakdown'}
         </div>

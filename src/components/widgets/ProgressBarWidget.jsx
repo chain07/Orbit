@@ -17,26 +17,25 @@ export const ProgressBarWidget = ({ data, title }) => {
     <div style={{
         display: 'flex',
         flexDirection: 'column',
-        padding: '16px 20px', // Strict padding
+        justifyContent: 'center',
+        padding: '16px 20px',
         height: '100%',
         width: '100%',
         boxSizing: 'border-box',
-        position: 'relative',
-        justifyContent: 'flex-end',
-        minHeight: '120px' // Reduced min-height
+        position: 'relative'
     }}>
 
       {/* Atomic Header Fix */}
       <div style={{
             position: 'absolute',
-            top: '16px',
-            left: '20px',
-            margin: 0,
-            fontSize: '15px',
-            fontWeight: '600',
-            color: 'var(--text-secondary)', // #8E8E93
-            zIndex: 10,
-            letterSpacing: '-0.3px'
+            top: 0,
+            left: 0,
+            margin: '12px',
+            fontSize: '11px',
+            fontWeight: '700',
+            textTransform: 'uppercase',
+            color: 'var(--secondary)',
+            zIndex: 20
       }}>
         {title || data.label}
       </div>
@@ -57,7 +56,7 @@ export const ProgressBarWidget = ({ data, title }) => {
       </div>
 
       {/* Bar Container */}
-      <div style={{ width: '100%', marginTop: '40px' }}>
+      <div style={{ width: '100%', marginTop: '4px' }}>
           <div style={{
               height: '24px', // Thicker track
               backgroundColor: 'var(--bg-secondary)',

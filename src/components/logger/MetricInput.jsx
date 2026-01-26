@@ -6,6 +6,9 @@ import { MetricType } from '../../types/schemas';
  * Renders a single metric as a standalone Card with specific input controls.
  */
 export const MetricInput = ({ metric, value, onChange }) => {
+  // Simple Dark Mode Detection for high-contrast backgrounds
+  const isDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const inputBg = isDark ? '#2C2C2E' : '#F2F2F7';
 
   const handleChange = (val) => {
     onChange(val);
@@ -31,7 +34,7 @@ export const MetricInput = ({ metric, value, onChange }) => {
                         style={{
                             width: '51px',
                             height: '31px',
-                            backgroundColor: isChecked ? '#34C759' : 'var(--bg-secondary)',
+                            backgroundColor: isChecked ? '#34C759' : inputBg,
                             borderRadius: '34px',
                             position: 'relative',
                             cursor: 'pointer',
@@ -58,7 +61,7 @@ export const MetricInput = ({ metric, value, onChange }) => {
              const numVal = parseFloat(value) || 0;
              return (
                <div style={{ display: 'flex', justifyContent: 'center' }}>
-                   <div style={{ display: 'flex', alignItems: 'center', backgroundColor: 'var(--bg-secondary)', borderRadius: '12px', padding: '4px' }}>
+                   <div style={{ display: 'flex', alignItems: 'center', backgroundColor: inputBg, borderRadius: '12px', padding: '4px' }}>
                        <button
                          type="button"
                          onClick={() => handleChange(Math.max(0, numVal - 1))}
@@ -163,7 +166,7 @@ export const MetricInput = ({ metric, value, onChange }) => {
                                 type="button"
                                 onClick={() => handleChange(opt)}
                                 style={{
-                                    backgroundColor: isActive ? '#007AFF' : 'var(--bg-secondary)',
+                                    backgroundColor: isActive ? '#007AFF' : inputBg,
                                     color: isActive ? '#FFFFFF' : 'var(--text-primary)',
                                     borderRadius: '20px',
                                     padding: '8px 16px',
@@ -187,7 +190,7 @@ export const MetricInput = ({ metric, value, onChange }) => {
             const mins = Math.round(((value || 0) - hours) * 60);
             return (
                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                   <div style={{ backgroundColor: 'var(--bg-secondary)', borderRadius: '12px', padding: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                   <div style={{ backgroundColor: inputBg, borderRadius: '12px', padding: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                        <input
                            type="number"
                            value={hours}
@@ -197,7 +200,7 @@ export const MetricInput = ({ metric, value, onChange }) => {
                        />
                        <span style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-secondary)', textTransform: 'uppercase', marginTop: '4px' }}>Hours</span>
                    </div>
-                   <div style={{ backgroundColor: 'var(--bg-secondary)', borderRadius: '12px', padding: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                   <div style={{ backgroundColor: inputBg, borderRadius: '12px', padding: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                        <input
                            type="number"
                            value={mins}
@@ -219,7 +222,7 @@ export const MetricInput = ({ metric, value, onChange }) => {
                      placeholder="Add notes..."
                      style={{
                          width: '100%',
-                         backgroundColor: 'var(--bg-secondary)',
+                         backgroundColor: inputBg,
                          border: 'none',
                          borderRadius: '12px',
                          padding: '12px',

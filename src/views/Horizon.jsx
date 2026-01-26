@@ -216,7 +216,7 @@ export const Horizon = () => {
           }}>
             {orderedWidgets.map((widget, idx) => {
               const WidgetComponent = getWidgetComponent(widget.widgetType);
-              const isFullWidth = widget.widgetType === 'stackedbar' || widget.widgetType === 'sparkline' || widget.widgetType === 'heatmap' || widget.widgetType === 'progress' || widget.widgetType === 'compound';
+              const isFullWidth = ['stackedbar', 'sparkline', 'heatmap', 'progress', 'compound', 'history'].includes(widget.widgetType);
 
               if (isEditing) {
                   return (

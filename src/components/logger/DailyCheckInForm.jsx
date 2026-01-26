@@ -56,12 +56,6 @@ export const DailyCheckInForm = () => {
         margin: '0 auto',
         paddingBottom: '100px' // Space for FAB
     }}>
-        {/* Form Header */}
-        <div style={{ marginBottom: '24px', paddingLeft: '8px' }}>
-            <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{todayDate}</div>
-            <div style={{ fontSize: '34px', fontWeight: '700', color: 'var(--text-primary)', marginTop: '4px', letterSpacing: '-0.5px' }}>Check-In</div>
-        </div>
-
         <form onSubmit={handleSubmit}>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {metrics.map((metric, index) => (
