@@ -4,12 +4,12 @@ import { RingChart } from '../ui/charts/RingChart';
 /**
  * ReliabilityRing Widget
  * * Displays a metric's progress as a ring chart.
- * * Refactored Phase 4.9.1: Global Header.
+ * * Refactored Phase 4.9.2: Atomic Visual Fixes.
  */
-export const ReliabilityRing = ({ data }) => {
+export const ReliabilityRing = ({ data, title }) => {
   if (!data) return null;
 
-  const { value = 0, label = '' } = data;
+  const { value = 0 } = data;
 
   // Traffic Light Logic
   let ringColor = '#34C759'; // Green (76-100)
@@ -27,18 +27,19 @@ export const ReliabilityRing = ({ data }) => {
         width: '100%',
         position: 'relative'
     }}>
-      {/* Global Standard Header */}
+      {/* Atomic Header Fix */}
       <div style={{
-          position: 'absolute',
-          top: '16px',
-          left: '20px',
-          fontSize: '15px',
-          fontWeight: '600',
-          letterSpacing: '-0.3px',
-          color: 'var(--text-primary)',
-          zIndex: 10
+            position: 'absolute',
+            top: '16px',
+            left: '20px',
+            margin: 0,
+            fontSize: '15px',
+            fontWeight: '600',
+            color: 'var(--text-secondary)', // #8E8E93
+            zIndex: 10,
+            letterSpacing: '-0.3px'
       }}>
-        {label}
+        {title || data.label}
       </div>
 
       <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: '16px' }}>

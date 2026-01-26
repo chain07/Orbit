@@ -43,7 +43,7 @@ export const DailyCheckInForm = () => {
 
   if (metrics.length === 0) {
       return (
-          <div style={{ textAlign: 'center', padding: '40px', color: '#8E8E93', fontStyle: 'italic' }}>
+          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
               No metrics configured.
           </div>
       );
@@ -58,19 +58,20 @@ export const DailyCheckInForm = () => {
     }}>
         {/* Form Header */}
         <div style={{ marginBottom: '24px', paddingLeft: '8px' }}>
-            <div style={{ fontSize: '13px', fontWeight: '700', color: '#8E8E93', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{todayDate}</div>
-            <div style={{ fontSize: '34px', fontWeight: '700', color: '#000000', marginTop: '4px', letterSpacing: '-0.5px' }}>Check-In</div>
+            <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{todayDate}</div>
+            <div style={{ fontSize: '34px', fontWeight: '700', color: 'var(--text-primary)', marginTop: '4px', letterSpacing: '-0.5px' }}>Check-In</div>
         </div>
 
         <form onSubmit={handleSubmit}>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                {metrics.map(metric => (
-                    <MetricInput
-                        key={metric.id}
-                        metric={metric}
-                        value={entries[metric.id]}
-                        onChange={(val) => handleChange(metric.id, val)}
-                    />
+                {metrics.map((metric, index) => (
+                    <div key={metric.id} style={{ marginTop: index === 0 ? 0 : undefined }}>
+                        <MetricInput
+                            metric={metric}
+                            value={entries[metric.id]}
+                            onChange={(val) => handleChange(metric.id, val)}
+                        />
+                    </div>
                 ))}
             </div>
 

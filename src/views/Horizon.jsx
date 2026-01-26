@@ -9,6 +9,7 @@ import { EmptyState } from '../components/ui/EmptyState';
 import UpdateManager from '../components/system/UpdateManager';
 import { OnboardingWizard } from '../components/system/OnboardingWizard';
 import { Icons } from '../components/ui/Icons';
+import { OrbitButton } from '../components/ui/OrbitButton';
 import '../styles/motion.css';
 
 class WidgetErrorBoundary extends React.Component {
@@ -217,44 +218,63 @@ export const Horizon = () => {
               const WidgetComponent = getWidgetComponent(widget.widgetType);
               const isFullWidth = widget.widgetType === 'stackedbar' || widget.widgetType === 'sparkline' || widget.widgetType === 'heatmap' || widget.widgetType === 'progress' || widget.widgetType === 'compound';
 
+              if (isEditing) {
+                  return (
+                    <div
+                        key={widget.id || idx}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '12px',
+                            backgroundColor: 'var(--card-bg)',
+                            marginBottom: '8px',
+                            borderRadius: '12px',
+                            border: '1px solid var(--separator)'
+                        }}
+                    >
+                         <div className="flex flex-col gap-1 min-w-[120px]">
+                            {/* Title */}
+                            <span className="font-bold text-primary text-sm truncate">
+                                {widget.label || widget.title || 'Widget'}
+                            </span>
+                            {/* Type Badge */}
+                            <span className="text-xs text-secondary bg-secondary/10 px-2 py-0.5 rounded-full w-fit capitalize">
+                                {widget.widgetType}
+                            </span>
+                         </div>
+
+                        {/* Controls */}
+                        <div className="flex gap-2">
+                             <OrbitButton
+                                variant="secondary"
+                                icon={<Icons.ChevronUp size={16} />}
+                                onClick={() => moveWidget(idx, -1)}
+                                disabled={idx === 0}
+                             />
+                             <OrbitButton
+                                variant="secondary"
+                                icon={<Icons.ChevronDown size={16} />}
+                                onClick={() => moveWidget(idx, 1)}
+                                disabled={idx === orderedWidgets.length - 1}
+                             />
+                        </div>
+                    </div>
+                  );
+              }
+
               return (
                 <Glass
                   key={widget.id || idx}
-                  className={`relative overflow-hidden transition-transform ${isEditing ? 'border-blue border-opacity-50' : ''}`}
+                  className="relative overflow-hidden transition-transform"
                   style={{
                     gridColumn: isFullWidth ? 'span 2' : 'span 1',
-                    aspectRatio: isFullWidth && !isEditing ? '2 / 1' : isEditing ? 'auto' : '1 / 1',
-                    minHeight: isEditing ? '80px' : 'auto'
+                    aspectRatio: isFullWidth ? '2 / 1' : '1 / 1'
                   }}
                 >
                    <WidgetErrorBoundary>
-                     {/* In Edit Mode, simplify or block interaction? For now, render fully but overlay blocks clicks */}
                      <WidgetComponent data={widget.data} title={widget.title} />
                    </WidgetErrorBoundary>
-
-                   {isEditing && (
-                       <div className="absolute inset-0 bg-black/5 z-50 flex items-center justify-between px-6 backdrop-blur-[1px]">
-                           <span className="font-bold text-primary">{widget.title || 'Widget'}</span>
-                           <div className="flex gap-4">
-                               <button
-                                onClick={() => moveWidget(idx, -1)}
-                                disabled={idx === 0}
-                                className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center disabled:opacity-30 active:scale-95 transition-all"
-                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                               >
-                                   <Icons.ChevronUp size={20} />
-                               </button>
-                               <button
-                                onClick={() => moveWidget(idx, 1)}
-                                disabled={idx === orderedWidgets.length - 1}
-                                className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center disabled:opacity-30 active:scale-95 transition-all"
-                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                               >
-                                   <Icons.ChevronDown size={20} />
-                               </button>
-                           </div>
-                       </div>
-                   )}
                 </Glass>
               );
             })}

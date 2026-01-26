@@ -1,10 +1,9 @@
 import React, { useMemo } from 'react';
-import { dateUtils } from '../../lib/dateUtils';
 
 /**
  * ConsistencyHeatmap Widget
  * * Displays a contribution-graph style heatmap.
- * * Refactored Phase 4.9.1: Global Header, Bottom Padding, Bold Month Label.
+ * * Refactored Phase 4.9.2: Atomic Visual Fixes (Overflow, Header).
  */
 export const ConsistencyHeatmap = ({ data, title }) => {
   if (!data || !data.values) return null;
@@ -31,7 +30,7 @@ export const ConsistencyHeatmap = ({ data, title }) => {
       if (value >= 75) return 'rgba(52, 199, 89, 0.75)';
       if (value >= 50) return 'rgba(52, 199, 89, 0.5)';
       if (value > 0) return 'rgba(52, 199, 89, 0.25)';
-      return '#E5E5EA'; // Empty Grey
+      return 'var(--bg-secondary)'; // Dynamic Empty Color
   };
 
   const startMonth = new Date(days[0].date).toLocaleString('default', { month: 'short' });
@@ -51,21 +50,22 @@ export const ConsistencyHeatmap = ({ data, title }) => {
         flexDirection: 'column',
         alignItems: 'center',
         padding: '16px',
-        paddingBottom: '30px' // Added padding
+        paddingBottom: '40px' // Increased padding as requested
     }}>
 
-        {/* Global Standard Header */}
+        {/* Atomic Header Fix */}
         <div style={{
             position: 'absolute',
             top: '16px',
             left: '20px',
+            margin: 0,
             fontSize: '15px',
             fontWeight: '600',
-            letterSpacing: '-0.3px',
-            color: 'var(--text-primary)',
-            zIndex: 10
+            color: 'var(--text-secondary)', // #8E8E93
+            zIndex: 10,
+            letterSpacing: '-0.3px'
         }}>
-            {data.label || title || 'Consistency'}
+            {title || data.label || 'Consistency'}
         </div>
 
         {/* Month Label (Top Right) */}
@@ -81,11 +81,10 @@ export const ConsistencyHeatmap = ({ data, title }) => {
             {monthRange}
         </div>
 
-        {/* Grid Container */}
+        {/* Grid Container - Expanded */}
         <div style={{
             marginTop: '32px',
             width: '100%',
-            maxWidth: '280px' // Slightly increased to fit padding
         }}>
             {/* Calendar Grid */}
             <div style={{

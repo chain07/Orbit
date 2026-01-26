@@ -1,47 +1,78 @@
 import React from 'react';
+import { WidgetDataEngine } from '../../engine/WidgetDataEngine';
 
-/**
- * RecentHistory Widget
- * * Lists the last N entries for a metric.
- */
-export const RecentHistory = ({ data }) => {
-  if (!data || !data.entries) return null;
+export const RecentHistory = ({ data, title }) => {
+  // If data is just the raw array (from engine), use it.
+  // Otherwise try to extract from typical structure
+  const entries = Array.isArray(data) ? data : (data?.entries || []);
 
-  const { entries = [], unit = '' } = data;
-  const recentItems = entries.slice(0, 5); // Max 5 items
-
-  const formatDate = (isoString) => {
-    const d = new Date(isoString);
-    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-  };
+  // Sort by timestamp descending
+  const sorted = [...entries].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 5);
 
   return (
-    <div style={{ position: 'relative', height: '100%', width: '100%', display: 'flex', flexDirection: 'column', padding: '16px' }}>
-      {/* Standard Header */}
-      <div style={{ position: 'absolute', top: '14px', left: '16px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-secondary)', zIndex: 10 }}>
-        History
+    <div style={{
+      width: '100%',
+      height: '100%',
+      position: 'relative',
+      overflow: 'hidden',
+      padding: '20px',
+      paddingTop: '50px', // Clear header
+      boxSizing: 'border-box'
+    }}>
+      {/* Strict Header */}
+      <div style={{
+        position: 'absolute',
+        top: '16px',
+        left: '20px',
+        margin: 0,
+        fontSize: '15px',
+        fontWeight: '600',
+        color: 'var(--text-secondary)', // #8E8E93
+        zIndex: 10,
+        letterSpacing: '-0.3px'
+      }}>
+        {title}
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '32px', overflowY: 'auto' }}>
-        {recentItems.length === 0 ? (
-          <div style={{ fontSize: '13px', color: 'var(--text-secondary)', fontStyle: 'italic', opacity: 0.6 }}>
-            No recent entries
-          </div>
+      <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px',
+          height: '100%',
+          overflowY: 'auto'
+      }}>
+        {sorted.length === 0 ? (
+           <div className="flex items-center justify-center h-full text-xs text-secondary opacity-60">
+               No history yet
+           </div>
         ) : (
-          recentItems.map((entry, idx) => (
-            <div 
-              key={entry.id || idx} 
-              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-            >
-              <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '500' }}>
-                {formatDate(entry.timestamp)}
-              </span>
-              
-              <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)' }}>
-                {entry.value} {unit}
-              </span>
-            </div>
-          ))
+            sorted.map((entry) => {
+                const dateObj = new Date(entry.timestamp);
+                const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                return (
+                    <div
+                      key={entry.id}
+                      style={{
+                          backgroundColor: 'var(--bg-color)',
+                          borderRadius: '10px',
+                          padding: '12px',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          fontSize: '14px'
+                      }}
+                    >
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>
+                            {dateStr} <span style={{ opacity: 0.5 }}>{timeStr}</span>
+                        </span>
+                        <span style={{ fontWeight: '500', color: 'var(--text-primary)', maxWidth: '60%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {String(entry.value)}
+                        </span>
+                    </div>
+                );
+            })
         )}
       </div>
     </div>

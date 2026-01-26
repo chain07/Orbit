@@ -2,7 +2,7 @@ import React from 'react';
 import { MetricType } from '../../types/schemas';
 
 /**
- * MetricInput (Refactored Phase 4.9.1: Card Stack)
+ * MetricInput (Refactored Phase 4.9.2: Dark Mode & Polish)
  * Renders a single metric as a standalone Card with specific input controls.
  */
 export const MetricInput = ({ metric, value, onChange }) => {
@@ -31,7 +31,7 @@ export const MetricInput = ({ metric, value, onChange }) => {
                         style={{
                             width: '51px',
                             height: '31px',
-                            backgroundColor: isChecked ? '#34C759' : '#E5E5EA',
+                            backgroundColor: isChecked ? '#34C759' : 'var(--bg-secondary)',
                             borderRadius: '34px',
                             position: 'relative',
                             cursor: 'pointer',
@@ -58,13 +58,13 @@ export const MetricInput = ({ metric, value, onChange }) => {
              const numVal = parseFloat(value) || 0;
              return (
                <div style={{ display: 'flex', justifyContent: 'center' }}>
-                   <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#F2F2F7', borderRadius: '12px', padding: '4px' }}>
+                   <div style={{ display: 'flex', alignItems: 'center', backgroundColor: 'var(--bg-secondary)', borderRadius: '12px', padding: '4px' }}>
                        <button
                          type="button"
                          onClick={() => handleChange(Math.max(0, numVal - 1))}
                          style={{
                              width: '44px', height: '44px', borderRadius: '10px', border: 'none',
-                             backgroundColor: '#FFFFFF', color: '#000000',
+                             backgroundColor: 'var(--card-bg)', color: 'var(--text-primary)',
                              fontSize: '24px', fontWeight: '400', cursor: 'pointer',
                              boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
                              display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -73,7 +73,7 @@ export const MetricInput = ({ metric, value, onChange }) => {
                        >
                            −
                        </button>
-                       <div style={{ minWidth: '60px', textAlign: 'center', fontSize: '20px', fontWeight: '600', color: '#000000' }}>
+                       <div style={{ minWidth: '60px', textAlign: 'center', fontSize: '20px', fontWeight: '600', color: 'var(--text-primary)' }}>
                            {numVal}
                        </div>
                         <button
@@ -81,7 +81,7 @@ export const MetricInput = ({ metric, value, onChange }) => {
                          onClick={() => handleChange(numVal + 1)}
                          style={{
                              width: '44px', height: '44px', borderRadius: '10px', border: 'none',
-                             backgroundColor: '#FFFFFF', color: '#000000',
+                             backgroundColor: 'var(--card-bg)', color: 'var(--text-primary)',
                              fontSize: '24px', fontWeight: '400', cursor: 'pointer',
                              boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
                              display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -119,8 +119,8 @@ export const MetricInput = ({ metric, value, onChange }) => {
                         }
                     `}</style>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                        <span style={{ fontSize: '12px', color: '#8E8E93' }}>{metric.range?.min || 0}</span>
-                        <span style={{ fontSize: '12px', color: '#8E8E93' }}>{metric.range?.max || 10}</span>
+                        <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{metric.range?.min || 0}</span>
+                        <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{metric.range?.max || 10}</span>
                     </div>
                     <input
                         type="range"
@@ -163,8 +163,8 @@ export const MetricInput = ({ metric, value, onChange }) => {
                                 type="button"
                                 onClick={() => handleChange(opt)}
                                 style={{
-                                    backgroundColor: isActive ? '#007AFF' : '#F2F2F7',
-                                    color: isActive ? '#FFFFFF' : '#000000',
+                                    backgroundColor: isActive ? '#007AFF' : 'var(--bg-secondary)',
+                                    color: isActive ? '#FFFFFF' : 'var(--text-primary)',
                                     borderRadius: '20px',
                                     padding: '8px 16px',
                                     border: 'none',
@@ -187,26 +187,26 @@ export const MetricInput = ({ metric, value, onChange }) => {
             const mins = Math.round(((value || 0) - hours) * 60);
             return (
                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                   <div style={{ backgroundColor: '#F2F2F7', borderRadius: '12px', padding: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                   <div style={{ backgroundColor: 'var(--bg-secondary)', borderRadius: '12px', padding: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                        <input
                            type="number"
                            value={hours}
                            min={0}
                            onChange={(e) => handleChange(parseFloat(e.target.value || 0) + (mins/60))}
-                           style={{ fontSize: '24px', fontWeight: '600', textAlign: 'center', background: 'transparent', border: 'none', width: '100%', padding: 0, color: '#000000' }}
+                           style={{ fontSize: '24px', fontWeight: '600', textAlign: 'center', background: 'transparent', border: 'none', width: '100%', padding: 0, color: 'var(--text-primary)' }}
                        />
-                       <span style={{ fontSize: '11px', fontWeight: '600', color: '#8E8E93', textTransform: 'uppercase', marginTop: '4px' }}>Hours</span>
+                       <span style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-secondary)', textTransform: 'uppercase', marginTop: '4px' }}>Hours</span>
                    </div>
-                   <div style={{ backgroundColor: '#F2F2F7', borderRadius: '12px', padding: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                   <div style={{ backgroundColor: 'var(--bg-secondary)', borderRadius: '12px', padding: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                        <input
                            type="number"
                            value={mins}
                            min={0}
                            max={59}
                            onChange={(e) => handleChange(hours + (parseFloat(e.target.value || 0)/60))}
-                           style={{ fontSize: '24px', fontWeight: '600', textAlign: 'center', background: 'transparent', border: 'none', width: '100%', padding: 0, color: '#000000' }}
+                           style={{ fontSize: '24px', fontWeight: '600', textAlign: 'center', background: 'transparent', border: 'none', width: '100%', padding: 0, color: 'var(--text-primary)' }}
                        />
-                       <span style={{ fontSize: '11px', fontWeight: '600', color: '#8E8E93', textTransform: 'uppercase', marginTop: '4px' }}>Mins</span>
+                       <span style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-secondary)', textTransform: 'uppercase', marginTop: '4px' }}>Mins</span>
                    </div>
                </div>
             );
@@ -219,12 +219,12 @@ export const MetricInput = ({ metric, value, onChange }) => {
                      placeholder="Add notes..."
                      style={{
                          width: '100%',
-                         backgroundColor: '#F2F2F7',
+                         backgroundColor: 'var(--bg-secondary)',
                          border: 'none',
                          borderRadius: '12px',
                          padding: '12px',
                          fontSize: '16px',
-                         color: '#000000',
+                         color: 'var(--text-primary)',
                          fontFamily: 'inherit',
                          resize: 'none',
                          minHeight: '80px',
@@ -240,7 +240,7 @@ export const MetricInput = ({ metric, value, onChange }) => {
 
   return (
     <div style={{
-        backgroundColor: '#FFFFFF',
+        backgroundColor: 'var(--card-bg)',
         borderRadius: '20px',
         boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
         padding: '20px',
@@ -250,7 +250,7 @@ export const MetricInput = ({ metric, value, onChange }) => {
     }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <span style={{ fontSize: '17px', fontWeight: '700', color: '#000000' }}>{metric.label}</span>
+          <span style={{ fontSize: '17px', fontWeight: '700', color: 'var(--text-primary)' }}>{metric.label}</span>
           <span style={{ fontSize: '15px', fontWeight: '600', color: '#007AFF', fontVariantNumeric: 'tabular-nums' }}>
               {renderContext()}
           </span>

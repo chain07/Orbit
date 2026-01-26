@@ -3,9 +3,9 @@ import React, { useMemo } from 'react';
 /**
  * CompoundBarWidget
  * Use Case: For Select metrics.
- * Refactor Phase 4.9.1: Segmented Bar, Grid Legend.
+ * Refactor Phase 4.9.2: Atomic Visual Fixes.
  */
-export const CompoundBarWidget = ({ data }) => {
+export const CompoundBarWidget = ({ data, title }) => {
   if (!data || !data.breakdown) return null;
 
   const { breakdown = [] } = data;
@@ -42,38 +42,42 @@ export const CompoundBarWidget = ({ data }) => {
     <div style={{
         display: 'flex',
         flexDirection: 'column',
-        padding: '20px',
+        padding: '16px 20px', // Strict Padding
         height: '100%',
         width: '100%',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        position: 'relative',
+        justifyContent: 'flex-end',
+        minHeight: '120px' // Reduced min-height
     }}>
-        {/* Header: Flex Row */}
+        {/* Atomic Header Fix */}
         <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-end',
-            marginBottom: '10px',
-            width: '100%'
+            position: 'absolute',
+            top: '16px',
+            left: '20px',
+            margin: 0,
+            fontSize: '15px',
+            fontWeight: '600',
+            color: 'var(--text-secondary)', // #8E8E93
+            zIndex: 10,
+            letterSpacing: '-0.3px'
         }}>
-             {/* Label - Standard Header Style (Relative) */}
-            <div style={{
-                fontSize: '15px',
-                fontWeight: '600',
-                letterSpacing: '-0.3px',
-                color: 'var(--text-primary)'
-            }}>
-                {data.label || 'Breakdown'}
-            </div>
+            {title || data.label || 'Breakdown'}
+        </div>
 
-            {/* Total Value (Optional, mimicking Progress style) */}
-            <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '19px', fontWeight: '700', color: '#007AFF' }}>
-                    {segments.reduce((sum, s) => sum + s.value, 0)}
-                </div>
-                <span style={{ fontSize: '11px', fontWeight: '500', color: '#8E8E93', display: 'block' }}>
-                    Total
-                </span>
+        {/* Total Value - Top Right */}
+        <div style={{
+            position: 'absolute',
+            top: '16px',
+            right: '20px',
+            textAlign: 'right'
+        }}>
+            <div style={{ fontSize: '20px', fontWeight: '700', color: '#007AFF' }}>
+                {segments.reduce((sum, s) => sum + s.value, 0)}
             </div>
+            <span style={{ fontSize: '11px', fontWeight: '500', color: '#8E8E93', display: 'block' }}>
+                Total
+            </span>
         </div>
 
         {/* Hero Bar (Segmented) */}
@@ -84,7 +88,8 @@ export const CompoundBarWidget = ({ data }) => {
             borderRadius: '9px',
             overflow: 'hidden',
             gap: '1px',
-            marginBottom: '16px'
+            marginBottom: '16px',
+            marginTop: '40px'
         }}>
             {segments.map((seg, i) => (
                 <div key={i} style={{
