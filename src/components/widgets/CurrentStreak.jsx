@@ -4,7 +4,7 @@ import { Icons } from '../ui/Icons';
 /**
  * CurrentStreak Widget
  * * Displays the current active streak for a metric.
- * * Refactored Phase 4.9.4: Resized Typography.
+ * * Refactored Phase 4.95: Visual Polish (Icon Inline).
  */
 export const CurrentStreak = ({ data, title }) => {
   if (!data) return null;
@@ -13,50 +13,49 @@ export const CurrentStreak = ({ data, title }) => {
 
   return (
     <div style={{ position: 'relative', height: '100%', width: '100%' }}>
-      {/* Strict Header */}
+      {/* Header Container: Inline Icon & Label */}
       <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
             position: 'absolute',
-            top: '12px',
-            left: '12px',
-            margin: 0,
+            top: '16px', // Increased from 12px for breathing room
+            left: '20px', // Increased from 12px
+            zIndex: 20
+      }}>
+        {/* Flame Icon */}
+        <Icons.Flame size={16} color="#FF9500" fill="#FF9500" style={{ opacity: 1 }} />
+
+        {/* Label */}
+        <div style={{
             fontSize: '11px',
             fontWeight: '700',
             textTransform: 'uppercase',
             color: 'var(--secondary)',
-            zIndex: 20
-      }}>
-        {title || data.label || 'Streak'}
+            margin: 0
+        }}>
+            {title || data.label || 'Streak'}
+        </div>
       </div>
 
-      {/* Flame Icon - Top Right - Solid Orange */}
-      <div style={{
-          position: 'absolute',
-          top: '16px',
-          right: '20px',
-          zIndex: 10
-      }}>
-          <Icons.Flame size={24} color="#FF9500" fill="#FF9500" style={{ opacity: 1 }} />
-      </div>
-
-      {/* Data Group - Bottom Right */}
+      {/* Data Group - Bottom Left */}
       <div style={{
           position: 'absolute',
           bottom: '20px',
-          right: '20px',
-          textAlign: 'right',
+          left: '20px', // Moved to left
           zIndex: 10
       }}>
         <div style={{
-            fontSize: '72px', // Increased from 64px
+            fontSize: '72px',
             fontWeight: '800',
-            lineHeight: '0.9',
+            lineHeight: '1',
             letterSpacing: '-2px',
             color: 'var(--text-primary)'
         }}>
             {current}
         </div>
         <div style={{
-            fontSize: '16px', // Increased from 14px
+            fontSize: '16px',
             fontWeight: '700',
             color: '#FF9500',
             textTransform: 'uppercase',

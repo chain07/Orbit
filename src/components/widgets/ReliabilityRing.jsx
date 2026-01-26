@@ -4,7 +4,7 @@ import { RingChart } from '../ui/charts/RingChart';
 /**
  * ReliabilityRing Widget
  * * Displays a metric's progress as a ring chart.
- * * Refactored Phase 4.12: Atomic Visual Fixes (Label Positioning).
+ * * Refactored Phase 4.95: Visual Polish (Label overlap fix).
  */
 export const ReliabilityRing = ({ data, title }) => {
   if (!data) return null;
@@ -26,7 +26,6 @@ export const ReliabilityRing = ({ data, title }) => {
         height: '100%',
         width: '100%',
         position: 'relative'
-        // No padding on outermost wrapper
     }}>
       {/* Atomic Header Fix: Strict Positioning */}
       <div style={{
@@ -43,10 +42,19 @@ export const ReliabilityRing = ({ data, title }) => {
         {title || data.label}
       </div>
 
-      <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: '16px' }}>
+      {/* Ring Container with padding to clear header and reduced size */}
+      <div style={{
+          position: 'relative',
+          width: '80%', // Reduced from 100%
+          height: '80%', // Reduced from 100%
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          paddingTop: '20px' // Added top padding
+      }}>
           <RingChart
             value={value}
-            size={140}
+            size={120} // Slightly reduced from 140
             strokeWidth={12}
             color={ringColor}
             label={null}
@@ -58,7 +66,7 @@ export const ReliabilityRing = ({ data, title }) => {
               alignItems: 'center',
               justifyContent: 'center',
               pointerEvents: 'none',
-              paddingTop: '16px'
+              paddingTop: '20px' // Match container padding
           }}>
               <span style={{ fontSize: '28px', fontWeight: '800', color: 'var(--text-primary)' }}>
                 {Math.round(value)}%

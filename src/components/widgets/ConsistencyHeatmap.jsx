@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 /**
  * ConsistencyHeatmap Widget
  * * Displays a contribution-graph style heatmap for the current month.
- * * Refactored Phase 4.9.4: Current Month Logic & Visual Calibration.
+ * * Refactored Phase 4.95: Visual Polish (Visible Empty States, Header Alignment).
  */
 export const ConsistencyHeatmap = ({ data, title }) => {
   if (!data || !data.values) return null;
@@ -20,8 +20,6 @@ export const ConsistencyHeatmap = ({ data, title }) => {
     // Iterate from startOfMonth to today (inclusive)
     const current = new Date(startOfMonth);
     while (current <= end) {
-        // Handle timezone offset issues by using local values for ISO string construction manually or just ensuring date parts match
-        // Using string manipulation to ensure "YYYY-MM-DD" matches local date
         const year = current.getFullYear();
         const month = String(current.getMonth() + 1).padStart(2, '0');
         const day = String(current.getDate()).padStart(2, '0');
@@ -42,7 +40,7 @@ export const ConsistencyHeatmap = ({ data, title }) => {
       if (value >= 75) return 'rgba(52, 199, 89, 0.75)';
       if (value >= 50) return 'rgba(52, 199, 89, 0.5)';
       if (value > 0) return 'rgba(52, 199, 89, 0.25)';
-      return 'var(--bg-secondary)'; // Visible Empty Slots
+      return 'var(--bg-secondary)'; // Visible Empty Slots (using theme var, typically #F2F2F7 or #2C2C2E)
   };
 
   const monthName = today.toLocaleString('default', { month: 'long' });
@@ -58,7 +56,6 @@ export const ConsistencyHeatmap = ({ data, title }) => {
         width: '100%',
         display: 'flex',
         flexDirection: 'column',
-        // No outer padding
     }}>
 
         {/* Strict Header */}
@@ -76,23 +73,25 @@ export const ConsistencyHeatmap = ({ data, title }) => {
             {title || data.label || 'Consistency'}
         </div>
 
+        {/* Date Range Label - Top Right */}
+        <div style={{
+            position: 'absolute',
+            top: '12px',
+            right: '12px',
+            fontSize: '12px',
+            fontWeight: '600',
+            color: 'var(--text-secondary)',
+            zIndex: 20
+        }}>
+            {monthName}
+        </div>
+
         {/* Content Wrapper */}
         <div style={{
             padding: '40px 20px 20px 20px',
             boxSizing: 'border-box',
             width: '100%'
         }}>
-            {/* Month Label */}
-            <div style={{
-                textAlign: 'right',
-                fontSize: '13px',
-                fontWeight: '700',
-                color: 'var(--text-primary)',
-                marginBottom: '12px'
-            }}>
-                {monthName}
-            </div>
-
             {/* Calendar Grid */}
             <div style={{
                 display: 'grid',
@@ -107,7 +106,9 @@ export const ConsistencyHeatmap = ({ data, title }) => {
                         style={{
                             aspectRatio: '1/1',
                             borderRadius: '4px',
-                            backgroundColor: getColor(day.value)
+                            backgroundColor: getColor(day.value),
+                            // Ensure visibility for empty states if theme var is too subtle
+                            boxShadow: day.value === 0 ? 'inset 0 0 0 1px rgba(0,0,0,0.03)' : 'none'
                         }}
                         title={`${day.date}: ${day.value}`}
                     />

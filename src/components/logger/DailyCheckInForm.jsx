@@ -12,7 +12,7 @@ export const DailyCheckInForm = () => {
     if (isSaved) setIsSaved(false);
   };
 
-  const handleSubmit = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     
     // Filter out empty entries
@@ -22,32 +22,41 @@ export const DailyCheckInForm = () => {
 
     if (validEntries.length === 0) return;
 
-    // Submit entries with Type Parsing
-    validEntries.forEach(([metricId, value]) => {
-      const metric = metrics.find(m => m.id === metricId);
-      let parsedValue = value;
+    try {
+        // Submit entries with Type Parsing
+        const promises = validEntries.map(async ([metricId, value]) => {
+          const metric = metrics.find(m => m.id === metricId);
+          let parsedValue = value;
 
-      if (metric) {
-          if (metric.type === 'number' || metric.type === 'range') {
-              parsedValue = parseFloat(value);
-          } else if (metric.type === 'boolean') {
-              parsedValue = value === true || value === 'true'; // Handle string/bool
+          if (metric) {
+              if (metric.type === 'number' || metric.type === 'range') {
+                  parsedValue = parseFloat(value);
+              } else if (metric.type === 'boolean') {
+                  parsedValue = value === true || value === 'true'; // Handle string/bool
+              }
           }
-      }
 
-      addLogEntry({ 
-        metricId,
-        value: parsedValue,
-        timestamp: new Date() 
-      });
-    });
+          return addLogEntry({
+            metricId,
+            value: parsedValue,
+            timestamp: new Date()
+          });
+        });
 
-    setEntries({});
-    setIsSaved(true);
-    
-    setTimeout(() => {
-      setIsSaved(false);
-    }, 2000);
+        await Promise.all(promises);
+
+        setEntries({});
+        setIsSaved(true);
+
+        // Native feedback as requested
+        // alert('Check-in Saved!');
+
+        setTimeout(() => {
+          setIsSaved(false);
+        }, 2000);
+    } catch (e) {
+        alert('Error saving: ' + e.message);
+    }
   };
 
   if (metrics.length === 0) {
@@ -65,7 +74,7 @@ export const DailyCheckInForm = () => {
         margin: '0 auto',
         paddingBottom: '40px'
     }}>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSave}>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {metrics.map((metric, index) => (
                     <div key={metric.id} style={{ marginTop: index === 0 ? 0 : undefined }}>
@@ -80,7 +89,8 @@ export const DailyCheckInForm = () => {
 
             {/* Standard Bottom Button */}
             <button
-                type="submit"
+                type="button" // Use button type to prevent implicit submit if needed, but onClick works
+                onClick={handleSave}
                 disabled={isSaved}
                 style={{
                     width: '100%',

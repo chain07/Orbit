@@ -5,7 +5,6 @@ import { Glass } from '../../components/ui/Glass';
 export const Timeline = () => {
   const { logEntries, metrics } = useContext(StorageContext);
   
-  // Refactored to use standard metricId mapping
   const metricMap = metrics.reduce((acc, m) => ({ ...acc, [m.id]: m }), {});
 
   const groupedLogs = useMemo(() => {
@@ -21,46 +20,82 @@ export const Timeline = () => {
 
   if (logEntries.length === 0) {
       return (
-        <div className="text-center text-secondary py-8 italic text-sm opacity-60">
+        <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '32px', fontStyle: 'italic', fontSize: '14px', opacity: 0.6 }}>
           No logs recorded yet.
         </div>
       );
   }
 
   return (
-      <Glass className="p-0 overflow-hidden">
-        <div className="flex flex-col gap-6 pb-20 pt-4">
-          {Object.entries(groupedLogs).map(([date, logs]) => (
-              <div key={date} className="flex flex-col gap-2">
-                  <div className="text-xs font-bold text-secondary uppercase tracking-wide px-4 sticky top-0 bg-bg-color z-10 py-2 border-b border-separator/50">
+      <div style={{ paddingBottom: '80px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {Object.entries(groupedLogs).map(([date, logs], groupIdx) => (
+              <details key={date} open={groupIdx === 0} style={{ width: '100%' }}>
+                  <summary style={{
+                      padding: '12px 16px',
+                      fontSize: '13px',
+                      fontWeight: '800',
+                      color: 'var(--text-secondary)',
+                      textTransform: 'uppercase',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                      position: 'sticky',
+                      top: 0,
+                      backgroundColor: 'var(--bg-color)',
+                      zIndex: 10,
+                      borderBottom: '1px solid var(--separator)',
+                      listStyle: 'none' // Hide default arrow
+                  }}>
                       {date}
-                  </div>
-                  <div className="bg-card overflow-hidden mx-0">
+                  </summary>
+
+                  <div style={{
+                      backgroundColor: 'var(--card-bg)',
+                      borderRadius: '16px',
+                      overflow: 'hidden',
+                      marginTop: '8px',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                  }}>
                       {logs.map((log, idx) => {
                           const metric = metricMap[log.metricId];
                           const isLast = idx === logs.length - 1;
                           return (
                               <div
                                 key={log.id || idx}
-                                className={`flex justify-between items-center p-4 bg-card ${!isLast ? 'border-b border-separator/50' : ''}`}
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    padding: '16px',
+                                    backgroundColor: 'var(--card-bg)',
+                                    borderBottom: !isLast ? '1px solid var(--separator)' : 'none'
+                                }}
                               >
-                                  <div className="flex flex-col gap-1">
-                                      <span className="font-semibold text-primary">{metric?.label || 'Unknown Metric'}</span>
-                                      <span className="text-xs text-secondary">
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                      <span style={{ fontWeight: '600', color: 'var(--text-primary)', fontSize: '15px' }}>
+                                        {metric?.label || 'Unknown Metric'}
+                                      </span>
+                                      <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
                                           {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                       </span>
                                   </div>
-                                  <div className="font-mono font-medium text-primary bg-bg-color px-2 py-1 rounded text-sm">
+                                  <div style={{
+                                      fontFamily: 'ui-monospace, monospace',
+                                      fontWeight: '600',
+                                      color: 'var(--text-primary)',
+                                      backgroundColor: 'var(--bg-secondary)',
+                                      padding: '4px 8px',
+                                      borderRadius: '6px',
+                                      fontSize: '14px'
+                                  }}>
                                       {typeof log.value === 'boolean' ? (log.value ? 'Done' : 'Missed') : log.value}
-                                      {metric?.unit ? <span className="text-secondary ml-1 text-xs">{metric.unit}</span> : ''}
+                                      {metric?.unit ? <span style={{ color: 'var(--text-secondary)', marginLeft: '4px', fontSize: '12px' }}>{metric.unit}</span> : ''}
                                   </div>
                               </div>
                           );
                       })}
                   </div>
-              </div>
+              </details>
           ))}
-        </div>
-      </Glass>
+      </div>
   );
 };

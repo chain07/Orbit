@@ -4,6 +4,7 @@ import { StackedBar } from '../ui/charts/StackedBar';
 /**
  * SegmentedBarWidget
  * Wrapper around StackedBar for displaying categorical distributions.
+ * * Refactored Phase 4.95: Min-Height Sizing.
  */
 export const SegmentedBarWidget = ({ data, title }) => {
   if (!data || !data.entries || data.entries.length === 0) {
@@ -17,7 +18,12 @@ export const SegmentedBarWidget = ({ data, title }) => {
   const { entries, colors = {} } = data;
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+    <div style={{
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        minHeight: '200px' // Force height match
+    }}>
       {/* Strict Header */}
       <div style={{
             position: 'absolute',

@@ -15,6 +15,9 @@ export const Logger = ({ initialMetricId = null }) => {
   const [activeMode, setActiveMode] = useState('checkin');
 
   useEffect(() => {
+    // Scroll Fix
+    window.scrollTo(0, 0);
+
     if (initialMetricId) {
       const metric = metrics.find(m => m.id === initialMetricId);
       if (metric) {
@@ -72,7 +75,7 @@ export const Logger = ({ initialMetricId = null }) => {
         {hasMetrics && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
             <div className="section-label" style={{ padding: '0 4px', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
-              Today's Timeline
+              Timeline
             </div>
             <Timeline />
           </div>
