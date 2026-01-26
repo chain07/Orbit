@@ -3,7 +3,7 @@ import React from 'react';
 /**
  * TrendSparkline Widget
  * * Displays a rolling window trend for a metric.
- * * Refactored Phase 4.9.2: Atomic Visual Fixes (Header, Grid).
+ * * Refactored Phase 4.12: Atomic Visual Fixes (Padding Removal).
  */
 export const TrendSparkline = ({ data, title }) => {
   if (!data || !data.data) return null;
@@ -58,13 +58,13 @@ export const TrendSparkline = ({ data, title }) => {
   const pathD = getSplinePath(points);
 
   return (
-    <div style={{ position: 'relative', height: '100%', width: '100%', padding: '16px' }}>
-       {/* Atomic Header Fix */}
+    <div style={{ position: 'relative', height: '100%', width: '100%' }}>
+       {/* Atomic Header Fix: Strict Positioning */}
        <div style={{
             position: 'absolute',
-            top: 0,
-            left: 0,
-            margin: '12px',
+            top: '12px',
+            left: '12px',
+            margin: 0,
             fontSize: '11px',
             fontWeight: '700',
             textTransform: 'uppercase',

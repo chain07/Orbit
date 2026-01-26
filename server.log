@@ -44,3 +44,10 @@ Port 5175 is in use, trying another one...
 5:21:59 AM [vite] hmr update /src/views/Horizon.jsx
 5:22:29 AM [vite] hmr update /src/components/logger/DailyCheckInForm.jsx
 5:23:00 AM [vite] hmr update /src/components/logger/MetricInput.jsx
+6:08:01 AM [vite] hmr update /src/components/widgets/ProgressBarWidget.jsx
+6:08:12 AM [vite] hmr update /src/components/widgets/ReliabilityRing.jsx
+6:08:31 AM [vite] hmr update /src/components/widgets/TrendSparkline.jsx
+6:09:01 AM [vite] hmr update /src/components/widgets/ConsistencyHeatmap.jsx
+6:09:24 AM [vite] hmr update /src/components/widgets/CompoundBarWidget.jsx
+6:09:34 AM [vite] hmr update /src/components/widgets/CurrentStreak.jsx
+6:09:52 AM [vite] hmr update /src/components/logger/DailyCheckInForm.jsx

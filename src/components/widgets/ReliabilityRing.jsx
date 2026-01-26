@@ -4,7 +4,7 @@ import { RingChart } from '../ui/charts/RingChart';
 /**
  * ReliabilityRing Widget
  * * Displays a metric's progress as a ring chart.
- * * Refactored Phase 4.9.2: Atomic Visual Fixes.
+ * * Refactored Phase 4.12: Atomic Visual Fixes (Label Positioning).
  */
 export const ReliabilityRing = ({ data, title }) => {
   if (!data) return null;
@@ -26,13 +26,14 @@ export const ReliabilityRing = ({ data, title }) => {
         height: '100%',
         width: '100%',
         position: 'relative'
+        // No padding on outermost wrapper
     }}>
-      {/* Atomic Header Fix */}
+      {/* Atomic Header Fix: Strict Positioning */}
       <div style={{
             position: 'absolute',
-            top: 0,
-            left: 0,
-            margin: '12px',
+            top: '12px',
+            left: '12px',
+            margin: 0,
             fontSize: '11px',
             fontWeight: '700',
             textTransform: 'uppercase',

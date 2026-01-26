@@ -7,8 +7,6 @@ export const DailyCheckInForm = () => {
   const [entries, setEntries] = useState({});
   const [status, setStatus] = useState('idle'); // 'idle' | 'success'
 
-  const todayDate = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-
   const handleChange = (metricId, value) => {
     setEntries(prev => ({ ...prev, [metricId]: value }));
     if (status === 'success') setStatus('idle');
@@ -24,11 +22,22 @@ export const DailyCheckInForm = () => {
 
     if (validEntries.length === 0) return;
 
-    // Submit entries
+    // Submit entries with Type Parsing
     validEntries.forEach(([metricId, value]) => {
+      const metric = metrics.find(m => m.id === metricId);
+      let parsedValue = value;
+
+      if (metric) {
+          if (metric.type === 'number' || metric.type === 'range') {
+              parsedValue = parseFloat(value);
+          } else if (metric.type === 'boolean') {
+              parsedValue = value === true || value === 'true'; // Handle string/bool
+          }
+      }
+
       addLogEntry({ 
         metricId,
-        value, 
+        value: parsedValue,
         timestamp: new Date() 
       });
     });
@@ -36,6 +45,9 @@ export const DailyCheckInForm = () => {
     setEntries({});
     setStatus('success');
     
+    // Temporary feedback
+    // alert('Saved'); // Removed per request for better UI feedback
+
     setTimeout(() => {
       setStatus('idle');
     }, 2000);
@@ -54,7 +66,7 @@ export const DailyCheckInForm = () => {
         width: '100%',
         maxWidth: '600px',
         margin: '0 auto',
-        paddingBottom: '100px' // Space for FAB
+        paddingBottom: '40px'
     }}>
         <form onSubmit={handleSubmit}>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -69,38 +81,28 @@ export const DailyCheckInForm = () => {
                 ))}
             </div>
 
-            {/* Fixed FAB Save Button */}
+            {/* Standard Bottom Button (No FAB) */}
             <button
                 type="submit"
                 disabled={status === 'success'}
                 style={{
-                    position: 'fixed',
-                    bottom: '30px',
-                    right: '20px',
-                    width: '60px',
-                    height: '60px',
-                    borderRadius: '30px',
-                    backgroundColor: status === 'success' ? '#34C759' : '#1C1C1E',
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
-                    zIndex: 100,
+                    width: '100%',
+                    height: '50px',
+                    borderRadius: '14px',
+                    backgroundColor: status === 'success' ? '#34C759' : '#007AFF',
+                    color: '#FFF',
+                    fontSize: '17px',
+                    fontWeight: '600',
+                    marginTop: '32px',
                     border: 'none',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     cursor: 'pointer',
-                    transition: 'all 0.3s cubic-bezier(0.25, 1, 0.5, 1)',
-                    transform: status === 'success' ? 'scale(1.1)' : 'scale(1)'
+                    transition: 'background-color 0.3s ease'
                 }}
             >
-                {status === 'success' ? (
-                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="20 6 9 17 4 12" />
-                     </svg>
-                ) : (
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                         <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                )}
+                {status === 'success' ? 'Check-In Saved' : 'Save Check-In'}
             </button>
         </form>
     </div>

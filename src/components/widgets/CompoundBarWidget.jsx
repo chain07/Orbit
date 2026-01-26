@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 /**
  * CompoundBarWidget
  * Use Case: For Select metrics.
- * Refactor Phase 4.9.2: Atomic Visual Fixes.
+ * Refactor Phase 4.12: Atomic Visual Fixes (Padding Removal).
  */
 export const CompoundBarWidget = ({ data, title }) => {
   if (!data || !data.breakdown) return null;
@@ -40,22 +40,17 @@ export const CompoundBarWidget = ({ data, title }) => {
 
   return (
     <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '16px 20px', // Strict Padding
         height: '100%',
         width: '100%',
-        boxSizing: 'border-box',
         position: 'relative',
-        justifyContent: 'flex-end',
-        minHeight: '120px' // Reduced min-height
+        // No outer padding
     }}>
-        {/* Atomic Header Fix */}
+        {/* Atomic Header Fix: Strict Positioning */}
         <div style={{
             position: 'absolute',
-            top: 0,
-            left: 0,
-            margin: '12px',
+            top: '12px',
+            left: '12px',
+            margin: 0,
             fontSize: '11px',
             fontWeight: '700',
             textTransform: 'uppercase',
@@ -70,7 +65,8 @@ export const CompoundBarWidget = ({ data, title }) => {
             position: 'absolute',
             top: '16px',
             right: '20px',
-            textAlign: 'right'
+            textAlign: 'right',
+            zIndex: 20
         }}>
             <div style={{ fontSize: '20px', fontWeight: '700', color: '#007AFF' }}>
                 {segments.reduce((sum, s) => sum + s.value, 0)}
@@ -80,52 +76,63 @@ export const CompoundBarWidget = ({ data, title }) => {
             </span>
         </div>
 
-        {/* Hero Bar (Segmented) */}
+        {/* Inner Content Wrapper */}
         <div style={{
             display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-end',
             width: '100%',
-            height: '18px',
-            borderRadius: '9px',
-            overflow: 'hidden',
-            gap: '1px',
-            marginBottom: '16px',
-            marginTop: '40px'
+            height: '100%',
+            padding: '0 20px 16px 20px',
+            boxSizing: 'border-box'
         }}>
-            {segments.map((seg, i) => (
-                <div key={i} style={{
-                    height: '100%',
-                    width: `${seg.percent}%`,
-                    backgroundColor: seg.color,
-                    transition: 'width 0.6s cubic-bezier(0.25, 1, 0.5, 1)'
-                }} />
-            ))}
-        </div>
-
-        {/* Legend Grid */}
-        <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '8px 12px',
-            width: '100%'
-        }}>
-            {segments.map((seg, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center' }}>
-                    <div style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
+            {/* Hero Bar (Segmented) */}
+            <div style={{
+                display: 'flex',
+                width: '100%',
+                height: '18px',
+                borderRadius: '9px',
+                overflow: 'hidden',
+                gap: '1px',
+                marginBottom: '16px',
+                marginTop: '40px' // Space for absolute header
+            }}>
+                {segments.map((seg, i) => (
+                    <div key={i} style={{
+                        height: '100%',
+                        width: `${seg.percent}%`,
                         backgroundColor: seg.color,
-                        marginRight: '8px',
-                        flexShrink: 0
+                        transition: 'width 0.6s cubic-bezier(0.25, 1, 0.5, 1)'
                     }} />
-                    <span style={{ fontSize: '12px', color: '#8E8E93', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                       {seg.label}
-                    </span>
-                    <span style={{ fontSize: '12px', fontWeight: '600', marginLeft: 'auto', color: 'var(--text-primary)' }}>
-                        {seg.value}
-                    </span>
-                </div>
-            ))}
+                ))}
+            </div>
+
+            {/* Legend Grid */}
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: '8px 12px',
+                width: '100%'
+            }}>
+                {segments.map((seg, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center' }}>
+                        <div style={{
+                            width: '8px',
+                            height: '8px',
+                            borderRadius: '50%',
+                            backgroundColor: seg.color,
+                            marginRight: '8px',
+                            flexShrink: 0
+                        }} />
+                        <span style={{ fontSize: '12px', color: '#8E8E93', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {seg.label}
+                        </span>
+                        <span style={{ fontSize: '12px', fontWeight: '600', marginLeft: 'auto', color: 'var(--text-primary)' }}>
+                            {seg.value}
+                        </span>
+                    </div>
+                ))}
+            </div>
         </div>
     </div>
   );

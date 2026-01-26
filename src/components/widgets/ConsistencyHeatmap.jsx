@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 /**
  * ConsistencyHeatmap Widget
  * * Displays a contribution-graph style heatmap.
- * * Refactored Phase 4.9.2: Atomic Visual Fixes (Overflow, Header).
+ * * Refactored Phase 4.12: Atomic Visual Fixes (Padding, Grid, Empty States).
  */
 export const ConsistencyHeatmap = ({ data, title }) => {
   if (!data || !data.values) return null;
@@ -30,7 +30,7 @@ export const ConsistencyHeatmap = ({ data, title }) => {
       if (value >= 75) return 'rgba(52, 199, 89, 0.75)';
       if (value >= 50) return 'rgba(52, 199, 89, 0.5)';
       if (value > 0) return 'rgba(52, 199, 89, 0.25)';
-      return 'var(--bg-secondary)'; // Dynamic Empty Color
+      return 'rgba(0,0,0,0.05)'; // Visible Empty Slots
   };
 
   const startMonth = new Date(days[0].date).toLocaleString('default', { month: 'short' });
@@ -50,16 +50,16 @@ export const ConsistencyHeatmap = ({ data, title }) => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        padding: '16px',
-        paddingBottom: '20px'
+        // No outer padding
+        paddingBottom: '16px'
     }}>
 
-        {/* Atomic Header Fix */}
+        {/* Atomic Header Fix: Strict Positioning */}
         <div style={{
             position: 'absolute',
-            top: 0,
-            left: 0,
-            margin: '12px',
+            top: '12px',
+            left: '12px',
+            margin: 0,
             fontSize: '11px',
             fontWeight: '700',
             textTransform: 'uppercase',
@@ -82,10 +82,12 @@ export const ConsistencyHeatmap = ({ data, title }) => {
             {monthRange}
         </div>
 
-        {/* Grid Container - Expanded */}
+        {/* Grid Container - Expanded with internal padding */}
         <div style={{
             marginTop: '32px',
             width: '100%',
+            padding: '0 16px',
+            boxSizing: 'border-box'
         }}>
             {/* Calendar Grid */}
             <div style={{
@@ -113,7 +115,7 @@ export const ConsistencyHeatmap = ({ data, title }) => {
                 display: 'grid',
                 gridTemplateColumns: 'repeat(7, 1fr)',
                 gap: '4px',
-                marginTop: '8px'
+                marginTop: '6px'
             }}>
                 {weekDays.map((d, i) => (
                     <div key={i} style={{ textAlign: 'center', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: '600' }}>
