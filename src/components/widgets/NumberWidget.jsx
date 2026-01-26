@@ -3,14 +3,7 @@ import React from 'react';
 /**
  * NumberWidget
  * * Displays a single key metric value with an optional trend indicator.
- * * Expected data structure:
- * {
- * value: number | string,
- * label: string,
- * unit: string, (optional prefix/suffix)
- * trend: number, (optional percentage change)
- * trendDirection: 'up' | 'down' | 'neutral'
- * }
+ * * Refactored Phase 4.9.1: Global Header.
  */
 export const NumberWidget = ({ data }) => {
   if (!data) return null;
@@ -19,8 +12,17 @@ export const NumberWidget = ({ data }) => {
 
   return (
     <div style={{ position: 'relative', height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      {/* Standard Header */}
-      <div style={{ position: 'absolute', top: '14px', left: '16px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-secondary)', zIndex: 10 }}>
+      {/* Global Standard Header */}
+      <div style={{
+          position: 'absolute',
+          top: '16px',
+          left: '20px',
+          fontSize: '15px',
+          fontWeight: '600',
+          letterSpacing: '-0.3px',
+          color: 'var(--text-primary)',
+          zIndex: 10
+      }}>
         {label}
       </div>
 

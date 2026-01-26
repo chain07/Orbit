@@ -1,4 +1,4 @@
-import React, { useContext, useState, useMemo } from 'react';
+import React, { useContext, useState, useMemo, useEffect } from 'react';
 import { StorageContext } from '../context/StorageContext';
 import { NavigationContext } from '../context/NavigationContext';
 import { WidgetDataEngine } from '../engine/WidgetDataEngine';
@@ -55,18 +55,46 @@ export const Horizon = () => {
     return 'Good Night.';
   }, []);
 
-  const topInsights = useMemo(() => {
-    if (!HorizonAgent || !HorizonAgent.generateAllInsights) return [];
-    try {
-      const allInsights = HorizonAgent.generateAllInsights(metrics, allLogs);
-      return Object.values(allInsights || {}).flat()
-        .filter(i => i.context === 'tactical')
-        .sort((a, b) => (b.priority || 0) - (a.priority || 0))
-        .slice(0, 1);
-    } catch (e) {
-      return [];
+  const hasMetrics = metrics && metrics.length > 0;
+  const [dailyMessage, setDailyMessage] = useState(null);
+
+  // Daily Briefing Persistence
+  useEffect(() => {
+    if (!hasMetrics) return;
+
+    const today = new Date().toISOString().split('T')[0];
+    const stored = localStorage.getItem('dailyBriefing');
+
+    // Check if we have a valid stored message for today
+    if (stored) {
+        try {
+            const parsed = JSON.parse(stored);
+            if (parsed.date === today) {
+                setDailyMessage(parsed.message);
+                return;
+            }
+        } catch (e) {
+            console.error("Failed to parse daily briefing", e);
+        }
     }
-  }, [metrics, allLogs]);
+
+    // If no valid stored message, generate one
+    if (HorizonAgent && HorizonAgent.generateAllInsights) {
+        try {
+            const allInsights = HorizonAgent.generateAllInsights(metrics, allLogs);
+            const tactical = Object.values(allInsights || {}).flat()
+                .filter(i => i.context === 'tactical')
+                .sort((a, b) => (b.priority || 0) - (a.priority || 0));
+
+            const msg = tactical.length > 0 ? tactical[0].message : "Good morning. Ready to track your progress today?";
+
+            setDailyMessage(msg);
+            localStorage.setItem('dailyBriefing', JSON.stringify({ date: today, message: msg }));
+        } catch (e) {
+            console.error("Failed to generate insights", e);
+        }
+    }
+  }, [metrics, allLogs, hasMetrics]);
 
   // Merge layout order with metrics data
   const orderedWidgets = useMemo(() => {
@@ -92,8 +120,6 @@ export const Horizon = () => {
 
       return [...ordered, ...remaining];
   }, [metrics, allLogs, segment, widgetLayout]);
-
-  const hasMetrics = metrics && metrics.length > 0;
 
   const moveWidget = (index, direction) => {
       if (!updateWidgetLayout) return;
@@ -169,15 +195,7 @@ export const Horizon = () => {
                 <Icons.Activity className="text-blue" size={14} /> DAILY BRIEFING
                 </div>
                 <div className="text-md font-medium text-primary leading-relaxed">
-                {hasMetrics && topInsights.length > 0 ? (
-                    topInsights.map((insight, idx) => (
-                    <div key={idx}>
-                        {insight.message}
-                    </div>
-                    ))
-                ) : (
-                    "Good morning. I'll scan your data for actionable tactical moves and insights once you start logging."
-                )}
+                {dailyMessage || "Good morning. I'll scan your data for actionable tactical moves and insights once you start logging."}
                 </div>
             </div>
             </Glass>

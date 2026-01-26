@@ -4,13 +4,7 @@ import { dateUtils } from '../../lib/dateUtils';
 /**
  * ConsistencyHeatmap Widget
  * * Displays a contribution-graph style heatmap.
- * Expected data structure:
- * {
- * values: { [date]: number }, // 0-1 values
- * startDate: string (YYYY-MM-DD),
- * endDate: string (YYYY-MM-DD),
- * color: string
- * }
+ * * Refactored Phase 4.9.1: Global Header, Bottom Padding, Bold Month Label.
  */
 export const ConsistencyHeatmap = ({ data, title }) => {
   if (!data || !data.values) return null;
@@ -32,31 +26,58 @@ export const ConsistencyHeatmap = ({ data, title }) => {
   }, [data.values]);
 
   const getColor = (value) => {
-      if (!value) return '#E5E5EA';
-      return '#34C759';
+      // 0-100 logic
+      if (value >= 100) return '#34C759'; // Full Green
+      if (value >= 75) return 'rgba(52, 199, 89, 0.75)';
+      if (value >= 50) return 'rgba(52, 199, 89, 0.5)';
+      if (value > 0) return 'rgba(52, 199, 89, 0.25)';
+      return '#E5E5EA'; // Empty Grey
   };
 
   const startMonth = new Date(days[0].date).toLocaleString('default', { month: 'short' });
   const endMonth = new Date(days[days.length-1].date).toLocaleString('default', { month: 'short' });
   const monthRange = startMonth === endMonth ? startMonth : `${startMonth} - ${endMonth}`;
 
-  // Weekday labels (S, M, T, W, T, F, S)
   const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-
-  // Calculate start day offset (0 = Sunday, ... 6 = Saturday)
   const startDayIndex = new Date(days[0].date).getDay();
   const offsetSlots = Array.from({ length: startDayIndex });
 
   return (
-    <div style={{ position: 'relative', height: '100%', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px' }}>
+    <div style={{
+        position: 'relative',
+        height: '100%',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '16px',
+        paddingBottom: '30px' // Added padding
+    }}>
 
-        {/* Standard Header */}
-        <div style={{ position: 'absolute', top: '14px', left: '16px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-secondary)', zIndex: 10 }}>
+        {/* Global Standard Header */}
+        <div style={{
+            position: 'absolute',
+            top: '16px',
+            left: '20px',
+            fontSize: '15px',
+            fontWeight: '600',
+            letterSpacing: '-0.3px',
+            color: 'var(--text-primary)',
+            zIndex: 10
+        }}>
             {data.label || title || 'Consistency'}
         </div>
 
-        {/* Context Label (Top Right) */}
-        <div style={{ position: 'absolute', top: '14px', right: '16px', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: '500', zIndex: 10 }}>
+        {/* Month Label (Top Right) */}
+        <div style={{
+            position: 'absolute',
+            top: '16px',
+            right: '20px',
+            fontSize: '12px',
+            color: 'var(--text-secondary)',
+            fontWeight: '700',
+            zIndex: 10
+        }}>
             {monthRange}
         </div>
 
@@ -64,7 +85,7 @@ export const ConsistencyHeatmap = ({ data, title }) => {
         <div style={{
             marginTop: '32px',
             width: '100%',
-            maxWidth: '240px' // Limit width to keep squares reasonable
+            maxWidth: '280px' // Slightly increased to fit padding
         }}>
             {/* Calendar Grid */}
             <div style={{
@@ -73,10 +94,7 @@ export const ConsistencyHeatmap = ({ data, title }) => {
                 gap: '4px',
                 width: '100%'
             }}>
-                {/* Empty slots for offset */}
                 {offsetSlots.map((_, i) => <div key={`empty-${i}`} />)}
-
-                {/* Day Cells */}
                 {days.map(day => (
                     <div
                         key={day.date}
@@ -85,7 +103,7 @@ export const ConsistencyHeatmap = ({ data, title }) => {
                             borderRadius: '4px',
                             backgroundColor: getColor(day.value)
                         }}
-                        title={day.date}
+                        title={`${day.date}: ${day.value}`}
                     />
                 ))}
             </div>

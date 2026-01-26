@@ -10,3 +10,15 @@ Port 5175 is in use, trying another one...
 
   ➜  Local:   http://localhost:5176/
   ➜  Network: use --host to expose
+2:35:54 AM [vite] hmr update /src/components/widgets/CurrentStreak.jsx
+2:35:54 AM [vite] hmr update /src/components/widgets/ProgressBarWidget.jsx
+2:35:54 AM [vite] hmr update /src/components/widgets/CompoundBarWidget.jsx
+2:36:30 AM [vite] hmr update /src/components/widgets/ConsistencyHeatmap.jsx
+2:36:30 AM [vite] hmr update /src/components/widgets/ReliabilityRing.jsx
+2:36:31 AM [vite] hmr update /src/components/widgets/TrendSparkline.jsx
+2:36:44 AM [vite] hmr update /src/components/widgets/NumberWidget.jsx
+2:37:51 AM [vite] hmr update /src/views/Horizon.jsx
+2:38:48 AM [vite] hmr update /src/components/logger/MetricInput.jsx
+2:39:13 AM [vite] hmr update /src/components/logger/DailyCheckInForm.jsx
+2:42:39 AM [vite] hmr update /src/views/Horizon.jsx
+2:44:16 AM [vite] hmr update /src/views/Horizon.jsx

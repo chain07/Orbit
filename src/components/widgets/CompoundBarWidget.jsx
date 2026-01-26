@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 /**
  * CompoundBarWidget
  * Use Case: For Select metrics.
- * Visual: Single bar, multi-colored segments. Legend below.
+ * Refactor Phase 4.9.1: Segmented Bar, Grid Legend.
  */
 export const CompoundBarWidget = ({ data }) => {
   if (!data || !data.breakdown) return null;
@@ -39,66 +39,88 @@ export const CompoundBarWidget = ({ data }) => {
   }, [breakdown]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', padding: '16px' }}>
-        {/* Standard Header */}
+    <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        padding: '20px',
+        height: '100%',
+        width: '100%',
+        boxSizing: 'border-box'
+    }}>
+        {/* Header: Flex Row */}
         <div style={{
-            fontSize: '11px',
-            fontWeight: '700',
-            color: 'var(--text-secondary)',
-            textTransform: 'uppercase',
-            position: 'absolute',
-            top: '14px',
-            left: '16px',
-            zIndex: 10
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-end',
+            marginBottom: '10px',
+            width: '100%'
         }}>
-            {data.label || 'Breakdown'}
+             {/* Label - Standard Header Style (Relative) */}
+            <div style={{
+                fontSize: '15px',
+                fontWeight: '600',
+                letterSpacing: '-0.3px',
+                color: 'var(--text-primary)'
+            }}>
+                {data.label || 'Breakdown'}
+            </div>
+
+            {/* Total Value (Optional, mimicking Progress style) */}
+            <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '19px', fontWeight: '700', color: '#007AFF' }}>
+                    {segments.reduce((sum, s) => sum + s.value, 0)}
+                </div>
+                <span style={{ fontSize: '11px', fontWeight: '500', color: '#8E8E93', display: 'block' }}>
+                    Total
+                </span>
+            </div>
         </div>
 
-        {/* Inset Card Container */}
+        {/* Hero Bar (Segmented) */}
         <div style={{
-            backgroundColor: 'rgba(0,0,0,0.03)',
-            borderRadius: '16px',
-            padding: '20px',
-            marginTop: '32px',
-            width: '100%',
             display: 'flex',
-            flexDirection: 'column',
-            gap: '16px'
+            width: '100%',
+            height: '18px',
+            borderRadius: '9px',
+            overflow: 'hidden',
+            gap: '1px',
+            marginBottom: '16px'
         }}>
-            {/* Bar */}
-            <div style={{
-                display: 'flex',
-                width: '100%',
-                height: '16px',
-                background: 'rgba(0,0,0,0.05)',
-                borderRadius: '8px',
-                overflow: 'hidden'
-            }}>
-                {segments.map((seg, i) => (
-                    <div key={i} style={{
-                        height: '100%',
-                        width: `${seg.percent}%`,
-                        backgroundColor: seg.color,
-                        transition: 'width 0.6s cubic-bezier(0.25, 1, 0.5, 1)'
-                    }} />
-                ))}
-            </div>
+            {segments.map((seg, i) => (
+                <div key={i} style={{
+                    height: '100%',
+                    width: `${seg.percent}%`,
+                    backgroundColor: seg.color,
+                    transition: 'width 0.6s cubic-bezier(0.25, 1, 0.5, 1)'
+                }} />
+            ))}
+        </div>
 
-            {/* Legend */}
-            <div style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '12px',
-            }}>
-                {segments.map((seg, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <div style={{ width: '8px', height: '8px', borderRadius: '2px', flexShrink: 0, backgroundColor: seg.color }} />
-                        <span style={{ fontSize: '12px', fontWeight: '500', color: 'var(--text-primary)' }}>
-                           {seg.label} <span style={{ opacity: 0.5 }}>({seg.value})</span>
-                        </span>
-                    </div>
-                ))}
-            </div>
+        {/* Legend Grid */}
+        <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '8px 12px',
+            width: '100%'
+        }}>
+            {segments.map((seg, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center' }}>
+                    <div style={{
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        backgroundColor: seg.color,
+                        marginRight: '8px',
+                        flexShrink: 0
+                    }} />
+                    <span style={{ fontSize: '12px', color: '#8E8E93', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                       {seg.label}
+                    </span>
+                    <span style={{ fontSize: '12px', fontWeight: '600', marginLeft: 'auto', color: 'var(--text-primary)' }}>
+                        {seg.value}
+                    </span>
+                </div>
+            ))}
         </div>
     </div>
   );

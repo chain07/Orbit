@@ -3,7 +3,7 @@ import React from 'react';
 /**
  * ProgressBarWidget
  * Use Case: Duration or Range metrics.
- * Visual: Simple track (grey) and fill (blue). Label Top-Left. Value Top-Right.
+ * Refactor Phase 4.9.1: Vertical Stack, Flex Header.
  */
 export const ProgressBarWidget = ({ data }) => {
   if (!data) return null;
@@ -14,26 +14,57 @@ export const ProgressBarWidget = ({ data }) => {
   const percent = Math.min(100, Math.max(0, (value / max) * 100));
 
   return (
-    <div style={{ position: 'relative', height: '100%', width: '100%', display: 'flex', flexDirection: 'column', padding: '16px' }}>
+    <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        padding: '20px',
+        height: '100%',
+        width: '100%',
+        boxSizing: 'border-box'
+    }}>
 
-      {/* Standard Header */}
-      <div style={{ position: 'absolute', top: '14px', left: '16px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-secondary)', zIndex: 10 }}>
-        {label}
-      </div>
+      {/* Header: Flex Row */}
+      <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-end',
+          marginBottom: '10px',
+          width: '100%'
+      }}>
+          {/* Label - Standard Header Style (Relative) */}
+          <div style={{
+              fontSize: '15px',
+              fontWeight: '600',
+              letterSpacing: '-0.3px',
+              color: 'var(--text-primary)'
+          }}>
+            {label}
+          </div>
 
-      {/* Top Right Value */}
-      <div style={{ position: 'absolute', top: '14px', right: '16px', fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)', zIndex: 10 }}>
-        {value} / {max} {unit}
+          {/* Value Stack */}
+          <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: '19px', fontWeight: '700', color: '#007AFF' }}>
+                  {value}
+              </div>
+              <span style={{ fontSize: '11px', fontWeight: '500', color: '#8E8E93', display: 'block' }}>
+                  / {max} {unit}
+              </span>
+          </div>
       </div>
 
       {/* Bar Container */}
-      <div style={{ marginTop: '40px', width: '100%' }}>
-          <div style={{ height: '24px', backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: '12px', overflow: 'hidden' }}>
+      <div style={{ width: '100%' }}>
+          <div style={{
+              height: '12px',
+              backgroundColor: '#F2F2F7',
+              borderRadius: '6px',
+              overflow: 'hidden'
+          }}>
               <div style={{
                   height: '100%',
                   width: `${percent}%`,
-                  borderRadius: '12px',
-                  backgroundColor: color || 'var(--blue)',
+                  borderRadius: '6px',
+                  backgroundColor: color || '#007AFF',
                   transition: 'width 0.5s ease-out'
               }} />
           </div>

@@ -3,6 +3,7 @@ import React from 'react';
 /**
  * TrendSparkline Widget
  * * Displays a rolling window trend for a metric.
+ * * Refactored Phase 4.9.1: Global Header, SVG Grid, Full Width.
  */
 export const TrendSparkline = ({ data }) => {
   if (!data || !data.data) return null;
@@ -13,7 +14,7 @@ export const TrendSparkline = ({ data }) => {
   const svgWidth = 200;
   const svgHeight = 100;
 
-  // Safe normalization: Find min/max and add padding
+  // Safe normalization: Find min/max and add 10% padding
   let min = Math.min(...values);
   let max = Math.max(...values);
 
@@ -58,30 +59,48 @@ export const TrendSparkline = ({ data }) => {
 
   return (
     <div style={{ position: 'relative', height: '100%', width: '100%', padding: '16px' }}>
-       {/* Standard Header */}
-       <div style={{ position: 'absolute', top: '14px', left: '16px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-secondary)', zIndex: 10 }}>
+       {/* Global Standard Header */}
+       <div style={{
+           position: 'absolute',
+           top: '16px',
+           left: '20px',
+           fontSize: '15px',
+           fontWeight: '600',
+           letterSpacing: '-0.3px',
+           color: 'var(--text-primary)',
+           zIndex: 10
+       }}>
          {label || 'Trend'}
        </div>
 
        {/* Current Value (Top Right) */}
-       <div style={{ position: 'absolute', top: '14px', right: '16px', fontSize: '24px', fontWeight: '800', lineHeight: 1, zIndex: 10 }}>
+       <div style={{
+           position: 'absolute',
+           top: '16px',
+           right: '20px',
+           fontSize: '24px',
+           fontWeight: '800',
+           lineHeight: 1,
+           zIndex: 10
+       }}>
            {typeof current === 'number' ? Math.round(current * 10) / 10 : current}
        </div>
 
        {/* Graph Container */}
        <div style={{ position: 'relative', width: '100%', height: '100%', paddingTop: '40px', paddingRight: '24px' }}>
-           {/* 5 Background Lines (0, 25, 50, 75, 100%) */}
-           <div style={{ position: 'absolute', top: '40px', width: '100%', borderTop: '1px dashed rgba(0,0,0,0.05)' }} />
-           <div style={{ position: 'absolute', top: 'calc(40px + 25% * (100% - 40px))', width: '100%', borderTop: '1px dashed rgba(0,0,0,0.05)' }} />
-           <div style={{ position: 'absolute', top: 'calc(40px + 50% * (100% - 40px))', width: '100%', borderTop: '1px dashed rgba(0,0,0,0.05)' }} />
-           <div style={{ position: 'absolute', top: 'calc(40px + 75% * (100% - 40px))', width: '100%', borderTop: '1px dashed rgba(0,0,0,0.05)' }} />
-           <div style={{ position: 'absolute', bottom: '0', width: '100%', borderTop: '1px dashed rgba(0,0,0,0.05)' }} />
+
+           {/* SVG Grid Lines (0, 50, 100%) - Using SVG <line> restored */}
+           <svg width="100%" height="100%" style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }}>
+               <line x1="0" y1="40" x2="100%" y2="40" stroke="rgba(0,0,0,0.05)" strokeDasharray="4" />
+               <line x1="0" y1="50%" x2="100%" y2="50%" stroke="rgba(0,0,0,0.05)" strokeDasharray="4" />
+               <line x1="0" y1="100%" x2="100%" y2="100%" stroke="rgba(0,0,0,0.05)" strokeDasharray="4" />
+           </svg>
 
            {/* Axis Labels (Outside Right) */}
            <div style={{ position: 'absolute', top: '34px', right: 0, fontSize: '10px', color: 'var(--text-secondary)', textAlign: 'right' }}>{Math.round(max)}</div>
            <div style={{ position: 'absolute', bottom: '-6px', right: 0, fontSize: '10px', color: 'var(--text-secondary)', textAlign: 'right' }}>{Math.round(min)}</div>
 
-           {/* The SVG - Height adjusted to fill remaining space */}
+           {/* The Graph SVG */}
            <div style={{ position: 'absolute', top: '40px', left: 0, right: '24px', bottom: 0 }}>
                 <svg width="100%" height="100%" viewBox={`0 0 ${svgWidth} ${svgHeight}`} preserveAspectRatio="none" style={{ overflow: 'visible' }}>
                     <path d={pathD} fill="none" stroke={color} strokeWidth="3" vectorEffect="non-scaling-stroke" />
