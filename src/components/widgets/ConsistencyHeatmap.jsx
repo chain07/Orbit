@@ -2,24 +2,36 @@ import React, { useMemo } from 'react';
 
 /**
  * ConsistencyHeatmap Widget
- * * Displays a contribution-graph style heatmap.
- * * Refactored Phase 4.12: Atomic Visual Fixes (Padding, Grid, Empty States).
+ * * Displays a contribution-graph style heatmap for the current month.
+ * * Refactored Phase 4.9.4: Current Month Logic & Visual Calibration.
  */
 export const ConsistencyHeatmap = ({ data, title }) => {
   if (!data || !data.values) return null;
 
+  const today = new Date();
+
   const days = useMemo(() => {
     const arr = [];
-    const end = new Date();
-    // Exactly 30 days
-    for (let i = 29; i >= 0; i--) {
-        const d = new Date(end);
-        d.setDate(d.getDate() - i);
-        const iso = d.toISOString().split('T')[0];
+    // Start of current month
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    // End is today
+    const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+    // Iterate from startOfMonth to today (inclusive)
+    const current = new Date(startOfMonth);
+    while (current <= end) {
+        // Handle timezone offset issues by using local values for ISO string construction manually or just ensuring date parts match
+        // Using string manipulation to ensure "YYYY-MM-DD" matches local date
+        const year = current.getFullYear();
+        const month = String(current.getMonth() + 1).padStart(2, '0');
+        const day = String(current.getDate()).padStart(2, '0');
+        const iso = `${year}-${month}-${day}`;
+
         arr.push({
             date: iso,
             value: data.values[iso] || 0
         });
+        current.setDate(current.getDate() + 1);
     }
     return arr;
   }, [data.values]);
@@ -30,15 +42,12 @@ export const ConsistencyHeatmap = ({ data, title }) => {
       if (value >= 75) return 'rgba(52, 199, 89, 0.75)';
       if (value >= 50) return 'rgba(52, 199, 89, 0.5)';
       if (value > 0) return 'rgba(52, 199, 89, 0.25)';
-      return 'rgba(0,0,0,0.05)'; // Visible Empty Slots
+      return 'var(--bg-secondary)'; // Visible Empty Slots
   };
 
-  const startMonth = new Date(days[0].date).toLocaleString('default', { month: 'short' });
-  const endMonth = new Date(days[days.length-1].date).toLocaleString('default', { month: 'short' });
-  const monthRange = startMonth === endMonth ? startMonth : `${startMonth} - ${endMonth}`;
-
+  const monthName = today.toLocaleString('default', { month: 'long' });
   const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-  const startDayIndex = new Date(days[0].date).getDay();
+  const startDayIndex = new Date(days[0].date).getDay(); // Index of first day of month (0=Sun)
   const offsetSlots = Array.from({ length: startDayIndex });
 
   return (
@@ -49,12 +58,10 @@ export const ConsistencyHeatmap = ({ data, title }) => {
         width: '100%',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
         // No outer padding
-        paddingBottom: '16px'
     }}>
 
-        {/* Atomic Header Fix: Strict Positioning */}
+        {/* Strict Header */}
         <div style={{
             position: 'absolute',
             top: '12px',
@@ -69,26 +76,23 @@ export const ConsistencyHeatmap = ({ data, title }) => {
             {title || data.label || 'Consistency'}
         </div>
 
-        {/* Month Label (Top Right) */}
+        {/* Content Wrapper */}
         <div style={{
-            position: 'absolute',
-            top: '16px',
-            right: '20px',
-            fontSize: '12px',
-            color: 'var(--text-secondary)',
-            fontWeight: '700',
-            zIndex: 10
+            padding: '40px 20px 20px 20px',
+            boxSizing: 'border-box',
+            width: '100%'
         }}>
-            {monthRange}
-        </div>
+            {/* Month Label */}
+            <div style={{
+                textAlign: 'right',
+                fontSize: '13px',
+                fontWeight: '700',
+                color: 'var(--text-primary)',
+                marginBottom: '12px'
+            }}>
+                {monthName}
+            </div>
 
-        {/* Grid Container - Expanded with internal padding */}
-        <div style={{
-            marginTop: '32px',
-            width: '100%',
-            padding: '0 16px',
-            boxSizing: 'border-box'
-        }}>
             {/* Calendar Grid */}
             <div style={{
                 display: 'grid',
@@ -110,7 +114,7 @@ export const ConsistencyHeatmap = ({ data, title }) => {
                 ))}
             </div>
 
-            {/* Sticky Day Labels */}
+            {/* Week Labels */}
             <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(7, 1fr)',

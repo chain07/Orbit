@@ -5,11 +5,11 @@ import { MetricInput } from './MetricInput';
 export const DailyCheckInForm = () => {
   const { metrics, addLogEntry } = useContext(StorageContext);
   const [entries, setEntries] = useState({});
-  const [status, setStatus] = useState('idle'); // 'idle' | 'success'
+  const [isSaved, setIsSaved] = useState(false);
 
   const handleChange = (metricId, value) => {
     setEntries(prev => ({ ...prev, [metricId]: value }));
-    if (status === 'success') setStatus('idle');
+    if (isSaved) setIsSaved(false);
   };
 
   const handleSubmit = (e) => {
@@ -43,13 +43,10 @@ export const DailyCheckInForm = () => {
     });
 
     setEntries({});
-    setStatus('success');
+    setIsSaved(true);
     
-    // Temporary feedback
-    // alert('Saved'); // Removed per request for better UI feedback
-
     setTimeout(() => {
-      setStatus('idle');
+      setIsSaved(false);
     }, 2000);
   };
 
@@ -81,15 +78,15 @@ export const DailyCheckInForm = () => {
                 ))}
             </div>
 
-            {/* Standard Bottom Button (No FAB) */}
+            {/* Standard Bottom Button */}
             <button
                 type="submit"
-                disabled={status === 'success'}
+                disabled={isSaved}
                 style={{
                     width: '100%',
-                    height: '50px',
-                    borderRadius: '14px',
-                    backgroundColor: status === 'success' ? '#34C759' : '#007AFF',
+                    height: '56px',
+                    borderRadius: '16px',
+                    backgroundColor: isSaved ? '#34C759' : '#007AFF',
                     color: '#FFF',
                     fontSize: '17px',
                     fontWeight: '600',
@@ -99,10 +96,10 @@ export const DailyCheckInForm = () => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     cursor: 'pointer',
-                    transition: 'background-color 0.3s ease'
+                    transition: 'all 0.3s ease'
                 }}
             >
-                {status === 'success' ? 'Check-In Saved' : 'Save Check-In'}
+                {isSaved ? 'Saved!' : 'Save Check-In'}
             </button>
         </form>
     </div>

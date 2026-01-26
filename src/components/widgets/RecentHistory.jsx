@@ -1,5 +1,4 @@
 import React from 'react';
-import { WidgetDataEngine } from '../../engine/WidgetDataEngine';
 
 export const RecentHistory = ({ data, title }) => {
   // If data is just the raw array (from engine), use it.
@@ -15,23 +14,22 @@ export const RecentHistory = ({ data, title }) => {
       height: '100%',
       position: 'relative',
       overflow: 'hidden',
-      padding: '20px',
-      paddingTop: '50px', // Clear header
+      // No padding
       boxSizing: 'border-box'
     }}>
       {/* Strict Header */}
       <div style={{
         position: 'absolute',
-        top: '16px',
-        left: '20px',
+        top: '12px',
+        left: '12px',
         margin: 0,
-        fontSize: '15px',
-        fontWeight: '600',
-        color: 'var(--text-secondary)', // #8E8E93
-        zIndex: 10,
-        letterSpacing: '-0.3px'
+        fontSize: '11px',
+        fontWeight: '700',
+        textTransform: 'uppercase',
+        color: 'var(--secondary)',
+        zIndex: 20
       }}>
-        {title}
+        {title || 'History'}
       </div>
 
       <div style={{
@@ -39,10 +37,12 @@ export const RecentHistory = ({ data, title }) => {
           flexDirection: 'column',
           gap: '8px',
           height: '100%',
-          overflowY: 'auto'
+          overflowY: 'auto',
+          padding: '40px 20px 20px 20px', // Top padding clears header
+          boxSizing: 'border-box'
       }}>
         {sorted.length === 0 ? (
-           <div className="flex items-center justify-center h-full text-xs text-secondary opacity-60">
+           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', fontSize: '12px', color: 'var(--text-secondary)', opacity: 0.6 }}>
                No history yet
            </div>
         ) : (
@@ -55,7 +55,7 @@ export const RecentHistory = ({ data, title }) => {
                     <div
                       key={entry.id}
                       style={{
-                          backgroundColor: 'var(--bg-color)',
+                          backgroundColor: 'var(--bg-secondary)',
                           borderRadius: '10px',
                           padding: '12px',
                           display: 'flex',

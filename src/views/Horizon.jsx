@@ -273,7 +273,7 @@ export const Horizon = () => {
                   }}
                 >
                    <WidgetErrorBoundary>
-                     <WidgetComponent data={widget.data} title={widget.title} />
+                     <WidgetComponent data={widget.data} title={widget.label || widget.name || widget.title} />
                    </WidgetErrorBoundary>
                 </Glass>
               );

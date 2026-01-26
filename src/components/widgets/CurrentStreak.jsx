@@ -4,7 +4,7 @@ import { Icons } from '../ui/Icons';
 /**
  * CurrentStreak Widget
  * * Displays the current active streak for a metric.
- * * Refactored Phase 4.12: Atomic Visual Fixes (Header Positioning).
+ * * Refactored Phase 4.9.4: Resized Typography.
  */
 export const CurrentStreak = ({ data, title }) => {
   if (!data) return null;
@@ -13,7 +13,7 @@ export const CurrentStreak = ({ data, title }) => {
 
   return (
     <div style={{ position: 'relative', height: '100%', width: '100%' }}>
-      {/* Atomic Header Fix: Strict Positioning */}
+      {/* Strict Header */}
       <div style={{
             position: 'absolute',
             top: '12px',
@@ -41,22 +41,22 @@ export const CurrentStreak = ({ data, title }) => {
       {/* Data Group - Bottom Right */}
       <div style={{
           position: 'absolute',
-          bottom: '16px',
+          bottom: '20px',
           right: '20px',
           textAlign: 'right',
           zIndex: 10
       }}>
         <div style={{
-            fontSize: '64px', // Increased size
+            fontSize: '72px', // Increased from 64px
             fontWeight: '800',
             lineHeight: '0.9',
             letterSpacing: '-2px',
-            color: 'var(--text-primary)' // Dynamic text color
+            color: 'var(--text-primary)'
         }}>
             {current}
         </div>
         <div style={{
-            fontSize: '14px', // Increased size
+            fontSize: '16px', // Increased from 14px
             fontWeight: '700',
             color: '#FF9500',
             textTransform: 'uppercase',
