@@ -46,7 +46,7 @@ export const SegmentedBarWidget = ({ data, title }) => {
           boxSizing: 'border-box',
           display: 'flex',
           alignItems: 'center',
-          marginTop: '20px' // Additional clearance
+          marginTop: '40px' // Additional clearance
       }}>
         <div style={{ width: '100%' }}>
             <StackedBar

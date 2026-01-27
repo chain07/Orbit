@@ -237,52 +237,108 @@ export const AnalyticsEngine = {
   // System Health / Intel Stats
   // ----------------------
   calculateSystemHealth: (metrics = [], logs = [], segment = 'Weekly', timeLogs = []) => {
-    if (!metrics.length) return { reliability: 0, trend: '0%', intensity: 'None', status: 'Offline' };
+    if (!metrics.length) return { reliability: 0, trend: '0%', intensity: 'None', status: 'Offline', momentumHistory: [], activityVolume: { entries: [] } };
 
-    // Merge timeLogs if provided to ensure they contribute to stats
-    const allLogs = [...logs];
-    if (timeLogs && timeLogs.length > 0) {
-        timeLogs.forEach(t => {
-            // Normalize TimeLog to LogEntry format for calculation
-            allLogs.push({
-                metricId: t.activityId || t.metricId,
-                value: t.duration,
-                timestamp: t.startTime
-            });
-        });
-    }
-
-    // Determine window size in days
+    // 1. Determine Window Size
     let days = 7;
     if (segment === 'Daily') days = 1;
     if (segment === 'Monthly') days = 30;
 
     const now = new Date();
+    const windowStart = new Date(now);
+    windowStart.setDate(windowStart.getDate() - days);
 
-    // Filter logs for current window
-    const currentLogs = allLogs.filter(l => {
-      const d = new Date(l.timestamp);
-      const diff = (now - d) / (1000 * 60 * 60 * 24);
-      return diff <= days;
-    });
+    // 2. Merge timeLogs into standard logs for counting
+    const allLogs = [...logs];
+    if (timeLogs && timeLogs.length > 0) {
+        timeLogs.forEach(t => {
+            allLogs.push({
+                metricId: t.activityId || t.metricId,
+                value: t.duration,
+                timestamp: t.startTime,
+                type: 'time'
+            });
+        });
+    }
 
-    // Filter logs for previous window (for trend comparison)
+    // Filter logs for current window (Standard Health)
+    const currentLogs = allLogs.filter(l => new Date(l.timestamp) >= windowStart);
+
+    // 3. Momentum History (Sparkline Data - Activity Counts)
+    const momentumHistory = [];
+    // We want a history relative to the window.
+    // For Daily: hourly buckets? Or just last 7 days regardless?
+    // "Momentum is... compared to previous 7-day window".
+    // Sparkline usually shows history.
+    // If Segment is Weekly, show last 7 days.
+    // If Monthly, show last 30 days.
+    // If Daily, maybe show last 24 hours or just last 7 days history for context?
+    // Let's stick to 'days' history.
+    const historyDays = segment === 'Daily' ? 7 : days; // Always show at least 7 days context
+
+    for (let i = historyDays - 1; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        // Count all activity for this day
+        const count = allLogs.filter(l => l.timestamp.startsWith(dateStr)).length;
+        momentumHistory.push(count);
+    }
+
+    // 4. Activity Volume (Stacked Bar Data - TimeLogs Duration)
+    const activityVolume = { entries: [], colors: {} };
+    const volumeMap = new Map(); // Date -> { ActivityName: Duration }
+
+    // Initialize map with empty entries for the window
+    for (let i = days - 1; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+
+        let label = dateStr;
+        if (segment === 'Weekly') label = d.toLocaleDateString('en-US', { weekday: 'short' });
+        if (segment === 'Monthly') label = d.getDate().toString();
+        if (segment === 'Daily') label = 'Today';
+
+        volumeMap.set(dateStr, { label, values: {} });
+    }
+
+    if (timeLogs) {
+        timeLogs.forEach(t => {
+            const d = new Date(t.startTime);
+            if (d < windowStart) return;
+            const dateStr = d.toISOString().split('T')[0];
+
+            if (volumeMap.has(dateStr)) {
+                const entry = volumeMap.get(dateStr);
+                const metric = metrics.find(m => m.id === (t.activityId || t.metricId));
+                const name = metric ? (metric.label || metric.name) : 'Unknown';
+
+                // Color mapping
+                if (metric && metric.color) activityVolume.colors[name] = metric.color;
+
+                entry.values[name] = (entry.values[name] || 0) + (t.duration || 0);
+            }
+        });
+    }
+    activityVolume.entries = Array.from(volumeMap.values());
+
+    // 5. Reliability & Trend
+    const prevWindowStart = new Date(windowStart);
+    prevWindowStart.setDate(prevWindowStart.getDate() - days);
+
     const prevLogs = allLogs.filter(l => {
       const d = new Date(l.timestamp);
-      const diff = (now - d) / (1000 * 60 * 60 * 24);
-      return diff > days && diff <= (days * 2);
+      return d >= prevWindowStart && d < windowStart;
     });
 
-    // 1. Reliability (Average Goal Completion)
     let totalCompletion = 0;
     metrics.forEach(m => {
-       // MetricEngine.goalCompletion handles 0-100 logic
        const comp = MetricEngine.goalCompletion ? MetricEngine.goalCompletion(m, currentLogs) : 0;
-       totalCompletion += Math.min(comp, 100); // Cap individual impact at 100%
+       totalCompletion += Math.min(comp, 100);
     });
     const reliability = Math.round(totalCompletion / (metrics.length || 1));
 
-    // 2. Trend Calculation
     let prevTotal = 0;
     metrics.forEach(m => {
        const comp = MetricEngine.goalCompletion ? MetricEngine.goalCompletion(m, prevLogs) : 0;
@@ -292,8 +348,7 @@ export const AnalyticsEngine = {
     const trendVal = reliability - prevReliability;
     const trend = trendVal >= 0 ? `+${trendVal}%` : `${trendVal}%`;
 
-    // 3. Intensity (Log Volume Heuristic)
-    // Baseline: We expect roughly 1 log per metric per day (very rough heuristic)
+    // 6. Intensity
     const expectedVolume = metrics.length * (days > 1 ? days : 1);
     const ratio = currentLogs.length / (expectedVolume || 1);
 
@@ -302,9 +357,8 @@ export const AnalyticsEngine = {
     if (ratio > 0.8) intensity = 'High';
     if (ratio > 1.2) intensity = 'Peak';
 
-    // 4. Operational Baseline Status
     const status = reliability > 80 ? 'Optimal' : reliability > 50 ? 'Functional' : 'Degraded';
 
-    return { reliability, trend, intensity, status };
+    return { reliability, trend, intensity, status, momentumHistory, activityVolume };
   }
 };
