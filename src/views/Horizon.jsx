@@ -1,12 +1,10 @@
-import React, { useContext, useState, useMemo } from 'react';
+import React, { useContext, useState, useMemo, useEffect } from 'react';
 import { StorageContext } from '../context/StorageContext';
 import { NavigationContext } from '../context/NavigationContext';
 import { WidgetDataEngine } from '../engine/WidgetDataEngine';
 import { HorizonAgent } from '../lib/horizonAgent';
-import SegmentedControl from '../components/ui/SegmentedControl';
 import Glass from '../components/ui/Glass';
 import { getWidgetComponent } from '../components/widgets/WidgetRegistry';
-import { EditLayoutModal } from '../components/horizon/EditLayoutModal';
 import { EmptyState } from '../components/ui/EmptyState';
 import UpdateManager from '../components/system/UpdateManager';
 import { OnboardingWizard } from '../components/system/OnboardingWizard';
@@ -38,11 +36,10 @@ class WidgetErrorBoundary extends React.Component {
 }
 
 export const Horizon = () => {
-  const { metrics, logEntries, onboardingComplete } = useContext(StorageContext);
+  const { metrics, logEntries, allLogs, updateWidgetLayout, widgetLayout } = useContext(StorageContext);
   const { setActiveTab } = useContext(NavigationContext);
   const [segment, setSegment] = useState('Weekly');
   const [isEditing, setIsEditing] = useState(false);
-  const [isNudgeDismissed, setIsNudgeDismissed] = useState(false);
   const [showWizard, setShowWizard] = useState(false);
   
   const todayDate = new Date().toLocaleDateString('en-US', { 
@@ -59,42 +56,90 @@ export const Horizon = () => {
     return 'Good Night.';
   }, []);
 
-  const topInsights = useMemo(() => {
-    if (!HorizonAgent || !HorizonAgent.generateAllInsights) return [];
-    try {
-      const allInsights = HorizonAgent.generateAllInsights(metrics, logEntries);
-      return Object.values(allInsights || {}).flat()
-        .sort((a, b) => (b.priority || 0) - (a.priority || 0))
-        .slice(0, 2);
-    } catch (e) {
-      return [];
-    }
-  }, [metrics, logEntries]);
-
-  const widgets = useMemo(() => {
-    try {
-      return WidgetDataEngine.generateWidgets
-        ? WidgetDataEngine.generateWidgets(metrics, logEntries, segment)
-        : [];
-    } catch (e) {
-      return [];
-    }
-  }, [metrics, logEntries, segment]);
-
   const hasMetrics = metrics && metrics.length > 0;
+  const [dailyMessage, setDailyMessage] = useState(null);
 
-  const showNudge = useMemo(() => {
-      if (!hasMetrics) return false;
-      if (isNudgeDismissed) return false;
+  // Daily Briefing Persistence
+  useEffect(() => {
+    if (!hasMetrics) return;
 
-      const metricCount = metrics.length;
-      const hasGoal = metrics.some(m => m.goal !== null && m.goal !== undefined && m.goal > 0);
+    const today = new Date().toISOString().split('T')[0];
+    const stored = localStorage.getItem('dailyBriefing');
 
-      return metricCount < 3 || !hasGoal;
-  }, [metrics, hasMetrics, isNudgeDismissed]);
+    // Check if we have a valid stored message for today
+    if (stored) {
+        try {
+            const parsed = JSON.parse(stored);
+            if (parsed.date === today) {
+                setDailyMessage(parsed.message);
+                return;
+            }
+        } catch (e) {
+            console.error("Failed to parse daily briefing", e);
+        }
+    }
+
+    // If no valid stored message, generate one
+    if (HorizonAgent && HorizonAgent.generateAllInsights) {
+        try {
+            const allInsights = HorizonAgent.generateAllInsights(metrics, allLogs);
+            const tactical = Object.values(allInsights || {}).flat()
+                .filter(i => i.context === 'tactical')
+                .sort((a, b) => (b.priority || 0) - (a.priority || 0));
+
+            const msg = tactical.length > 0 ? tactical[0].message : "Good morning. Ready to track your progress today?";
+
+            setDailyMessage(msg);
+            localStorage.setItem('dailyBriefing', JSON.stringify({ date: today, message: msg }));
+        } catch (e) {
+            console.error("Failed to generate insights", e);
+        }
+    }
+  }, [metrics, allLogs, hasMetrics]);
+
+  // Merge layout order with metrics data
+  const orderedWidgets = useMemo(() => {
+      // Get base widgets
+      const baseWidgets = WidgetDataEngine.generateWidgets(metrics, allLogs, segment);
+
+      // Filter out widgets for metrics that no longer exist
+      const validWidgets = baseWidgets.filter(w => metrics.some(m => m.id === w.id));
+
+      // If no layout saved, return base
+      const layoutOrder = widgetLayout?.Horizon;
+      if (!layoutOrder || !Array.isArray(layoutOrder)) return validWidgets;
+
+      // Map base widgets by ID for quick lookup
+      const widgetMap = new Map(validWidgets.map(w => [w.id, w]));
+
+      // Reorder based on layout
+      const ordered = layoutOrder.map(id => widgetMap.get(id)).filter(Boolean);
+
+      // Append any new metrics that aren't in the layout yet
+      const processedIds = new Set(ordered.map(w => w.id));
+      const remaining = validWidgets.filter(w => !processedIds.has(w.id));
+
+      return [...ordered, ...remaining];
+  }, [metrics, allLogs, segment, widgetLayout]);
+
+  const moveWidget = (index, direction) => {
+      if (!updateWidgetLayout) return;
+
+      const newOrder = [...orderedWidgets];
+      const targetIndex = index + direction;
+
+      if (targetIndex < 0 || targetIndex >= newOrder.length) return;
+
+      // Swap
+      [newOrder[index], newOrder[targetIndex]] = [newOrder[targetIndex], newOrder[index]];
+
+      // Save ID list
+      const newLayoutIds = newOrder.map(w => w.id);
+      updateWidgetLayout(prev => ({ ...prev, Horizon: newLayoutIds }));
+  };
 
   return (
-    <div className="layout-padding fade-in">
+    <div className="layout-padding fade-in" style={{ maxWidth: '100vw', overflowX: 'hidden' }}>
       
       {/* Header - Fixed Gap */}
       <div className="view-header-stack">
@@ -106,18 +151,24 @@ export const Horizon = () => {
             {greeting}
           </h1>
           {hasMetrics && (
-            <OrbitButton
-              onClick={() => setIsEditing(true)}
-              variant="secondary"
-              className="!w-auto !h-9 !px-4 !text-xs"
+            <button
+              onClick={() => setIsEditing(!isEditing)}
+              style={{
+                  color: 'var(--blue)',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer'
+              }}
             >
-              Edit Layout
-            </OrbitButton>
+              {isEditing ? 'Done' : 'Edit'}
+            </button>
           )}
         </div>
       </div>
 
-      <div className="layout-content">
+      <div className="layout-content" style={{ boxSizing: 'border-box', width: '100vw', overflowX: 'hidden' }}>
         <UpdateManager />
 
         {!hasMetrics && (
@@ -138,82 +189,97 @@ export const Horizon = () => {
           </div>
         )}
 
-        {showNudge && (
-            <Glass
-              className="relative mb-6"
-              style={{
-                background: 'linear-gradient(to right, rgba(0,122,255,0.1), rgba(175,82,222,0.1))',
-                borderColor: 'rgba(0,122,255,0.2)'
-              }}
-            >
-                <OrbitButton
-                    onClick={() => setIsNudgeDismissed(true)}
-                    variant="secondary"
-                    className="absolute top-2 right-2 !w-8 !h-8 !p-0"
-                    icon={<Icons.X size={14} />}
-                />
-                <div className="flex justify-between items-center pr-6">
-                    <div>
-                        <div className="font-bold text-blue">Complete Your Orbit</div>
-                        <div className="text-xs text-secondary mt-1">Add at least 3 metrics and 1 goal for better insights.</div>
-                    </div>
-                    <OrbitButton
-                      onClick={() => setActiveTab('System')}
-                      variant="primary"
-                      className="!w-auto !h-8 !px-4 !text-xs"
-                    >
-                        Setup
-                    </OrbitButton>
+        {!isEditing && (
+            <Glass className="p-4 border-l-4 border-blue mb-4">
+            <div className="flex flex-col justify-center gap-2 min-h-[80px]">
+                <div className="text-xs font-bold text-blue uppercase tracking-wider flex items-center gap-2">
+                <Icons.Activity className="text-blue" size={14} /> DAILY BRIEFING
                 </div>
+                <div className="text-md font-medium text-primary leading-relaxed">
+                {dailyMessage || "Good morning. I'll scan your data for actionable tactical moves and insights once you start logging."}
+                </div>
+            </div>
             </Glass>
         )}
 
-        <Glass className="p-4 border-l-4 border-blue mb-4">
-          <div className="flex flex-col gap-2">
-            <div className="text-xs font-bold text-blue uppercase tracking-wider flex items-center gap-2">
-              <Icons.Activity className="text-blue" size={14} /> HORIZON AGENT
-            </div>
-            <div className="text-secondary text-sm leading-relaxed">
-              {hasMetrics && topInsights.length > 0 ? (
-                topInsights.map((insight, idx) => (
-                  <div key={idx} className="mb-1">
-                    {insight.message}
-                  </div>
-                ))
-              ) : (
-                "I am your Horizon Agent. I work privately on your device to uncover patterns in your habits. Once you start logging, I'll reveal trends, momentum shifts, and correlations to help you optimize your routine."
-              )}
-            </div>
-          </div>
-        </Glass>
-
         {hasMetrics && (
-          <>
-            <SegmentedControl
-              options={['Daily', 'Weekly', 'Monthly'].map(s => ({ label: s, value: s }))}
-              value={segment}
-              onChange={setSegment}
-            />
+          <div style={{
+            display: isEditing ? 'flex' : 'grid',
+            flexDirection: isEditing ? 'column' : 'initial',
+            gridTemplateColumns: isEditing ? 'none' : 'repeat(2, minmax(0, 1fr))',
+            gap: '16px',
+            padding: '20px',
+            width: '100%',
+            boxSizing: 'border-box',
+            overflowX: 'hidden',
+            paddingBottom: '100px'
+          }}>
+            {orderedWidgets.map((widget, idx) => {
+              const WidgetComponent = getWidgetComponent(widget.widgetType);
+              const isFullWidth = ['stackedbar', 'sparkline', 'heatmap', 'progress', 'progressbar', 'compound', 'history'].includes(widget.widgetType);
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              {widgets.map((widget, idx) => {
-                const WidgetComponent = getWidgetComponent(widget.type);
-                return (
-                  <Glass key={widget.id || idx} className="relative overflow-hidden">
-                     <WidgetErrorBoundary>
-                       <WidgetComponent data={widget.data} title={widget.title} />
-                     </WidgetErrorBoundary>
-                  </Glass>
-                );
-              })}
-            </div>
-          </>
+              if (isEditing) {
+                  return (
+                    <div
+                        key={widget.id || idx}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '12px',
+                            backgroundColor: 'var(--card-bg)',
+                            marginBottom: '8px',
+                            borderRadius: '12px',
+                            border: '1px solid var(--separator)'
+                        }}
+                    >
+                         <div className="flex flex-col gap-1 min-w-[120px]">
+                            {/* Title */}
+                            <span className="font-bold text-primary text-sm truncate">
+                                {widget.label || widget.title || 'Widget'}
+                            </span>
+                            {/* Type Badge */}
+                            <span className="text-xs text-secondary bg-secondary/10 px-2 py-0.5 rounded-full w-fit capitalize">
+                                {widget.widgetType}
+                            </span>
+                         </div>
+
+                        {/* Controls */}
+                        <div className="flex gap-2">
+                             <OrbitButton
+                                variant="secondary"
+                                icon={<Icons.ChevronUp size={16} />}
+                                onClick={() => moveWidget(idx, -1)}
+                                disabled={idx === 0}
+                             />
+                             <OrbitButton
+                                variant="secondary"
+                                icon={<Icons.ChevronDown size={16} />}
+                                onClick={() => moveWidget(idx, 1)}
+                                disabled={idx === orderedWidgets.length - 1}
+                             />
+                        </div>
+                    </div>
+                  );
+              }
+
+              return (
+                <Glass
+                  key={widget.id || idx}
+                  className="relative overflow-hidden transition-transform"
+                  style={{
+                    gridColumn: isFullWidth ? 'span 2' : 'span 1',
+                    aspectRatio: isFullWidth ? '2 / 1' : '1 / 1'
+                  }}
+                >
+                   <WidgetErrorBoundary>
+                     <WidgetComponent data={widget.data} title={widget.label || widget.name || widget.title} />
+                   </WidgetErrorBoundary>
+                </Glass>
+              );
+            })}
+          </div>
         )}
-
-        <EditLayoutModal
-          isOpen={isEditing}
-          onClose={() => setIsEditing(false)}
-        />
       </div>
     </div>
   );

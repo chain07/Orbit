@@ -1,74 +1,133 @@
 import React, { useMemo } from 'react';
-import { HeatMap } from '../ui/charts/Heatmap';
-import { dateUtils } from '../../lib/dateUtils';
 
 /**
  * ConsistencyHeatmap Widget
- * * Displays a contribution-graph style heatmap.
- * Expected data structure:
- * {
- * values: { [date]: number }, // 0-1 values
- * startDate: string (YYYY-MM-DD),
- * endDate: string (YYYY-MM-DD),
- * color: string
- * }
+ * * Displays a contribution-graph style heatmap for the current month.
+ * * Refactored Phase 4.15: Local Date Keys & Contrast Fix.
  */
-export const ConsistencyHeatmap = ({ data }) => {
+export const ConsistencyHeatmap = ({ data, title }) => {
   if (!data || !data.values) return null;
 
-  // Default to last 12 weeks/90 days if range not provided
-  const { startDate, endDate } = useMemo(() => {
-    if (data.startDate && data.endDate) {
-      return { startDate: data.startDate, endDate: data.endDate };
-    }
-    const end = new Date();
-    const start = new Date();
-    start.setDate(end.getDate() - 84); // 12 weeks approx
-    return {
-      startDate: dateUtils.formatDate(start),
-      endDate: dateUtils.formatDate(end)
-    };
-  }, [data.startDate, data.endDate]);
+  const today = new Date();
 
-  // Custom color scale based on the metric's primary color
-  // We can create a simple opacity-based scale or use the passed color
-  const colorScale = (value) => {
-    if (!value) return 'bg-gray-100 dark:bg-white/5'; // Empty state
-    
-    // If specific classes aren't available, we fallback to styles (though HeatMap expects classes usually)
-    // Here we map normalized values to opacity buckets if using Tailwind classes
-    // Assuming the parent passes a base color class is tricky in Tailwind without safelisting.
-    // Instead, we will rely on the HeatMap's default scale or allow injection.
-    
-    // For now, let's use the HeatMap's default scale but strictly mapped
-    if (value >= 1) return 'bg-green-500';
-    if (value >= 0.75) return 'bg-green-400';
-    if (value >= 0.5) return 'bg-green-300';
-    if (value > 0) return 'bg-green-200';
-    return 'bg-gray-100 dark:bg-white/5';
+  const days = useMemo(() => {
+    const arr = [];
+    // Start of current month
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    // End is today
+    const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+    // Iterate from startOfMonth to today (inclusive)
+    const current = new Date(startOfMonth);
+    while (current <= end) {
+        // Use Local Date String to match Engine keys
+        const iso = current.toLocaleDateString('en-CA'); // YYYY-MM-DD Local
+
+        arr.push({
+            date: iso,
+            value: data.values[iso] || 0
+        });
+        current.setDate(current.getDate() + 1);
+    }
+    return arr;
+  }, [data.values]);
+
+  const getColor = (value) => {
+      // 0-100 logic
+      if (value >= 100) return '#34C759'; // Full Green
+      if (value >= 75) return 'rgba(52, 199, 89, 0.75)';
+      if (value >= 50) return 'rgba(52, 199, 89, 0.5)';
+      if (value > 0) return 'rgba(52, 199, 89, 0.25)';
+      return 'rgba(128, 128, 128, 0.15)'; // Visible Grey for Empty States
   };
 
+  const monthName = today.toLocaleString('default', { month: 'long' });
+  const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  const startDayIndex = new Date(days[0].date + 'T00:00:00').getDay(); // Force local midnight parsing or just use standard
+  // Standard new Date('YYYY-MM-DD') parses as UTC. new Date('YYYY/MM/DD') parses as local.
+  // Safest: use getDay from the loop iteration logic or just:
+  const firstDayObj = new Date(days[0].date.replace(/-/g, '/')); // Force local parsing
+  const offsetSlots = Array.from({ length: firstDayObj.getDay() });
+
   return (
-    <div className="flex flex-col h-full w-full">
-      <div className="flex justify-between items-center mb-3">
-        <span className="text-sm font-bold text-secondary uppercase tracking-wide">
-          Consistency
-        </span>
-        <span className="text-xs text-secondary opacity-70">
-          Last 90 Days
-        </span>
-      </div>
-      
-      <div className="flex-1 overflow-x-auto overflow-y-hidden">
-        <HeatMap
-          data={data.values}
-          startDate={startDate}
-          endDate={endDate}
-          size={14} // Slightly smaller squares for density
-          className="justify-start pb-2"
-          colorScale={colorScale}
-        />
-      </div>
+    <div style={{
+        position: 'relative',
+        height: 'auto',
+        minHeight: '100%',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+    }}>
+
+        {/* Strict Header */}
+        <div style={{
+            position: 'absolute',
+            top: '12px',
+            left: '12px',
+            margin: 0,
+            fontSize: '11px',
+            fontWeight: '700',
+            textTransform: 'uppercase',
+            color: 'var(--text-secondary)',
+            zIndex: 20
+        }}>
+            {title || data.label || 'Consistency'}
+        </div>
+
+        {/* Date Range Label - Top Right */}
+        <div style={{
+            position: 'absolute',
+            top: '12px',
+            right: '12px',
+            fontSize: '12px',
+            fontWeight: '600',
+            color: 'var(--text-secondary)',
+            zIndex: 20
+        }}>
+            {monthName}
+        </div>
+
+        {/* Content Wrapper */}
+        <div style={{
+            padding: '40px 20px 20px 20px',
+            boxSizing: 'border-box',
+            width: '100%'
+        }}>
+            {/* Calendar Grid */}
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(7, 1fr)',
+                gap: '4px',
+                width: '100%'
+            }}>
+                {offsetSlots.map((_, i) => <div key={`empty-${i}`} />)}
+                {days.map(day => (
+                    <div
+                        key={day.date}
+                        style={{
+                            aspectRatio: '1/1',
+                            borderRadius: '4px',
+                            backgroundColor: getColor(day.value)
+                        }}
+                        title={`${day.date}: ${day.value}`}
+                    />
+                ))}
+            </div>
+
+            {/* Week Labels */}
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(7, 1fr)',
+                gap: '4px',
+                marginTop: '6px'
+            }}>
+                {weekDays.map((d, i) => (
+                    <div key={i} style={{ textAlign: 'center', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: '600' }}>
+                        {d}
+                    </div>
+                ))}
+            </div>
+        </div>
     </div>
   );
 };

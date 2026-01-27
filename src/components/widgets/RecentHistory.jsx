@@ -1,67 +1,81 @@
 import React from 'react';
-import { dateUtils } from '../../lib/dateUtils'; // Assuming utility exists, or we use native Date
 
 /**
  * RecentHistory Widget
- * * Lists the last N entries for a metric.
- * * Expected data structure:
- * {
- * entries: Array<{
- * id: string,
- * value: number,
- * timestamp: string,
- * note: string (optional)
- * }>,
- * unit: string
- * }
+ * * Displays a list of recent log entries for a metric.
+ * * Refactored Phase 4.14: Data Robustness.
  */
-export const RecentHistory = ({ data }) => {
-  if (!data || !data.entries) return null;
+export const RecentHistory = ({ data, title }) => {
+  // Extract entries safely, handling both array (raw) and object (structured) formats
+  const entries = data?.entries || (Array.isArray(data) ? data : []);
 
-  const { entries = [], unit = '' } = data;
-  const recentItems = entries.slice(0, 5); // Max 5 items
-
-  const formatDate = (isoString) => {
-    const d = new Date(isoString);
-    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-  };
-
-  const formatTime = (isoString) => {
-    const d = new Date(isoString);
-    return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-  };
+  // Ensure entries are sorted if not already (safeguard)
+  const sorted = [...entries].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 5);
 
   return (
-    <div className="flex flex-col h-full w-full">
-      <div className="text-sm font-bold text-secondary uppercase tracking-wide mb-3">
-        Recent Activity
+    <div style={{
+      width: '100%',
+      height: '100%',
+      position: 'relative',
+      overflow: 'hidden',
+      boxSizing: 'border-box'
+    }}>
+      {/* Strict Header */}
+      <div style={{
+        position: 'absolute',
+        top: '12px',
+        left: '12px',
+        margin: 0,
+        fontSize: '11px',
+        fontWeight: '700',
+        textTransform: 'uppercase',
+        color: 'var(--text-secondary)',
+        zIndex: 20
+      }}>
+        {title || 'History'}
       </div>
 
-      <div className="flex flex-col gap-2 overflow-y-auto">
-        {recentItems.length === 0 ? (
-          <div className="text-sm text-secondary italic opacity-60 text-center py-4">
-            No recent activity
-          </div>
+      <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px',
+          height: '100%',
+          overflowY: 'auto',
+          padding: '40px 20px 20px 20px',
+          boxSizing: 'border-box'
+      }}>
+        {sorted.length === 0 ? (
+           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', fontSize: '12px', color: 'var(--text-secondary)', opacity: 0.6, fontStyle: 'italic' }}>
+               No entries recorded
+           </div>
         ) : (
-          recentItems.map((entry, idx) => (
-            <div 
-              key={entry.id || idx} 
-              className="flex justify-between items-center py-2 border-b border-separator border-opacity-10 last:border-0"
-            >
-              <div className="flex flex-col">
-                <span className="text-xs font-bold text-secondary">
-                  {formatDate(entry.timestamp)}
-                </span>
-                <span className="text-[10px] text-secondary opacity-60">
-                  {formatTime(entry.timestamp)}
-                </span>
-              </div>
-              
-              <div className="font-mono font-medium text-sm">
-                {entry.value} <span className="text-xs text-secondary">{unit}</span>
-              </div>
-            </div>
-          ))
+            sorted.map((entry) => {
+                const dateObj = new Date(entry.timestamp);
+                const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                return (
+                    <div
+                      key={entry.id}
+                      style={{
+                          backgroundColor: 'var(--bg-secondary)',
+                          borderRadius: '10px',
+                          padding: '12px',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          fontSize: '14px'
+                      }}
+                    >
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>
+                            {dateStr} <span style={{ opacity: 0.5 }}>{timeStr}</span>
+                        </span>
+                        <span style={{ fontWeight: '500', color: 'var(--text-primary)', maxWidth: '60%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {String(entry.value)}
+                        </span>
+                    </div>
+                );
+            })
         )}
       </div>
     </div>

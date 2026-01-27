@@ -1,7 +1,9 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { StorageContext } from '../../context/StorageContext';
+import { OrbitDB } from '../../lib/db';
 import { Icons } from '../ui/Icons';
 import { OrbitButton } from '../ui/OrbitButton';
+import { createMetric, createLog, createTimeLog, MetricType, WidgetType } from '../../types/schemas';
 import '../../styles/index.css';
 
 export const DataManagement = () => {
@@ -9,38 +11,20 @@ export const DataManagement = () => {
     metrics,
     logEntries,
     timeLogs,
-    exportData,
     importData,
     clearAllData
   } = useContext(StorageContext);
 
-  const [storageStats, setStorageStats] = useState({ usedBytes: 0, percent: 0, mb: '0.00' });
+  const [stats, setStats] = useState({ items: 0 });
+  const [isSeeding, setIsSeeding] = useState(false);
 
   useEffect(() => {
-    const calculateUsage = () => {
-      try {
-        const db = localStorage.getItem('orbit_db') || '';
-        const archive = localStorage.getItem('orbit_archive') || '';
-        const totalBytes = (db.length + archive.length) * 2;
-        const limitBytes = 5242880; // 5MB limit
-        const percent = Math.min((totalBytes / limitBytes) * 100, 100);
+    // Count items (simple sync check from context state which mirrors DB)
+    const count = metrics.length + logEntries.length + timeLogs.length;
+    setStats({ items: count });
+  }, [metrics, logEntries, timeLogs]);
 
-        setStorageStats({
-          usedBytes: totalBytes,
-          percent: percent,
-          mb: (totalBytes / (1024 * 1024)).toFixed(2)
-        });
-      } catch (e) {
-        console.error("Storage calculation failed", e);
-      }
-    };
-
-    calculateUsage();
-    const interval = setInterval(calculateUsage, 2000);
-    return () => clearInterval(interval);
-  }, [logEntries, timeLogs]);
-
-  const handleArchiveOldData = () => {
+  const handleArchiveOldData = async () => {
     const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
     const cutoffTime = Date.now() - ONE_YEAR_MS;
     const cutoffIso = new Date(cutoffTime).toISOString();
@@ -55,7 +39,7 @@ export const DataManagement = () => {
       return;
     }
 
-    if (!window.confirm(`This will archive ${count} items (older than 1 year) to a JSON file and remove them from this device to free up space.\n\nContinue?`)) {
+    if (!window.confirm(`This will archive ${count} items (older than 1 year) to a JSON file and remove them from this device.\n\nContinue?`)) {
       return;
     }
 
@@ -80,18 +64,34 @@ export const DataManagement = () => {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    const fullData = exportData();
-    fullData.logEntries = logEntries.filter(l => l.timestamp >= cutoffIso);
-    fullData.timeLogs = timeLogs.filter(l => l.startTime >= cutoffIso);
-
-    importData(fullData);
-    alert("Archive complete. Old data removed.");
+    try {
+        for (const l of oldLogs) await OrbitDB.delete('logs', l.id);
+        for (const t of oldTimeLogs) await OrbitDB.delete('timeLogs', t.id);
+        alert("Archive complete. Old data removed.");
+        window.location.reload();
+    } catch (e) {
+        console.error(e);
+        alert("Error removing archived data.");
+    }
   };
 
-  const handleExportJSON = () => {
-    const data = exportData();
-    const json = { ...data };
-    const blob = new Blob([JSON.stringify(json, null, 2)], { type: "application/json" });
+  const handleExportJSON = async () => {
+    const dbMetrics = await OrbitDB.getAll('metrics');
+    const dbLogs = await OrbitDB.getAll('logs');
+    const dbTimeLogs = await OrbitDB.getAll('timeLogs');
+    const layout = JSON.parse(localStorage.getItem('orbit_widget_layout') || '{}');
+    const onboarding = JSON.parse(localStorage.getItem('orbit_onboarding') || 'false');
+
+    const data = {
+      metrics: dbMetrics,
+      logEntries: dbLogs,
+      timeLogs: dbTimeLogs,
+      widgetLayout: layout,
+      onboardingComplete: onboarding,
+      exportedAt: new Date().toISOString()
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -109,9 +109,7 @@ export const DataManagement = () => {
     logEntries.forEach(log => {
       const metric = metrics.find(m => m.id === log.metricId);
       const metricName = metric ? (metric.label || metric.name) : 'Unknown Metric';
-      const date = log.timestamp;
-      const value = log.value;
-      csvContent += `${date},"${metricName}",${value}\n`;
+      csvContent += `${log.timestamp},"${metricName}",${log.value}\n`;
     });
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -130,10 +128,10 @@ export const DataManagement = () => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       try {
         const data = JSON.parse(ev.target.result);
-        importData(data);
+        await importData(data);
         alert('Import successful!');
       } catch (err) {
         console.error("Invalid JSON", err);
@@ -143,43 +141,128 @@ export const DataManagement = () => {
     reader.readAsText(file);
   };
 
-  const handleNuke = () => {
-    if (window.confirm("⚠️ DANGER: This will wipe ALL data from this device. Are you sure?")) {
+  const handleNuke = async () => {
+    if (window.confirm("⚠️ DANGER: This will wipe ALL data. Are you sure?")) {
       if (window.confirm("Really? This cannot be undone.")) {
-        clearAllData();
+        await clearAllData();
+        window.location.reload();
       }
     }
   };
 
-  const percent = storageStats.percent.toFixed(1);
-  const percentNum = Number(storageStats.percent);
+  const seedTestData = async () => {
+      if (!window.confirm("Inject 30 days of test data? This replaces existing data.")) return;
+
+      setIsSeeding(true);
+      try {
+          await clearAllData();
+
+          // 1. Create Metrics
+          const m1 = createMetric({ name: 'read_30', label: 'Read 30 mins', type: MetricType.BOOLEAN, color: '#34C759', widgetType: WidgetType.STREAK, goal: 1 });
+          const m2 = createMetric({ name: 'water', label: 'Water (oz)', type: MetricType.NUMBER, color: '#007AFF', widgetType: WidgetType.RING, goal: 100, unit: 'oz' });
+          // Coding -> Progress Bar
+          const m3 = createMetric({ name: 'coding', label: 'Coding', type: MetricType.DURATION, color: '#AF52DE', widgetType: WidgetType.PROGRESS, goal: 4, unit: 'hrs' });
+          const m4 = createMetric({ name: 'energy', label: 'Energy', type: MetricType.RANGE, color: '#FF9500', widgetType: WidgetType.HEATMAP, range: {min:1, max:10}, goal: 8 });
+          // Mood -> Compound Bar
+          const m5 = createMetric({ name: 'mood', label: 'Mood', type: MetricType.SELECT, color: '#FF2D55', widgetType: WidgetType.COMPOUND, options: ['Good', 'Neutral', 'Bad'], goal: null });
+          // New Metric for History Widget testing
+          const m6 = createMetric({ name: 'journal', label: 'Journal', type: MetricType.TEXT, color: '#5AC8FA', widgetType: WidgetType.HISTORY, goal: null });
+
+          const newMetrics = [m1, m2, m3, m4, m5, m6];
+
+          // 2. Create Logs (30 days)
+          const newLogs = [];
+          const newTimeLogs = [];
+
+          const now = new Date();
+
+          for (let i = 0; i < 30; i++) {
+              const date = new Date(now);
+              date.setDate(date.getDate() - i);
+              const isoDate = date.toISOString();
+
+              // M1: Read (Random boolean)
+              if (Math.random() > 0.3) {
+                  newLogs.push(createLog({ metricId: m1.id, value: true, timestamp: isoDate }));
+              }
+
+              // M2: Water (Random 0-120)
+              const waterVal = Math.floor(Math.random() * 120);
+              newLogs.push(createLog({ metricId: m2.id, value: waterVal, timestamp: isoDate }));
+
+              // M3: Coding (TimeLog)
+              if (Math.random() > 0.2) {
+                  const durationHrs = 1 + Math.random() * 5;
+                  const start = new Date(date);
+                  start.setHours(10, 0, 0);
+                  const end = new Date(start.getTime() + durationHrs * 60 * 60 * 1000);
+
+                  newTimeLogs.push(createTimeLog({
+                      activityId: m3.id,
+                      activityLabel: 'Coding Session',
+                      startTime: start.toISOString(),
+                      endTime: end.toISOString(),
+                      duration: durationHrs
+                  }));
+              }
+
+              // M4: Energy (1-10)
+              const energyVal = Math.floor(Math.random() * 10) + 1;
+              newLogs.push(createLog({ metricId: m4.id, value: energyVal, timestamp: isoDate }));
+
+              // M5: Mood
+              const moods = ['Good', 'Neutral', 'Bad'];
+              const moodVal = moods[Math.floor(Math.random() * moods.length)];
+              newLogs.push(createLog({ metricId: m5.id, value: moodVal, timestamp: isoDate }));
+
+              // M6: Journal
+              if (i < 5) { // Only last 5 days
+                  newLogs.push(createLog({ metricId: m6.id, value: "Logged entry...", timestamp: isoDate }));
+              }
+          }
+
+          // Bulk Insert
+          await OrbitDB.clear('metrics');
+          for (const m of newMetrics) await OrbitDB.put('metrics', m);
+
+          await OrbitDB.clear('logs');
+          for (const l of newLogs) await OrbitDB.add('logs', l);
+
+          await OrbitDB.clear('timeLogs');
+          for (const t of newTimeLogs) await OrbitDB.add('timeLogs', t);
+
+          // Layout
+          const layout = { Horizon: newMetrics.map(m => m.id) };
+          localStorage.setItem('orbit_widget_layout', JSON.stringify(layout));
+          localStorage.setItem('orbit_onboarding', JSON.stringify(true));
+
+          alert("Seeding complete. Reloading...");
+          window.location.reload();
+
+      } catch (e) {
+          console.error(e);
+          alert("Seeding failed: " + e.message);
+      } finally {
+          setIsSeeding(false);
+      }
+  };
 
   return (
     <div className="card" style={{ transform: 'none', transition: 'none' }}>
-      <div className="section-label">Storage</div>
-      {/* Storage Meter */}
+      <div className="section-label">Database Status</div>
       <div className="flex flex-col gap-2 mb-6">
         <div className="flex justify-between text-sm text-secondary font-medium">
-          <span>Local Storage</span>
-          <span>{percent}%</span>
+          <span>Total Items</span>
+          <span className="font-mono">{stats.items}</span>
         </div>
-        <div className="storage-track-container">
-          <div
-            className={`h-full transition-all duration-500`}
-            style={{
-              width: `${percent}%`,
-              backgroundColor: percentNum > 80 ? 'var(--red)' : 'var(--blue)'
-            }}
-          />
-        </div>
-        <div className="text-xs text-secondary text-right">
-          {storageStats.mb} MB / 5.00 MB
+        <div className="text-xs text-secondary opacity-60">
+          Powered by IndexedDB (Local)
         </div>
       </div>
 
       <div className="section-label section-archival">Archival Engine</div>
       <p className="text-secondary text-sm archival-description leading-relaxed">
-        Offload data older than 1 year to a JSON file and remove it from local storage to free up space.
+        Offload data older than 1 year to a JSON file and remove it from local storage.
       </p>
 
       <OrbitButton
@@ -192,7 +275,7 @@ export const DataManagement = () => {
       </OrbitButton>
 
       <div className="section-label section-export">Universal Export</div>
-      <div className="flex flex-col gap-3">
+      <div style={{ display: 'flex', gap: '12px' }}>
          <OrbitButton
             onClick={handleExportJSON}
             variant="primary"
@@ -214,14 +297,14 @@ export const DataManagement = () => {
 
       <div className="border-t border-separator/50 my-6" />
 
-      <div className="button-row">
+      <div className="flex flex-col gap-3">
            <OrbitButton
              onClick={handleImportClick}
              variant="secondary"
-             className="flex-1"
+             className="w-full"
              icon={<Icons.Upload size={16} />}
            >
-             Import
+             Import Backup
            </OrbitButton>
 
            <input
@@ -232,13 +315,24 @@ export const DataManagement = () => {
              onChange={handleImportFile}
            />
 
-           <OrbitButton
-             onClick={handleNuke}
-             variant="destructive"
-             className="flex-1"
-           >
-             Reset
-           </OrbitButton>
+           <div className="flex gap-3 mt-2">
+               <OrbitButton
+                 onClick={seedTestData}
+                 variant="secondary"
+                 className="flex-1"
+                 disabled={isSeeding}
+               >
+                 {isSeeding ? "Seeding..." : "Seed Data"}
+               </OrbitButton>
+
+               <OrbitButton
+                 onClick={handleNuke}
+                 variant="destructive"
+                 className="flex-1"
+               >
+                 Reset DB
+               </OrbitButton>
+           </div>
       </div>
     </div>
   );

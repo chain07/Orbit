@@ -1,0 +1,91 @@
+
+> orbit-pwa@1.0.0 dev
+> vite
+
+Port 5173 is in use, trying another one...
+Port 5174 is in use, trying another one...
+Port 5175 is in use, trying another one...
+
+  VITE v5.4.21  ready in 821 ms
+
+  ➜  Local:   http://localhost:5176/
+  ➜  Network: use --host to expose
+2:35:54 AM [vite] hmr update /src/components/widgets/CurrentStreak.jsx
+2:35:54 AM [vite] hmr update /src/components/widgets/ProgressBarWidget.jsx
+2:35:54 AM [vite] hmr update /src/components/widgets/CompoundBarWidget.jsx
+2:36:30 AM [vite] hmr update /src/components/widgets/ConsistencyHeatmap.jsx
+2:36:30 AM [vite] hmr update /src/components/widgets/ReliabilityRing.jsx
+2:36:31 AM [vite] hmr update /src/components/widgets/TrendSparkline.jsx
+2:36:44 AM [vite] hmr update /src/components/widgets/NumberWidget.jsx
+2:37:51 AM [vite] hmr update /src/views/Horizon.jsx
+2:38:48 AM [vite] hmr update /src/components/logger/MetricInput.jsx
+2:39:13 AM [vite] hmr update /src/components/logger/DailyCheckInForm.jsx
+2:42:39 AM [vite] hmr update /src/views/Horizon.jsx
+2:44:16 AM [vite] hmr update /src/views/Horizon.jsx
+4:37:18 AM [vite] hmr update /src/components/widgets/RecentHistory.jsx
+4:38:23 AM [vite] hmr update /src/components/widgets/ReliabilityRing.jsx
+4:38:23 AM [vite] hmr update /src/components/widgets/TrendSparkline.jsx
+4:38:23 AM [vite] hmr update /src/components/widgets/ConsistencyHeatmap.jsx
+4:38:24 AM [vite] hmr update /src/components/widgets/CurrentStreak.jsx
+4:38:43 AM [vite] hmr update /src/components/widgets/ProgressBarWidget.jsx
+4:38:43 AM [vite] hmr update /src/components/widgets/CompoundBarWidget.jsx
+4:40:10 AM [vite] hmr update /src/views/Horizon.jsx
+4:41:32 AM [vite] hmr update /src/components/logger/MetricInput.jsx
+4:41:32 AM [vite] hmr update /src/components/logger/DailyCheckInForm.jsx
+4:46:47 AM [vite] hmr update /src/views/Horizon.jsx
+5:19:20 AM [vite] hmr update /src/components/widgets/ReliabilityRing.jsx
+5:19:28 AM [vite] hmr update /src/components/widgets/TrendSparkline.jsx
+5:19:45 AM [vite] hmr update /src/components/widgets/ConsistencyHeatmap.jsx
+5:19:55 AM [vite] hmr update /src/components/widgets/CurrentStreak.jsx
+5:20:05 AM [vite] hmr update /src/components/widgets/ProgressBarWidget.jsx
+5:20:15 AM [vite] hmr update /src/components/widgets/CompoundBarWidget.jsx
+5:20:58 AM [vite] hmr update /src/components/widgets/ProgressBarWidget.jsx
+5:21:30 AM [vite] hmr update /src/components/widgets/ConsistencyHeatmap.jsx
+5:21:59 AM [vite] hmr update /src/views/Horizon.jsx
+5:22:29 AM [vite] hmr update /src/components/logger/DailyCheckInForm.jsx
+5:23:00 AM [vite] hmr update /src/components/logger/MetricInput.jsx
+6:08:01 AM [vite] hmr update /src/components/widgets/ProgressBarWidget.jsx
+6:08:12 AM [vite] hmr update /src/components/widgets/ReliabilityRing.jsx
+6:08:31 AM [vite] hmr update /src/components/widgets/TrendSparkline.jsx
+6:09:01 AM [vite] hmr update /src/components/widgets/ConsistencyHeatmap.jsx
+6:09:24 AM [vite] hmr update /src/components/widgets/CompoundBarWidget.jsx
+6:09:34 AM [vite] hmr update /src/components/widgets/CurrentStreak.jsx
+6:09:52 AM [vite] hmr update /src/components/logger/DailyCheckInForm.jsx
+3:50:15 PM [vite] hmr update /src/views/Horizon.jsx
+3:51:11 PM [vite] hmr update /src/components/widgets/RecentHistory.jsx
+3:51:24 PM [vite] hmr update /src/components/widgets/SegmentedBarWidget.jsx
+3:52:05 PM [vite] hmr update /src/components/widgets/CurrentStreak.jsx
+3:52:24 PM [vite] hmr update /src/components/widgets/ProgressBarWidget.jsx
+3:52:56 PM [vite] hmr update /src/components/widgets/ConsistencyHeatmap.jsx
+3:53:39 PM [vite] hmr update /src/components/logger/DailyCheckInForm.jsx
+5:47:31 PM [vite] hmr update /src/components/widgets/ReliabilityRing.jsx
+5:47:40 PM [vite] hmr update /src/components/widgets/CurrentStreak.jsx
+5:47:46 PM [vite] hmr update /src/views/Horizon.jsx
+5:48:05 PM [vite] hmr update /src/components/widgets/ConsistencyHeatmap.jsx
+5:48:15 PM [vite] hmr update /src/components/widgets/SegmentedBarWidget.jsx
+5:48:30 PM [vite] hmr update /src/views/Logger.jsx
+5:48:41 PM [vite] hmr update /src/components/logger/DailyCheckInForm.jsx
+5:48:58 PM [vite] hmr update /src/components/logger/Timeline.jsx
+8:56:49 PM [vite] hmr update /src/views/Horizon.jsx
+8:56:58 PM [vite] hmr update /src/components/widgets/ReliabilityRing.jsx
+8:57:06 PM [vite] hmr update /src/components/widgets/CurrentStreak.jsx
+8:57:17 PM [vite] hmr update /src/components/widgets/ProgressBarWidget.jsx
+8:57:32 PM [vite] hmr update /src/components/widgets/ConsistencyHeatmap.jsx
+8:57:47 PM [vite] hmr update /src/components/widgets/TrendSparkline.jsx
+8:58:00 PM [vite] hmr update /src/components/widgets/CompoundBarWidget.jsx
+8:58:10 PM [vite] hmr update /src/components/widgets/RecentHistory.jsx
+8:58:18 PM [vite] hmr update /src/components/widgets/SegmentedBarWidget.jsx
+8:58:30 PM [vite] hmr update /src/components/logger/DailyCheckInForm.jsx
+8:58:43 PM [vite] hmr update /src/components/logger/Timeline.jsx
+1:31:58 AM [vite] hmr update /src/components/widgets/CurrentStreak.jsx
+1:32:26 AM [vite] hmr update /src/components/widgets/SegmentedBarWidget.jsx
+1:33:11 AM [vite] hmr update /src/views/Horizon.jsx, /src/views/Intel.jsx, /src/components/widgets/RecentHistory.jsx
+1:33:40 AM [vite] hmr update /src/components/widgets/RecentHistory.jsx
+2:17:20 AM [vite] hmr update /src/components/widgets/ProgressBarWidget.jsx
+2:18:06 AM [vite] hmr update /src/views/Horizon.jsx, /src/views/Intel.jsx, /src/components/widgets/RecentHistory.jsx
+2:18:40 AM [vite] hmr update /src/components/widgets/ConsistencyHeatmap.jsx
+3:10:25 AM [vite] hmr update /src/components/widgets/ProgressBarWidget.jsx
+3:11:19 AM [vite] hmr update /src/components/ui/charts/StackedBar.jsx
+3:11:45 AM [vite] hmr update /src/components/ui/charts/StackedBar.jsx
+3:12:11 AM [vite] hmr update /src/components/ui/charts/StackedBar.jsx
+4:08:26 AM [vite] hmr update /src/components/ui/charts/StackedBar.jsx

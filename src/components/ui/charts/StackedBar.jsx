@@ -1,37 +1,45 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 
 /**
  * StackedBar Chart
- * Ported from WeeklyBarChartV3.html
- *
- * Props:
- * - data: Array of objects { label: string, values: { [category]: number } }
- * - colors: Object mapping category names to hex colors
- * - title: string
- * - subtitle: string
+ * * Refactored Phase 4.17: Y-Axis Right, Auto-Colors, Scale Fix.
+ * * Supports dynamic scaling and flexible layout.
  */
-export const StackedBar = ({ data = [], colors = {}, title = "Activity", subtitle = "Last 7 Days" }) => {
+export const StackedBar = ({ data = [], colors = {}, height = 200 }) => {
   const [selectedIdx, setSelectedIdx] = useState(null);
 
-  // Memoized Calculations
-  const { processedData, max, total, avg, categories } = useMemo(() => {
+  // iOS System Colors (Extended Palette)
+  const systemPalette = [
+    '#007AFF', // Blue
+    '#AF52DE', // Purple
+    '#FF2D55', // Pink
+    '#FF3B30', // Red
+    '#FF9500', // Orange
+    '#FFCC00', // Yellow
+    '#34C759', // Green
+    '#5AC8FA', // Teal
+    '#32ADE6', // Cyan
+    '#5856D6', // Indigo
+    '#A2845E', // Brown
+    '#8E8E93'  // Gray
+  ];
+
+  // --- Memoized Calculations ---
+  const calculated = useMemo(() => {
     if (!data || data.length === 0) {
-      return { processedData: [], max: 0, total: 0, avg: 0, categories: [] };
+      return { processedData: [], max: 4, total: 0, avg: 0, categories: [] };
     }
 
-    // Calculate total from data unconditionally as per requirement
     const calculatedTotal = data.reduce((sum, day) => {
         const dayTotal = Object.values(day.values || {}).reduce((a, b) => a + b, 0);
         return sum + dayTotal;
     }, 0);
 
-    let grandSum = 0;
     let maxDaily = 0;
     const cats = new Set();
 
     const proc = data.map(day => {
       let dSum = 0;
-      // Filter out zero values and collect categories
       const dayValues = {};
       Object.entries(day.values || {}).forEach(([k, v]) => {
         if (v > 0) {
@@ -40,151 +48,210 @@ export const StackedBar = ({ data = [], colors = {}, title = "Activity", subtitl
           dSum += v;
         }
       });
-      grandSum += dSum;
       if (dSum > maxDaily) maxDaily = dSum;
 
       return { ...day, values: dayValues, sum: dSum };
     });
 
-    // Smart Scale: Round up to nearest even number, minimum 4
+    // Dynamic Scale: Nearest even number greater than or equal to maxDaily
+    // If maxDaily is 5, ceil(5/2) = 3, 3*2 = 6.
+    // If maxDaily is 6, ceil(6/2) = 3, 3*2 = 6.
+    // Minimum 4.
     const computedMax = Math.max(4, Math.ceil(maxDaily / 2) * 2);
-    const computedTotal = calculatedTotal; // Use strict total calculation
     const computedAvg = data.length ? calculatedTotal / data.length : 0;
 
-    // Convert Set to Array and Sort by Total Sum Descending for Legend
-    const catArray = Array.from(cats).map(k => {
+    const catArray = Array.from(cats).map((k, i) => {
        const sum = proc.reduce((acc, d) => acc + (d.values[k] || 0), 0);
-       return { key: k, sum, color: colors[k] || '#8E8E93' };
+       // Auto-assign color if missing
+       const assignedColor = colors[k] || systemPalette[i % systemPalette.length];
+       return { key: k, sum, color: assignedColor };
     }).sort((a, b) => b.sum - a.sum);
 
     return {
       processedData: proc,
       max: computedMax,
-      total: computedTotal,
+      total: calculatedTotal,
       avg: computedAvg,
       categories: catArray
     };
   }, [data, colors]);
 
-  // Handle Tap
+  const { processedData, max, total, categories } = calculated;
+
+  // Create a quick lookup for category colors (including auto-assigned ones)
+  const colorMap = useMemo(() => {
+      return categories.reduce((acc, cat) => ({ ...acc, [cat.key]: cat.color }), {});
+  }, [categories]);
+
   const handleTap = (idx) => {
-    if (selectedIdx === idx) {
-      setSelectedIdx(null);
-    } else {
-      setSelectedIdx(idx);
-    }
+    setSelectedIdx(selectedIdx === idx ? null : idx);
   };
 
-  // UI Values based on Selection
-  // Requirement: "Total Logs" and Math.round(total)
-  const footerLabel = selectedIdx === null ? "Total Logs" : `Total for ${processedData[selectedIdx]?.label}`;
-  const footerValue = selectedIdx === null
-    ? Math.round(total)
-    : `${processedData[selectedIdx]?.sum.toFixed(1)}h`;
-
+  // --- Render ---
   return (
-    <div className={`chart-interactive w-full ${selectedIdx !== null ? 'has-select' : ''}`}>
+    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
       
-      {/* Chart Wrapper */}
-      <div className="chart-wrapper">
-        <div className="chart-frame">
-           {/* Grids */}
-           <div className="grid-lines-bg">
-              {[0, 1, 2, 3, 4].map(i => <div key={i} className="h-line" />)}
+      {/* Chart Frame - Relative Container */}
+      <div style={{ position: 'relative', width: '100%', height: `${height}px`, marginBottom: '16px' }}>
+
+           {/* 1. Horizontal Grid Lines (Bottom Layer) */}
+           {/* Adjusted width to leave room for Y-Axis on Right (30px) */}
+           <div style={{
+               position: 'absolute',
+               left: 0,
+               right: '30px',
+               top: 0,
+               bottom: '20px',
+               display: 'flex',
+               flexDirection: 'column-reverse',
+               justifyContent: 'space-between',
+               zIndex: 0
+            }}>
+              {[0, 1, 2, 3, 4].map(i => (
+                  <div key={i} style={{ width: '100%', height: '1px', backgroundColor: 'rgba(128, 128, 128, 0.1)' }} />
+              ))}
            </div>
 
-           {/* Vertical Grid Lines (Background) */}
-           {/* Vertical Grid Lines (Background) */}
-           <div className="absolute inset-0 flex justify-between pointer-events-none z-0" style={{ width: '100%' }}>
-             {Array.from({ length: 7 }).map((_, i) => (
-               <div
-                 key={i}
-                 style={{
-                   flex: 1,
-                   borderRight: '1px solid rgba(128, 128, 128, 0.1)',
-                   height: '100%'
-                 }}
-               />
-             ))}
+           {/* 2. Y-Axis Labels (Right Side) */}
+           <div style={{
+               position: 'absolute',
+               right: 0,
+               top: 0,
+               bottom: '20px',
+               width: '24px',
+               display: 'flex',
+               flexDirection: 'column-reverse',
+               justifyContent: 'space-between',
+               fontSize: '10px',
+               color: 'var(--text-secondary)',
+               textAlign: 'left', // Align left towards graph
+               paddingLeft: '6px',
+               zIndex: 1
+            }}>
+               {[0, 1, 2, 3, 4].map(i => {
+                   const val = Math.round((max / 4) * i);
+                   return <div key={i} style={{ lineHeight: '0' }}>{val}</div>;
+               })}
            </div>
 
-           {/* Avg Line */}
-           <div
-             className="avg-line"
-             style={{ bottom: `${(avg / max) * 100}%` }}
-           >
-             <div className="avg-tag">AVG</div>
-           </div>
+           {/* 3. Bars Container (Interactive Layer) */}
+           <div style={{
+               position: 'absolute',
+               left: 0,
+               right: '30px', // Leave room for Y-Axis
+               top: 0,
+               bottom: '20px',
+               display: 'flex',
+               alignItems: 'flex-end',
+               justifyContent: 'space-between',
+               zIndex: 2
+            }}>
+               {processedData.map((day, idx) => {
+                   // Calculate bar segments
+                   const segments = Object.entries(day.values).map(([key, val]) => {
+                       return { key, val, h: (val / max) * 100 };
+                   });
 
-           {/* Bars */}
-           {processedData.map((day, idx) => (
-             <div
-               key={idx}
-               className={`col-group ${selectedIdx === idx ? 'active' : ''}`}
-               onClick={() => handleTap(idx)}
-             >
-                <div className="bar-stack">
-                  {Object.entries(day.values).map(([key, val], i, arr) => {
-                     const h = (val / max) * 100;
-                     const isTop = i === arr.length - 1;
-                     const isBottom = i === 0;
-                     return (
+                   return (
                        <div
-                         key={key}
-                         className={`bar-seg ${isTop ? 'is-top' : ''} ${isBottom ? 'is-bottom' : ''}`}
-                         style={{
-                           height: `${h}%`,
-                           backgroundColor: colors[key] || '#8E8E93'
-                         }}
-                       />
-                     );
-                  })}
-                </div>
-                <div className="x-lbl">
-                  {/* Assumption: Label is "Mon", "Tue" or date. Use first letter or short value */}
-                  {day.label.length > 3 ? day.label.slice(0, 3) : day.label}
-                </div>
-             </div>
-           ))}
-        </div>
+                           key={idx}
+                           onClick={() => handleTap(idx)}
+                           style={{
+                               flex: 1,
+                               height: '100%',
+                               display: 'flex',
+                               flexDirection: 'column',
+                               justifyContent: 'flex-end',
+                               alignItems: 'center',
+                               cursor: 'pointer',
+                               opacity: selectedIdx !== null && selectedIdx !== idx ? 0.4 : 1,
+                               transition: 'opacity 0.2s ease',
+                               position: 'relative'
+                           }}
+                       >
+                           {/* The Stack Column */}
+                           <div style={{
+                               width: '60%',
+                               height: '100%',
+                               display: 'flex',
+                               flexDirection: 'column-reverse', // Stack from bottom up
+                               justifyContent: 'flex-start',
+                               alignItems: 'center'
+                           }}>
+                               {segments.map((seg, i) => {
+                                   const isTop = i === segments.length - 1;
+                                   const isBottom = i === 0;
 
-        {/* Y Axis */}
-        <div className="y-axis-col">
-           {[0, 1, 2, 3, 4].map(i => {
-             const val = Math.round((max / 4) * i);
-             return <div key={i} className="y-lbl">{val === 0 ? "" : val}</div>
-           })}
-        </div>
+                                   return (
+                                       <div
+                                           key={seg.key}
+                                           style={{
+                                               height: `${seg.h}%`,
+                                               backgroundColor: colorMap[seg.key] || '#8E8E93',
+                                               width: '100%',
+                                               borderTopLeftRadius: isTop ? '4px' : 0,
+                                               borderTopRightRadius: isTop ? '4px' : 0,
+                                               borderBottomLeftRadius: isBottom ? '4px' : 0,
+                                               borderBottomRightRadius: isBottom ? '4px' : 0,
+                                               marginBottom: '1px',
+                                               minHeight: '2px'
+                                           }}
+                                       />
+                                   );
+                               })}
+                           </div>
+
+                           {/* X Label */}
+                           <div style={{
+                               position: 'absolute',
+                               bottom: '-20px',
+                               fontSize: '10px',
+                               fontWeight: '600',
+                               color: selectedIdx === idx ? 'var(--text-primary)' : 'var(--text-secondary)',
+                               width: '100%',
+                               textAlign: 'center',
+                               textTransform: 'uppercase'
+                           }}>
+                               {day.label}
+                           </div>
+                       </div>
+                   );
+               })}
+           </div>
       </div>
 
-      {/* Legend */}
-      <div className="legend">
-        {categories.map(cat => {
-           const isDim = selectedIdx !== null && (!processedData[selectedIdx].values[cat.key]);
-           const val = selectedIdx !== null && processedData[selectedIdx].values[cat.key]
-             ? processedData[selectedIdx].values[cat.key]
-             : 0;
+      {/* Legend & Footer */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
 
-           return (
-             <div key={cat.key} className={`leg-item ${isDim ? 'dim' : ''}`}>
-               <div className="leg-dot" style={{ backgroundColor: cat.color }}></div>
-               <span>{cat.key}</span>
-               <span className="leg-val">{val.toFixed(1)}h</span>
-             </div>
-           )
-        })}
+          {/* Legend Grid */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 16px' }}>
+              {categories.map(cat => {
+                  const val = selectedIdx !== null && processedData[selectedIdx].values[cat.key]
+                      ? processedData[selectedIdx].values[cat.key]
+                      : null;
+
+                  const isDim = selectedIdx !== null && (!val);
+
+                  return (
+                      <div key={cat.key} style={{ display: 'flex', alignItems: 'center', fontSize: '11px', color: isDim ? 'var(--text-secondary)' : 'var(--text-primary)', opacity: isDim ? 0.5 : 1 }}>
+                          <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: cat.color, marginRight: '6px' }} />
+                          <span style={{ marginRight: '4px', fontWeight: '500' }}>{cat.key}</span>
+                          {val !== null && <span style={{ fontWeight: '700' }}>{val.toFixed(1)}</span>}
+                      </div>
+                  );
+              })}
+          </div>
+
+          {/* Total Footer */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid var(--separator)', paddingTop: '12px' }}>
+              <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '500' }}>
+                  {selectedIdx === null ? "Total Logs" : `Total for ${processedData[selectedIdx].label}`}
+              </span>
+              <span style={{ fontSize: '24px', fontWeight: '700', color: 'var(--text-primary)', lineHeight: 1 }}>
+                  {selectedIdx === null ? Math.round(total) : processedData[selectedIdx].sum.toFixed(1)}
+              </span>
+          </div>
       </div>
-
-      {/* Footer */}
-      <div className="flex justify-between items-end mt-4 border-t pt-3" style={{ borderColor: 'rgba(128, 128, 128, 0.1)' }}>
-          <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>
-              Total Logs
-          </span>
-          <span style={{ fontSize: '26px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1 }}>
-              {Math.round(total)}
-          </span>
-      </div>
-
     </div>
   );
 };

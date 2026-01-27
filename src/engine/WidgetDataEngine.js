@@ -30,46 +30,39 @@ export const WidgetDataEngine = {
 
     // 3. Map each metric to a widget configuration
     return visibleMetrics.map(metric => {
-      // ENFORCEMENT: Strictly retrieve logs by metricId (UUID) from Map
       const metricLogs = logsByMetric[metric.id] || [];
       let data = null;
 
-      if (!metric.type) {
-         console.warn(`Metric ${metric.id} missing type definition.`);
-      }
-
       try {
         switch (metric.widgetType) {
-          // --- Visual Charts ---
           case WidgetType.RING:
             data = WidgetDataEngine.ringData(metric, metricLogs);
             break;
-
           case WidgetType.SPARKLINE:
             data = WidgetDataEngine.sparklineData(metric, metricLogs, segment);
             break;
-
           case WidgetType.HEATMAP:
             data = WidgetDataEngine.heatmapData(metric, metricLogs);
             break;
-
-          // --- Stats & Numbers ---
           case WidgetType.STREAK:
             data = WidgetDataEngine.streakData(metric, metricLogs);
             break;
-
           case WidgetType.NUMBER:
             data = WidgetDataEngine.numberData(metric, metricLogs, segment);
             break;
-
           case WidgetType.HISTORY:
             data = WidgetDataEngine.historyData(metric, metricLogs);
             break;
-
           case 'stackedbar':
             data = WidgetDataEngine.stackedBarData(metric, metricLogs, segment);
             break;
-
+          case WidgetType.COMPOUND:
+            data = WidgetDataEngine.compoundBarData(metric, metricLogs);
+            break;
+          case WidgetType.PROGRESS:
+          case 'progress':
+            data = WidgetDataEngine.progressBarData(metric, metricLogs);
+            break;
           default:
             data = { error: 'Unknown widget type' };
         }
@@ -78,62 +71,32 @@ export const WidgetDataEngine = {
         data = { error: 'Calculation error' };
       }
 
-      return {
-        ...metric,
-        data // This contains the formatted object for the UI component
-      };
+      return { ...metric, data };
     });
   },
 
-  /**
-   * Ring Chart Data
-   * Returns: { value: number (0-100), label: string, color: string, title: string }
-   */
+  // ... (Other methods remain unchanged until heatmapData) ...
   ringData: (metric, logs) => {
     const completion = MetricEngine.goalCompletion ? MetricEngine.goalCompletion(metric, logs) : 0;
-
-    return {
-      value: completion,
-      label: metric.label,
-      color: metric.color || '#007AFF',
-      title: metric.label
-    };
+    return { value: completion, label: metric.label, color: metric.color || '#007AFF', title: metric.label };
   },
 
-  /**
-   * Sparkline Data
-   * Returns: { data: number[], current: number, label: string, color: string }
-   */
   sparklineData: (metric, logs, segment = 'Weekly') => {
     const days = segment === 'Monthly' ? 30 : 7;
-
-    const rawHistory = MetricEngine.getLastNDaysValues
-      ? MetricEngine.getLastNDaysValues(logs, days)
-      : new Array(days).fill(0);
-
-    // FIX: Return raw values so the Sparkline component can handle scaling correctly.
-    // Previously returned 0-1 normalized values, which caused flatlining or incorrect axis.
+    const rawHistory = MetricEngine.getLastNDaysValues ? MetricEngine.getLastNDaysValues(logs, days) : new Array(days).fill(0);
     const currentVal = MetricEngine.getTodayValue ? MetricEngine.getTodayValue(logs) : 0;
-
-    return {
-      data: rawHistory,
-      current: currentVal,
-      label: metric.label,
-      color: metric.color || '#007AFF',
-    };
+    return { data: rawHistory, current: currentVal, label: metric.label, color: metric.color || '#007AFF' };
   },
 
   /**
    * Heatmap Data
-   * Returns: { values: Object<string, number>, color: string }
+   * Refactored Phase 4.15: Use Local Date Strings
    */
   heatmapData: (metric, logs) => {
     const values = {};
-
-    // Group logs by date - O(N)
     const logsByDate = logs.reduce((acc, log) => {
-      // Use split('T') which is faster/consistent vs toLocaleDateString
-      const date = log.timestamp.split('T')[0];
+      // Use Local Date to match user's day
+      const date = new Date(log.timestamp).toLocaleDateString('en-CA'); // YYYY-MM-DD Local
       if (!acc[date]) acc[date] = [];
       acc[date].push(log);
       return acc;
@@ -148,40 +111,23 @@ export const WidgetDataEngine = {
              dayValue = hasTrue ? 1 : 0;
         } else {
              const total = dayLogs.reduce((sum, l) => sum + (parseFloat(l.value) || 0), 0);
-             // FIX: Return 0-100 percentage or raw-ish value for intensity.
-             // Previous was 0-1. We multiply by 100 to match Ring/Chart standard scale.
              dayValue = MetricEngine.normalizeValue(metric, total) * 100;
         }
         values[date] = dayValue;
     });
 
-    return {
-      values,
-      color: metric.color || '#007AFF'
-    };
+    return { values, color: metric.color || '#007AFF' };
   },
 
-  /**
-   * Streak Data
-   * Returns: { current: number, best: number, isActive: boolean, unit: string }
-   */
   streakData: (metric, logs) => {
-    const current = MetricEngine.calculateCurrentStreak
-      ? MetricEngine.calculateCurrentStreak(logs)
-      : 0;
-    const best = MetricEngine.calculateBestStreak
-      ? MetricEngine.calculateBestStreak(logs)
-      : 0;
+    const current = MetricEngine.calculateCurrentStreak ? MetricEngine.calculateCurrentStreak(logs) : 0;
+    const best = MetricEngine.calculateBestStreak ? MetricEngine.calculateBestStreak(logs) : 0;
 
-    // OPTIMIZED: Is Active Check
-    // Avoid toLocaleDateString inside loop.
     let isActive = false;
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
     const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime();
 
-    // 1. Get today's logs for this metric
-    // Use simple numeric timestamp check
     const todayLogs = logs.filter(l => {
        const t = new Date(l.timestamp).getTime();
        return t >= startOfDay && t < endOfDay;
@@ -194,84 +140,80 @@ export const WidgetDataEngine = {
         isActive = sum >= (metric.goal || 1);
     }
 
-    return {
-      current,
-      best,
-      isActive,
-      unit: 'Days'
-    };
+    return { current, best, isActive, unit: 'Days' };
   },
 
-  /**
-   * Number Summary Data
-   * Returns: { value: number, label: string, unit: string, trend: number, trendDirection: string }
-   */
   numberData: (metric, logs, segment = 'Weekly') => {
     const todayVal = MetricEngine.getTodayValue ? MetricEngine.getTodayValue(logs) : 0;
-
     const days = segment === 'Monthly' ? 30 : 7;
     const history = MetricEngine.getLastNDaysValues(logs, days);
     const trend = AnalyticsEngine.calculateTrend(history);
-
-    return {
-      value: todayVal,
-      label: metric.label,
-      unit: metric.unit,
-      trend: trend,
-      trendDirection: trend > 0 ? 'up' : trend < 0 ? 'down' : 'neutral'
-    };
+    return { value: todayVal, label: metric.label, unit: metric.unit, trend: trend, trendDirection: trend > 0 ? 'up' : trend < 0 ? 'down' : 'neutral' };
   },
 
-  /**
-   * History List Data
-   * Returns: { data: Array }
-   */
   historyData: (metric, logs) => {
     const sorted = [...logs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     const recent = sorted.slice(0, 10);
-
-    return {
-      data: recent
-    };
+    const entries = recent.map(l => ({ id: l.id, value: l.value, timestamp: l.timestamp, note: l.note || '' }));
+    return { entries, unit: metric.unit };
   },
 
   /**
    * Stacked Bar Data
-   * Returns: { entries: Array<{ label: string, values: Object }>, colors: Object }
+   * Refactored Phase 4.15: Real Implementation for Weekly View
    */
   stackedBarData: (metric, logs, segment = 'Weekly') => {
-    // This is a stub implementation to ensure data flows to the component.
-    // In a real implementation, this would aggregate based on segment.
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const entriesMap = new Map();
 
-    // For now, we return empty structure or mock based on segment to verify UI switching.
-    // Daily: 6 buckets (4h)
-    // Weekly: 7 days
-    // Monthly: 4 weeks
+    // Initialize buckets
+    days.forEach(d => entriesMap.set(d, {}));
 
-    let entries = [];
-    if (segment === 'Daily') {
-        entries = [
-            { label: '4AM', values: {} }, { label: '8AM', values: {} },
-            { label: '12PM', values: {} }, { label: '4PM', values: {} },
-            { label: '8PM', values: {} }, { label: '12AM', values: {} }
-        ];
-    } else if (segment === 'Weekly') {
-        entries = [
-            { label: 'Mon', values: {} }, { label: 'Tue', values: {} },
-            { label: 'Wed', values: {} }, { label: 'Thu', values: {} },
-            { label: 'Fri', values: {} }, { label: 'Sat', values: {} },
-            { label: 'Sun', values: {} }
-        ];
-    } else { // Monthly
-        entries = [
-            { label: 'W1', values: {} }, { label: 'W2', values: {} },
-            { label: 'W3', values: {} }, { label: 'W4', values: {} }
-        ];
-    }
+    // Calculate current week boundaries (Mon-Sun)
+    const today = new Date();
+    // Adjust to Monday start
+    const day = today.getDay() || 7;
+    const monday = new Date(today);
+    monday.setHours(0,0,0,0);
+    monday.setDate(monday.getDate() - day + 1);
+
+    logs.forEach(log => {
+        const logDate = new Date(log.timestamp);
+        // Filter for current week only
+        if (logDate < monday) return;
+
+        const dayName = logDate.toLocaleDateString('en-US', { weekday: 'short' }); // Mon, Tue...
+        const entry = entriesMap.get(dayName);
+
+        if (entry) {
+            // If Select metric, stack by Option. Else stack by 'Value'
+            const key = metric.type === 'select' ? String(log.value) : metric.label;
+            const val = metric.type === 'select' ? 1 : (parseFloat(log.value) || 0);
+
+            entry[key] = (entry[key] || 0) + val;
+        }
+    });
+
+    const entries = days.map(label => ({
+        label,
+        values: entriesMap.get(label)
+    }));
 
     return {
         entries,
-        colors: { [metric.label]: metric.color || '#007AFF' } // Simple mapping
+        colors: { [metric.label]: metric.color || '#007AFF' }
     };
+  },
+
+  compoundBarData: (metric, logs) => {
+    const counts = {};
+    logs.forEach(l => { const val = String(l.value); counts[val] = (counts[val] || 0) + 1; });
+    const breakdown = Object.entries(counts).map(([label, value]) => ({ label, value }));
+    return { breakdown, label: metric.label };
+  },
+
+  progressBarData: (metric, logs) => {
+    const val = MetricEngine.getTodayValue ? MetricEngine.getTodayValue(logs) : 0;
+    return { value: Number(val.toFixed(1)), max: metric.goal || 10, label: metric.label, unit: metric.unit, color: metric.color };
   }
 };

@@ -1,40 +1,109 @@
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { StorageContext } from '../../context/StorageContext';
 import { Glass } from '../../components/ui/Glass';
 
 export const Timeline = () => {
   const { logEntries, metrics } = useContext(StorageContext);
   
-  // Refactored to use standard metricId mapping
   const metricMap = metrics.reduce((acc, m) => ({ ...acc, [m.id]: m }), {});
 
-  const sortedLogs = [...logEntries].sort(
-    (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
-  );
+  const groupedLogs = useMemo(() => {
+      const groups = {};
+      [...logEntries].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+      .forEach(log => {
+          const dateKey = new Date(log.timestamp).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+          if (!groups[dateKey]) groups[dateKey] = [];
+          groups[dateKey].push(log);
+      });
+      return groups;
+  }, [logEntries]);
+
+  if (logEntries.length === 0) {
+      return (
+        <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '32px', fontStyle: 'italic', fontSize: '14px', opacity: 0.6 }}>
+          No logs recorded yet.
+        </div>
+      );
+  }
 
   return (
-    <div className="flex flex-col gap-3">
-      {sortedLogs.length === 0 ? (
-        <div className="text-center text-secondary py-4 italic text-sm">
-          No logs found for today.
-        </div>
-      ) : (
-        sortedLogs.map((log, idx) => {
-          // Lookup using metricId strictly
-          const metric = metricMap[log.metricId];
-          return (
-            <Glass key={idx}>
-              <div className="flex justify-between">
-                <span className="font-bold">{metric?.label || 'Unknown Metric'}</span>
-                <span className="font-mono">{log.value}</span>
-              </div>
-              <div className="text-xs text-secondary mt-1">
-                {new Date(log.timestamp).toLocaleString()}
-              </div>
-            </Glass>
-          );
-        })
-      )}
-    </div>
+      <div style={{ paddingBottom: '80px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {Object.entries(groupedLogs).map(([date, logs], groupIdx) => (
+              <details key={date} open={groupIdx === 0} style={{ width: '100%' }}>
+                  <summary style={{
+                      padding: '12px 16px',
+                      fontSize: '13px',
+                      fontWeight: '800',
+                      color: 'var(--text-secondary)',
+                      textTransform: 'uppercase',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                      position: 'sticky',
+                      top: 0,
+                      backgroundColor: 'var(--bg-color)',
+                      zIndex: 10,
+                      borderBottom: '1px solid var(--separator)',
+                      listStyle: 'none'
+                  }}>
+                      {date}
+                  </summary>
+
+                  <div style={{
+                      backgroundColor: 'var(--card-bg)',
+                      borderRadius: '16px',
+                      overflow: 'hidden',
+                      marginTop: '8px',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                  }}>
+                      {logs.map((log, idx) => {
+                          const metric = metricMap[log.metricId];
+                          const isLast = idx === logs.length - 1;
+                          return (
+                              <React.Fragment key={log.id || idx}>
+                                  <div
+                                    style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        padding: '16px',
+                                        backgroundColor: 'var(--card-bg)'
+                                    }}
+                                  >
+                                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                          <span style={{ fontWeight: '600', color: 'var(--text-primary)', fontSize: '15px' }}>
+                                            {metric?.label || 'Unknown Metric'}
+                                          </span>
+                                          <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                                              {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                          </span>
+                                      </div>
+                                      <div style={{
+                                          fontFamily: 'ui-monospace, monospace',
+                                          fontWeight: '600',
+                                          color: 'var(--text-primary)',
+                                          backgroundColor: 'var(--bg-secondary)',
+                                          padding: '4px 8px',
+                                          borderRadius: '6px',
+                                          fontSize: '14px'
+                                      }}>
+                                          {typeof log.value === 'boolean' ? (log.value ? 'Done' : 'Missed') : log.value}
+                                          {metric?.unit ? <span style={{ color: 'var(--text-secondary)', marginLeft: '4px', fontSize: '12px' }}>{metric.unit}</span> : ''}
+                                      </div>
+                                  </div>
+                                  {!isLast && (
+                                      <div style={{
+                                          height: '1px',
+                                          backgroundColor: 'rgba(0,0,0,0.1)', // Polished Separator
+                                          margin: '0 16px',
+                                          width: 'auto'
+                                      }} />
+                                  )}
+                              </React.Fragment>
+                          );
+                      })}
+                  </div>
+              </details>
+          ))}
+      </div>
   );
 };

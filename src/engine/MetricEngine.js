@@ -235,7 +235,12 @@ export const MetricEngine = {
         return value ? 1 : 0;
       case MetricType.NUMBER:
       case MetricType.PERCENTAGE:
+      case MetricType.DURATION:
         return Math.min(1, Math.max(0, value / (metricConfig.goal || 1)));
+      case MetricType.RANGE:
+        const min = metricConfig.range?.min || 1;
+        const max = metricConfig.range?.max || 10;
+        return Math.max(0, Math.min(1, (value - min) / (max - min)));
       default:
         return 0;
     }

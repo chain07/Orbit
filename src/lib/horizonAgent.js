@@ -101,6 +101,7 @@ export const HorizonAgent = {
               metricInsights.push({
                 id: template.id,
                 type: template.type || 'general',
+                context: template.context || 'general',
                 title: template.type === 'recommendation' ? 'Next Best Move' : 'Insight',
                 message: typeof template.message === 'function' ? template.message(metric, stats) : template.message,
                 priority: template.type === 'recommendation' ? 10 : 5, // Higher priority for actionable recs

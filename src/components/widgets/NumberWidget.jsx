@@ -3,56 +3,46 @@ import React from 'react';
 /**
  * NumberWidget
  * * Displays a single key metric value with an optional trend indicator.
- * * Expected data structure:
- * {
- * value: number | string,
- * label: string,
- * unit: string, (optional prefix/suffix)
- * trend: number, (optional percentage change)
- * trendDirection: 'up' | 'down' | 'neutral'
- * }
+ * * Refactored Phase 4.9.1: Global Header.
  */
 export const NumberWidget = ({ data }) => {
   if (!data) return null;
 
-  const { value, label, unit = '', trend, trendDirection = 'neutral' } = data;
-
-  // Determine trend color
-  const getTrendColor = () => {
-    if (trendDirection === 'up') return 'text-green';
-    if (trendDirection === 'down') return 'text-red';
-    return 'text-secondary';
-  };
-
-  const trendIcon = trendDirection === 'up' ? '↑' : trendDirection === 'down' ? '↓' : '→';
+  const { value, label, unit = '' } = data;
 
   return (
-    <div className="flex flex-col h-full w-full justify-between p-1">
-      <div className="text-sm font-bold text-secondary uppercase tracking-wide">
+    <div style={{ position: 'relative', height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      {/* Global Standard Header */}
+      <div style={{
+          position: 'absolute',
+          top: '16px',
+          left: '20px',
+          fontSize: '15px',
+          fontWeight: '600',
+          letterSpacing: '-0.3px',
+          color: 'var(--text-primary)',
+          zIndex: 10
+      }}>
         {label}
       </div>
 
-      <div className="flex flex-col gap-1 my-auto">
-        <div className="flex items-baseline gap-1">
-          <span className="text-3xl font-bold tracking-tight">
+      {/* Background Icon - Kept for visual interest, adjusted opacity */}
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.05, pointerEvents: 'none' }}>
+        <svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor" className="text-secondary">
+           <path d="M8.5 14.5A2.5 2.5 0 0 0 11 17c1.38 0 2.5-1.12 2.5-2.5 0-1.38-1.12-2.5-2.5-2.5 0-.7.7-1.33 1.5-1.75C13.5 10 14 9 14 8c0-2.5-2-3.5-2.5-4C10 5.5 8 8 8 10c0 1.5 1 3 2 4 .5.5.5 1.5 0 2z"/>
+        </svg>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 10 }}>
+          <span style={{ fontSize: '42px', fontWeight: '800', color: 'var(--text-primary)', lineHeight: 1 }}>
             {value}
           </span>
           {unit && (
-            <span className="text-lg text-secondary font-medium">
+            <span style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-secondary)', textTransform: 'uppercase', marginTop: '4px' }}>
               {unit}
             </span>
           )}
-        </div>
       </div>
-
-      {/* Footer / Trend Info */}
-      {trend != null && (
-        <div className={`flex items-center gap-1 text-xs font-bold ${getTrendColor()}`}>
-          <span>{trendIcon}</span>
-          <span>{Math.abs(trend)}%</span>
-          <span className="text-secondary font-medium opacity-70 ml-1">vs last period</span>
-        </div>
-      )}
     </div>
   );
 };

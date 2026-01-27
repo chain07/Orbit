@@ -18,10 +18,12 @@ To ensure long-term stability and testability, ORBIT follows a strict three-laye
 
 ### 2.1 Layer 1: Storage (Persistence & State)
 The Storage Layer is the single source of truth.
-* **Sovereignty:** 100% of user data resides in `localStorage` as raw JSON. No cloud databases.
-* **Persistence:** Real-time persistence.
-* **Safety:** Schema changes must be handled via a `migrateData` utility to preserve user history.
-* **Data Portability:** JSON import/export is a core, mandatory feature.
+* **Hybrid Persistence Model:**
+    *   **IndexedDB (Heavy Data):** Metrics, Logs, and TimeLogs are stored in IndexedDB using a vanilla wrapper (`src/lib/db.js`) to support large datasets without blocking the main thread.
+    *   **localStorage (Config):** Lightweight settings (Widget Layouts, Onboarding) remain in localStorage for synchronous access.
+* **Optimistic UI:** The application state (React Context) is updated immediately for rendering. DB operations are side effects.
+* **Safety:** Schema changes must be handled via a `migrateData` utility. Legacy data in localStorage is automatically migrated to IndexedDB on initialization.
+* **Data Portability:** JSON import/export reads from and writes to the IndexedDB stores asynchronously.
 
 ### 2.2 Layer 2: Engine (Logic & Analytics)
 The "Shared Brain" of the system.
@@ -29,13 +31,13 @@ The "Shared Brain" of the system.
 * **Responsibility:** Handles all streak calculations, rolling averages, heuristic analysis, and data normalization.
 * **Performance:**
     * **Momentum Logic:** Must calculate 7-day rolling window deltas using single-pass reduction ($O(N)$ complexity).
-    * **Heuristics:** The Horizon Agent must degrade gracefully to simple trend analysis if the sample size is low ($N < 50$).
+    * **Merged Stream:** The Analytics Engine consumes a unified `allLogs` array (Logs + Normalized TimeLogs).
 
 ### 2.3 Layer 3: Presentation (UI & Interaction)
 The "Dumb" View Layer.
 * **Constraint:** Components **never** perform analytics or data processing. They only consume and format Engine outputs.
-* **Registry-Driven:** Dashboard layouts are generated dynamically via a `WidgetRegistry`, not hardcoded JSX.
-* **Parity:** Must strictly adhere to Apple Human Interface Guidelines (HIG) regarding physics, haptics, and layout (see Design System).
+* **Registry-Driven:** Dashboard layouts are generated dynamically via a `WidgetRegistry`.
+* **Liquid Native:** Layouts are enforced via strict inline styles (flexbox/grid) to prevent external CSS cascading issues and ensure pixel-perfect rendering (e.g., Stacked Bar Chart layout).
 
 ---
 
@@ -48,26 +50,26 @@ Defines quantitative tracking parameters.
 * `label`: Human-readable display name
 * `type`: `boolean` | `number` | `duration` | `range` | `select` | `text`
 * `goal`: Optional daily target
-* `widgetType`: `ring` | `sparkline` | `heatmap` | `stackedbar`
+* `widgetType`: `ring` | `sparkline` | `heatmap` | `stackedbar` | `progress` | `compound` | `history` | `streak`
 
 ### 3.2 LogEntry (The Stream)
 The immutable record of events.
 * `id`: UUID
 * `metricId`: Foreign key to MetricConfig (Strictly enforced).
-* `value`: Raw value.
-* `timestamp`: ISO string.
+* `value`: Raw value (Number or String).
+* `timestamp`: ISO string (UTC).
 
 ### 3.3 TimeLog (Duration)
 Rich data for activity tracking.
-* `activityId`: Foreign key to metric.
+* `id`: UUID
+* `activityId`: Foreign key to metric (maps to `metricId` in logic).
 * `startTime` / `endTime`: ISO timestamps.
 * `duration`: Decimal hours.
-* *Note:* Must resolve to the `LogEntry` stream for analytics.
+* *Note:* Must resolve to the `LogEntry` stream for analytics via the `allLogs` merger.
 
 ### 3.4 The Library (Qualitative)
 * **Structure:** Notion-style, block-based archive.
 * **Content:** Supports arbitrary headings, lists, code blocks, and rich text.
-* **Legacy:** Must include logic to migrate older "Standards" text entries into blocks.
 
 ---
 
@@ -75,24 +77,22 @@ Rich data for activity tracking.
 The application structure is fixed.
 
 ### 4.1 Tab 1: Horizon (Proactive Dashboard)
-* **Horizon Agent:** A heuristic engine that scans data windows (7, 30, 90 days) to generate natural-language insights.
-* **Dynamic Bento Grid:** User-editable layouts where widget visibility and order are persisted.
-* **Momentum Tracking:** Visualizes performance deltas.
+* **Daily Briefing:** A persisted, context-aware insight card (Tactical vs Strategic).
+* **Dynamic Bento Grid:** User-editable layouts where widget visibility and order are persisted in localStorage.
+* **Widgets:** Includes specialized visualizers like Reliability Rings, Segmented Bars (with auto-color assignment), and Consistency Heatmaps.
 
 ### 4.2 Tab 2: Logger (Input Engine)
-* **Daily Check-In:** Dynamically generated forms based on active MetricConfigs.
+* **Daily Check-In:** "Card Stack" form engine with native-fidelity inputs (Steppers, Toggles).
 * **Time Tracker:** Stopwatch-style live tracking and manual entry.
-* **Timeline:** Chronological visualization of the day's logs.
+* **Timeline:** Collapsible, date-grouped visualization of the log history.
 
 ### 4.3 Tab 3: Intel (Analytics)
 * **Report Generator:** Compiles system health and correlations into exportable Markdown reports.
-* **Report Archive:** Persistent storage for historical report snapshots.
 * **Telemetry:** Custom SVG stacked bars and overlays.
 
 ### 4.4 Tab 4: System (Configuration)
+* **Data Management:** "God Mode" seeder, Backup/Restore (Async via IndexedDB), and Nuke functionality.
 * **Metric Builder:** CRUD operations for schemas.
-* **Library Manager:** The interface for the block-based archive.
-* **Onboarding:** Dismissible setup wizard.
 
 ---
 
@@ -100,14 +100,14 @@ The application structure is fixed.
 
 ### 5.1 The Stack
 * **Runtime:** React 19 + Vite.
-* **Architecture:** Zero Dependency.
-* **Styling:** CSS Modules / Tokens with Apple HIG tokens.
+* **Architecture:** Zero Dependency (Vanilla JS DB Wrapper).
+* **Styling:** Standard CSS + Inline Styles ("Liquid Native" approach).
 * **Icons:** Custom SVG Icons.
-* **Motion:** CSS Transitions + Web Animations API (No Framer Motion).
+* **Motion:** CSS Transitions + Web Animations API.
 * **Charting:** Custom SVG primitives only (No Recharts/Chart.js).
 
 ### 5.2 Scaling & Normalization
-* **Storage Scale:** Raw values are stored unmodified (e.g., "8 hours", "10 reps").
+* **Storage Scale:** Raw values are stored unmodified.
 * **Internal Scale:** Engines normalize data to `0–1` for math.
 * **UI Return Scale:** All UI-facing outputs return `0–100` for consistency.
 
@@ -116,9 +116,9 @@ The application structure is fixed.
 ## 6. Maintenance & Operations
 
 ### 6.1 Build & Deploy
-* **PWA:** Managed via `vite-plugin-pwa` for reliable caching and update lifecycles.
+* **PWA:** Managed via `vite-plugin-pwa`.
 * **Manifest:** Defined as a standalone tool with **portrait-locked** orientation.
 
 ### 6.2 Data Integrity
-* **Versioning:** System must include a `migrateData` utility for schema updates.
-* **Safety Nets:** A mandatory "Nuke Data" confirmation flow is required to prevent accidental data loss.
+* **Versioning:** System includes a `migrateData` utility for schema updates.
+* **Migration:** Legacy localStorage data is automatically migrated to IndexedDB on first load.

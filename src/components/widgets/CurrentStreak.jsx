@@ -3,43 +3,60 @@ import React from 'react';
 /**
  * CurrentStreak Widget
  * * Displays the current active streak for a metric.
- * * Visual emphasis on the counter.
- * * Expected data structure:
- * {
- * current: number,
- * best: number, (optional)
- * isActive: boolean, (did they do it today?)
- * unit: string (e.g., "days")
- * }
+ * * Refactored Phase 4.14: Value anchored to Bottom-Right.
  */
-export const CurrentStreak = ({ data }) => {
+export const CurrentStreak = ({ data, title }) => {
   if (!data) return null;
 
-  const { current = 0, best = 0, isActive = false, unit = 'Days' } = data;
+  const { current = 0, unit = 'Days' } = data;
 
   return (
-    <div className="flex flex-col h-full w-full justify-center items-center py-2">
-      {/* Icon / Status Indicator */}
-      <div className={`mb-2 text-2xl ${isActive ? 'opacity-100' : 'opacity-40 grayscale'}`}>
-        🔥
+    <div style={{ position: 'relative', height: '100%', width: '100%' }}>
+      {/* Strict Header (Standard Top-Left) */}
+      <div style={{
+            position: 'absolute',
+            top: '16px',
+            left: '20px',
+            margin: 0,
+            fontSize: '11px',
+            fontWeight: '700',
+            textTransform: 'uppercase',
+            color: 'var(--text-secondary)',
+            zIndex: 20
+      }}>
+        {title || data.label || 'Streak'}
       </div>
 
-      {/* Main Counter */}
-      <div className="flex flex-col items-center">
-        <span className="text-4xl font-bold tracking-tight">
-          {current}
-        </span>
-        <span className="text-sm font-bold text-secondary uppercase tracking-wider mt-1">
-          {unit}
-        </span>
-      </div>
-
-      {/* Best Streak Context */}
-      {best > 0 && (
-        <div className="mt-4 py-1 px-3 rounded-full bg-separator bg-opacity-20 text-xs font-medium text-secondary">
-          Best: {best} {unit}
+      {/* Data Group - Bottom Right */}
+      <div style={{
+          position: 'absolute',
+          bottom: '16px',
+          right: '20px',
+          textAlign: 'right',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-end',
+          zIndex: 10
+      }}>
+        <div style={{
+            fontSize: '72px',
+            fontWeight: '800',
+            lineHeight: '1',
+            letterSpacing: '-2px',
+            color: 'var(--text-primary)'
+        }}>
+            {current}
         </div>
-      )}
+        <div style={{
+            fontSize: '16px',
+            fontWeight: '700',
+            color: '#FF9500',
+            textTransform: 'uppercase',
+            marginTop: '4px'
+        }}>
+            {unit}
+        </div>
+      </div>
     </div>
   );
 };
