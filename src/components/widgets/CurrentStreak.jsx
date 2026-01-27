@@ -3,7 +3,7 @@ import React from 'react';
 /**
  * CurrentStreak Widget
  * * Displays the current active streak for a metric.
- * * Refactored Phase 4.13: Icon Removal, Standard Layout, Global Color Fix.
+ * * Refactored Phase 4.14: Value anchored to Bottom-Right.
  */
 export const CurrentStreak = ({ data, title }) => {
   if (!data) return null;
@@ -15,25 +15,27 @@ export const CurrentStreak = ({ data, title }) => {
       {/* Strict Header (Standard Top-Left) */}
       <div style={{
             position: 'absolute',
-            top: '16px', // Standard Top
-            left: '20px', // Standard Left
+            top: '16px',
+            left: '20px',
             margin: 0,
             fontSize: '11px',
             fontWeight: '700',
             textTransform: 'uppercase',
-            color: 'var(--text-secondary)', // Global Fix
+            color: 'var(--text-secondary)',
             zIndex: 20
       }}>
         {title || data.label || 'Streak'}
       </div>
 
-      {/* Flame Icon REMOVED per Phase 4.13 */}
-
-      {/* Data Group - Bottom Left */}
+      {/* Data Group - Bottom Right */}
       <div style={{
           position: 'absolute',
-          bottom: '20px',
-          left: '20px',
+          bottom: '16px',
+          right: '20px',
+          textAlign: 'right',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-end',
           zIndex: 10
       }}>
         <div style={{

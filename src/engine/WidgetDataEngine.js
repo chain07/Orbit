@@ -75,6 +75,7 @@ export const WidgetDataEngine = {
             break;
 
           case WidgetType.PROGRESS:
+          case 'progress': // Fallback for explicit string identifier
             data = WidgetDataEngine.progressBarData(metric, metricLogs);
             break;
 
@@ -119,8 +120,6 @@ export const WidgetDataEngine = {
       ? MetricEngine.getLastNDaysValues(logs, days)
       : new Array(days).fill(0);
 
-    // FIX: Return raw values so the Sparkline component can handle scaling correctly.
-    // Previously returned 0-1 normalized values, which caused flatlining or incorrect axis.
     const currentVal = MetricEngine.getTodayValue ? MetricEngine.getTodayValue(logs) : 0;
 
     return {
@@ -137,10 +136,7 @@ export const WidgetDataEngine = {
    */
   heatmapData: (metric, logs) => {
     const values = {};
-
-    // Group logs by date - O(N)
     const logsByDate = logs.reduce((acc, log) => {
-      // Use split('T') which is faster/consistent vs toLocaleDateString
       const date = log.timestamp.split('T')[0];
       if (!acc[date]) acc[date] = [];
       acc[date].push(log);
@@ -156,8 +152,6 @@ export const WidgetDataEngine = {
              dayValue = hasTrue ? 1 : 0;
         } else {
              const total = dayLogs.reduce((sum, l) => sum + (parseFloat(l.value) || 0), 0);
-             // FIX: Return 0-100 percentage or raw-ish value for intensity.
-             // Previous was 0-1. We multiply by 100 to match Ring/Chart standard scale.
              dayValue = MetricEngine.normalizeValue(metric, total) * 100;
         }
         values[date] = dayValue;
@@ -174,22 +168,15 @@ export const WidgetDataEngine = {
    * Returns: { current: number, best: number, isActive: boolean, unit: string }
    */
   streakData: (metric, logs) => {
-    const current = MetricEngine.calculateCurrentStreak
-      ? MetricEngine.calculateCurrentStreak(logs)
-      : 0;
-    const best = MetricEngine.calculateBestStreak
-      ? MetricEngine.calculateBestStreak(logs)
-      : 0;
+    const current = MetricEngine.calculateCurrentStreak ? MetricEngine.calculateCurrentStreak(logs) : 0;
+    const best = MetricEngine.calculateBestStreak ? MetricEngine.calculateBestStreak(logs) : 0;
 
-    // OPTIMIZED: Is Active Check
-    // Avoid toLocaleDateString inside loop.
+    // Simple active check
     let isActive = false;
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
     const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime();
 
-    // 1. Get today's logs for this metric
-    // Use simple numeric timestamp check
     const todayLogs = logs.filter(l => {
        const t = new Date(l.timestamp).getTime();
        return t >= startOfDay && t < endOfDay;
@@ -216,7 +203,6 @@ export const WidgetDataEngine = {
    */
   numberData: (metric, logs, segment = 'Weekly') => {
     const todayVal = MetricEngine.getTodayValue ? MetricEngine.getTodayValue(logs) : 0;
-
     const days = segment === 'Monthly' ? 30 : 7;
     const history = MetricEngine.getLastNDaysValues(logs, days);
     const trend = AnalyticsEngine.calculateTrend(history);
@@ -232,14 +218,23 @@ export const WidgetDataEngine = {
 
   /**
    * History List Data
-   * Returns: { data: Array }
+   * Returns: { entries: Array<{ id, value, timestamp, note }> }
    */
   historyData: (metric, logs) => {
     const sorted = [...logs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     const recent = sorted.slice(0, 10);
 
+    // FIX: Map logs to structured entries
+    const entries = recent.map(l => ({
+        id: l.id,
+        value: l.value,
+        timestamp: l.timestamp,
+        note: l.note || ''
+    }));
+
     return {
-      data: recent
+      entries, // Return as 'entries' property
+      unit: metric.unit
     };
   },
 
@@ -248,14 +243,6 @@ export const WidgetDataEngine = {
    * Returns: { entries: Array<{ label: string, values: Object }>, colors: Object }
    */
   stackedBarData: (metric, logs, segment = 'Weekly') => {
-    // This is a stub implementation to ensure data flows to the component.
-    // In a real implementation, this would aggregate based on segment.
-
-    // For now, we return empty structure or mock based on segment to verify UI switching.
-    // Daily: 6 buckets (4h)
-    // Weekly: 7 days
-    // Monthly: 4 weeks
-
     let entries = [];
     if (segment === 'Daily') {
         entries = [
@@ -279,7 +266,7 @@ export const WidgetDataEngine = {
 
     return {
         entries,
-        colors: { [metric.label]: metric.color || '#007AFF' } // Simple mapping
+        colors: { [metric.label]: metric.color || '#007AFF' }
     };
   },
 
@@ -287,10 +274,9 @@ export const WidgetDataEngine = {
    * Compound Bar Data (for Select metrics)
    */
   compoundBarData: (metric, logs) => {
-    // Frequency distribution
     const counts = {};
     logs.forEach(l => {
-        const val = String(l.value); // ensure string key
+        const val = String(l.value);
         counts[val] = (counts[val] || 0) + 1;
     });
 
@@ -311,11 +297,8 @@ export const WidgetDataEngine = {
   progressBarData: (metric, logs) => {
     const val = MetricEngine.getTodayValue ? MetricEngine.getTodayValue(logs) : 0;
 
-    // For Duration, val is in hours.
-    // For Number, val is number.
-
     return {
-        value: Number(val.toFixed(1)), // clean formatting
+        value: Number(val.toFixed(1)),
         max: metric.goal || 10,
         label: metric.label,
         unit: metric.unit,

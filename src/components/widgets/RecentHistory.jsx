@@ -3,14 +3,13 @@ import React from 'react';
 /**
  * RecentHistory Widget
  * * Displays a list of recent log entries for a metric.
- * * Refactored Phase 4.13: Global Color Fix.
+ * * Refactored Phase 4.14: Data Robustness.
  */
 export const RecentHistory = ({ data, title }) => {
-  // If data is just the raw array (from engine), use it.
-  // Otherwise try to extract from typical structure
-  const entries = Array.isArray(data) ? data : (data?.entries || []);
+  // Extract entries safely, handling both array (raw) and object (structured) formats
+  const entries = data?.entries || (Array.isArray(data) ? data : []);
 
-  // Sort by timestamp descending
+  // Ensure entries are sorted if not already (safeguard)
   const sorted = [...entries].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 5);
 
   return (
@@ -19,7 +18,6 @@ export const RecentHistory = ({ data, title }) => {
       height: '100%',
       position: 'relative',
       overflow: 'hidden',
-      // No padding
       boxSizing: 'border-box'
     }}>
       {/* Strict Header */}
@@ -31,7 +29,7 @@ export const RecentHistory = ({ data, title }) => {
         fontSize: '11px',
         fontWeight: '700',
         textTransform: 'uppercase',
-        color: 'var(--text-secondary)', // Global Fix
+        color: 'var(--text-secondary)',
         zIndex: 20
       }}>
         {title || 'History'}
@@ -43,12 +41,12 @@ export const RecentHistory = ({ data, title }) => {
           gap: '8px',
           height: '100%',
           overflowY: 'auto',
-          padding: '40px 20px 20px 20px', // Top padding clears header
+          padding: '40px 20px 20px 20px',
           boxSizing: 'border-box'
       }}>
         {sorted.length === 0 ? (
-           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', fontSize: '12px', color: 'var(--text-secondary)', opacity: 0.6 }}>
-               No history yet
+           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', fontSize: '12px', color: 'var(--text-secondary)', opacity: 0.6, fontStyle: 'italic' }}>
+               No entries recorded
            </div>
         ) : (
             sorted.map((entry) => {

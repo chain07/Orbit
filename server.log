@@ -77,3 +77,7 @@ Port 5175 is in use, trying another one...
 8:58:18 PM [vite] hmr update /src/components/widgets/SegmentedBarWidget.jsx
 8:58:30 PM [vite] hmr update /src/components/logger/DailyCheckInForm.jsx
 8:58:43 PM [vite] hmr update /src/components/logger/Timeline.jsx
+1:31:58 AM [vite] hmr update /src/components/widgets/CurrentStreak.jsx
+1:32:26 AM [vite] hmr update /src/components/widgets/SegmentedBarWidget.jsx
+1:33:11 AM [vite] hmr update /src/views/Horizon.jsx, /src/views/Intel.jsx, /src/components/widgets/RecentHistory.jsx
+1:33:40 AM [vite] hmr update /src/components/widgets/RecentHistory.jsx

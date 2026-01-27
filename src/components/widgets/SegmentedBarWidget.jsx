@@ -4,7 +4,7 @@ import { StackedBar } from '../ui/charts/StackedBar';
 /**
  * SegmentedBarWidget
  * Wrapper around StackedBar for displaying categorical distributions.
- * * Refactored Phase 4.13: Global Color Fix, Min-Height.
+ * * Refactored Phase 4.14: Increased Min-Height to 320px.
  */
 export const SegmentedBarWidget = ({ data, title }) => {
   if (!data || !data.entries || data.entries.length === 0) {
@@ -22,7 +22,7 @@ export const SegmentedBarWidget = ({ data, title }) => {
         position: 'relative',
         width: '100%',
         height: '100%',
-        minHeight: '260px' // Increased breathing room per Phase 4.13
+        minHeight: '320px' // Increased breathing room per Phase 4.14
     }}>
       {/* Strict Header */}
       <div style={{
@@ -33,18 +33,26 @@ export const SegmentedBarWidget = ({ data, title }) => {
             fontSize: '11px',
             fontWeight: '700',
             textTransform: 'uppercase',
-            color: 'var(--text-secondary)', // Global Fix
+            color: 'var(--text-secondary)',
             zIndex: 20
       }}>
         {title || data.title || 'Distribution'}
       </div>
 
-      <div style={{ width: '100%', height: '100%', padding: '40px 20px 20px 20px', boxSizing: 'border-box', display: 'flex', alignItems: 'center' }}>
+      <div style={{
+          width: '100%',
+          height: '100%',
+          padding: '40px 20px 20px 20px',
+          boxSizing: 'border-box',
+          display: 'flex',
+          alignItems: 'center',
+          marginTop: '20px' // Additional clearance
+      }}>
         <div style={{ width: '100%' }}>
             <StackedBar
             data={entries}
             colors={colors}
-            height={180}
+            height={220} // Increased internal chart height
             />
         </div>
       </div>
