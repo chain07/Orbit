@@ -3,7 +3,7 @@ import React from 'react';
 /**
  * ProgressBarWidget
  * * Restored "Normal" Progress Bar.
- * * Refactored Phase 4.15: Thinner Bar, Visible Track, Reduced Whitespace.
+ * * Refactored Phase 4.16: Thicker Bar (24px) & Visible Track.
  */
 export const ProgressBarWidget = ({ data, title }) => {
   const value = data?.value || 0;
@@ -20,7 +20,7 @@ export const ProgressBarWidget = ({ data, title }) => {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center', // Centered vertically
-        padding: '16px 20px', // Reduced vertical padding
+        padding: '16px 20px', // Balanced padding
         boxSizing: 'border-box',
         position: 'relative'
     }}>
@@ -44,7 +44,7 @@ export const ProgressBarWidget = ({ data, title }) => {
             display: 'flex',
             justifyContent: 'flex-end',
             alignItems: 'baseline',
-            marginBottom: '6px', // Tighter spacing
+            marginBottom: '8px', // Slightly looser than 4.15
             fontSize: '13px',
             fontWeight: '600',
             color: 'var(--text-secondary)',
@@ -56,8 +56,8 @@ export const ProgressBarWidget = ({ data, title }) => {
 
         {/* Track */}
         <div style={{
-            height: '8px', // Thinner bar
-            borderRadius: '4px',
+            height: '24px', // Thicker bar (originally 16px, reduced to 8px, now 24px)
+            borderRadius: '12px',
             backgroundColor: 'rgba(128, 128, 128, 0.2)', // Visible Grey Track
             marginTop: '0',
             width: '100%',
@@ -68,9 +68,9 @@ export const ProgressBarWidget = ({ data, title }) => {
                 height: '100%',
                 width: `${percent}%`,
                 backgroundColor: color,
-                borderRadius: '4px',
+                borderRadius: '12px',
                 transition: 'width 0.5s ease-out',
-                minWidth: percent > 0 ? '4px' : '0'
+                minWidth: percent > 0 ? '6px' : '0'
             }} />
         </div>
     </div>
