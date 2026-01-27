@@ -4,10 +4,10 @@ These rules are absolute. Any implementation violating these is considered archi
 ---
 
 ## 1. Architectural Sovereignty
-- **Local-First Only:** 100% of data resides in `localStorage`.
+- **Hybrid Persistence:** User data resides in `IndexedDB` (Heavy) and `localStorage` (Config).
 - **Zero Backend:** No cloud databases, no mandatory external API calls.
 - **Offline-Capable:** Must function completely without internet connectivity (PWA).
-- **Data Portability:** JSON import/export must be always available.
+- **Data Portability:** JSON import/export must be always available (reading from IndexedDB).
 
 ## 2. Engineering Constraints
 - **Complexity Cap:** Momentum and Rolling Window calculations must maintain **O(N)** complexity via single-pass reduction.
@@ -16,7 +16,7 @@ These rules are absolute. Any implementation violating these is considered archi
 
 ## 3. Technology Mandates
 - **Runtime:** React 19 + Vite.
-- **Styling:** Stsndard CSS only. NO TAILWIND!
+- **Styling:** Standard CSS + Inline Styles (Liquid Native). NO TAILWIND!
 - **Iconography:** Must use `src/components/ui/Icons.jsx`. **No external icon dependencies (lucide-react, etc) allowed.**
 - **Motion:** CSS Transitions or Web Animations API only. **No Framer Motion**.
 - **Charts:** Custom SVG primitives only. **No external charting libraries (Recharts, Chart.js, etc).**
