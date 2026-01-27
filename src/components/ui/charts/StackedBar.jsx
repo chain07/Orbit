@@ -2,11 +2,27 @@ import React, { useMemo, useState } from 'react';
 
 /**
  * StackedBar Chart
- * * Refactored Phase 4.16: Full Inline Styles Implementation (No external CSS).
+ * * Refactored Phase 4.17: Y-Axis Right, Auto-Colors, Scale Fix.
  * * Supports dynamic scaling and flexible layout.
  */
 export const StackedBar = ({ data = [], colors = {}, height = 200 }) => {
   const [selectedIdx, setSelectedIdx] = useState(null);
+
+  // iOS System Colors (Extended Palette)
+  const systemPalette = [
+    '#007AFF', // Blue
+    '#AF52DE', // Purple
+    '#FF2D55', // Pink
+    '#FF3B30', // Red
+    '#FF9500', // Orange
+    '#FFCC00', // Yellow
+    '#34C759', // Green
+    '#5AC8FA', // Teal
+    '#32ADE6', // Cyan
+    '#5856D6', // Indigo
+    '#A2845E', // Brown
+    '#8E8E93'  // Gray
+  ];
 
   // --- Memoized Calculations ---
   const calculated = useMemo(() => {
@@ -37,13 +53,18 @@ export const StackedBar = ({ data = [], colors = {}, height = 200 }) => {
       return { ...day, values: dayValues, sum: dSum };
     });
 
-    // Dynamic Scale: Nearest even number, minimum 4
+    // Dynamic Scale: Nearest even number greater than or equal to maxDaily
+    // If maxDaily is 5, ceil(5/2) = 3, 3*2 = 6.
+    // If maxDaily is 6, ceil(6/2) = 3, 3*2 = 6.
+    // Minimum 4.
     const computedMax = Math.max(4, Math.ceil(maxDaily / 2) * 2);
     const computedAvg = data.length ? calculatedTotal / data.length : 0;
 
-    const catArray = Array.from(cats).map(k => {
+    const catArray = Array.from(cats).map((k, i) => {
        const sum = proc.reduce((acc, d) => acc + (d.values[k] || 0), 0);
-       return { key: k, sum, color: colors[k] || '#8E8E93' }; // Fallback color
+       // Auto-assign color if missing
+       const assignedColor = colors[k] || systemPalette[i % systemPalette.length];
+       return { key: k, sum, color: assignedColor };
     }).sort((a, b) => b.sum - a.sum);
 
     return {
@@ -57,6 +78,11 @@ export const StackedBar = ({ data = [], colors = {}, height = 200 }) => {
 
   const { processedData, max, total, categories } = calculated;
 
+  // Create a quick lookup for category colors (including auto-assigned ones)
+  const colorMap = useMemo(() => {
+      return categories.reduce((acc, cat) => ({ ...acc, [cat.key]: cat.color }), {});
+  }, [categories]);
+
   const handleTap = (idx) => {
     setSelectedIdx(selectedIdx === idx ? null : idx);
   };
@@ -69,10 +95,11 @@ export const StackedBar = ({ data = [], colors = {}, height = 200 }) => {
       <div style={{ position: 'relative', width: '100%', height: `${height}px`, marginBottom: '16px' }}>
 
            {/* 1. Horizontal Grid Lines (Bottom Layer) */}
+           {/* Adjusted width to leave room for Y-Axis on Right (30px) */}
            <div style={{
                position: 'absolute',
-               left: '30px',
-               right: 0,
+               left: 0,
+               right: '30px',
                top: 0,
                bottom: '20px',
                display: 'flex',
@@ -85,10 +112,10 @@ export const StackedBar = ({ data = [], colors = {}, height = 200 }) => {
               ))}
            </div>
 
-           {/* 2. Y-Axis Labels (Left) */}
+           {/* 2. Y-Axis Labels (Right Side) */}
            <div style={{
                position: 'absolute',
-               left: 0,
+               right: 0,
                top: 0,
                bottom: '20px',
                width: '24px',
@@ -97,7 +124,8 @@ export const StackedBar = ({ data = [], colors = {}, height = 200 }) => {
                justifyContent: 'space-between',
                fontSize: '10px',
                color: 'var(--text-secondary)',
-               textAlign: 'right',
+               textAlign: 'left', // Align left towards graph
+               paddingLeft: '6px',
                zIndex: 1
             }}>
                {[0, 1, 2, 3, 4].map(i => {
@@ -109,8 +137,8 @@ export const StackedBar = ({ data = [], colors = {}, height = 200 }) => {
            {/* 3. Bars Container (Interactive Layer) */}
            <div style={{
                position: 'absolute',
-               left: '30px',
-               right: 0,
+               left: 0,
+               right: '30px', // Leave room for Y-Axis
                top: 0,
                bottom: '20px',
                display: 'flex',
@@ -120,7 +148,6 @@ export const StackedBar = ({ data = [], colors = {}, height = 200 }) => {
             }}>
                {processedData.map((day, idx) => {
                    // Calculate bar segments
-                   // We need to stack them. Since we use flex-col-reverse, the first item is at bottom.
                    const segments = Object.entries(day.values).map(([key, val]) => {
                        return { key, val, h: (val / max) * 100 };
                    });
@@ -133,8 +160,8 @@ export const StackedBar = ({ data = [], colors = {}, height = 200 }) => {
                                flex: 1,
                                height: '100%',
                                display: 'flex',
-                               flexDirection: 'column', // Normal column direction
-                               justifyContent: 'flex-end', // Align items to bottom
+                               flexDirection: 'column',
+                               justifyContent: 'flex-end',
                                alignItems: 'center',
                                cursor: 'pointer',
                                opacity: selectedIdx !== null && selectedIdx !== idx ? 0.4 : 1,
@@ -160,14 +187,14 @@ export const StackedBar = ({ data = [], colors = {}, height = 200 }) => {
                                            key={seg.key}
                                            style={{
                                                height: `${seg.h}%`,
-                                               backgroundColor: colors[seg.key] || '#8E8E93',
+                                               backgroundColor: colorMap[seg.key] || '#8E8E93',
                                                width: '100%',
                                                borderTopLeftRadius: isTop ? '4px' : 0,
                                                borderTopRightRadius: isTop ? '4px' : 0,
                                                borderBottomLeftRadius: isBottom ? '4px' : 0,
                                                borderBottomRightRadius: isBottom ? '4px' : 0,
-                                               marginBottom: '1px', // Gap
-                                               minHeight: '2px' // Ensure visibility
+                                               marginBottom: '1px',
+                                               minHeight: '2px'
                                            }}
                                        />
                                    );
