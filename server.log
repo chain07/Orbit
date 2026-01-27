@@ -81,3 +81,6 @@ Port 5175 is in use, trying another one...
 1:32:26 AM [vite] hmr update /src/components/widgets/SegmentedBarWidget.jsx
 1:33:11 AM [vite] hmr update /src/views/Horizon.jsx, /src/views/Intel.jsx, /src/components/widgets/RecentHistory.jsx
 1:33:40 AM [vite] hmr update /src/components/widgets/RecentHistory.jsx
+2:17:20 AM [vite] hmr update /src/components/widgets/ProgressBarWidget.jsx
+2:18:06 AM [vite] hmr update /src/views/Horizon.jsx, /src/views/Intel.jsx, /src/components/widgets/RecentHistory.jsx
+2:18:40 AM [vite] hmr update /src/components/widgets/ConsistencyHeatmap.jsx

@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 /**
  * ConsistencyHeatmap Widget
  * * Displays a contribution-graph style heatmap for the current month.
- * * Refactored Phase 4.13: Global Color Fix.
+ * * Refactored Phase 4.15: Local Date Keys & Contrast Fix.
  */
 export const ConsistencyHeatmap = ({ data, title }) => {
   if (!data || !data.values) return null;
@@ -20,10 +20,8 @@ export const ConsistencyHeatmap = ({ data, title }) => {
     // Iterate from startOfMonth to today (inclusive)
     const current = new Date(startOfMonth);
     while (current <= end) {
-        const year = current.getFullYear();
-        const month = String(current.getMonth() + 1).padStart(2, '0');
-        const day = String(current.getDate()).padStart(2, '0');
-        const iso = `${year}-${month}-${day}`;
+        // Use Local Date String to match Engine keys
+        const iso = current.toLocaleDateString('en-CA'); // YYYY-MM-DD Local
 
         arr.push({
             date: iso,
@@ -40,13 +38,16 @@ export const ConsistencyHeatmap = ({ data, title }) => {
       if (value >= 75) return 'rgba(52, 199, 89, 0.75)';
       if (value >= 50) return 'rgba(52, 199, 89, 0.5)';
       if (value > 0) return 'rgba(52, 199, 89, 0.25)';
-      return 'var(--bg-secondary)'; // Visible Empty Slots
+      return 'rgba(128, 128, 128, 0.15)'; // Visible Grey for Empty States
   };
 
   const monthName = today.toLocaleString('default', { month: 'long' });
   const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-  const startDayIndex = new Date(days[0].date).getDay(); // Index of first day of month (0=Sun)
-  const offsetSlots = Array.from({ length: startDayIndex });
+  const startDayIndex = new Date(days[0].date + 'T00:00:00').getDay(); // Force local midnight parsing or just use standard
+  // Standard new Date('YYYY-MM-DD') parses as UTC. new Date('YYYY/MM/DD') parses as local.
+  // Safest: use getDay from the loop iteration logic or just:
+  const firstDayObj = new Date(days[0].date.replace(/-/g, '/')); // Force local parsing
+  const offsetSlots = Array.from({ length: firstDayObj.getDay() });
 
   return (
     <div style={{
@@ -67,7 +68,7 @@ export const ConsistencyHeatmap = ({ data, title }) => {
             fontSize: '11px',
             fontWeight: '700',
             textTransform: 'uppercase',
-            color: 'var(--text-secondary)', // Global Fix
+            color: 'var(--text-secondary)',
             zIndex: 20
         }}>
             {title || data.label || 'Consistency'}
@@ -106,9 +107,7 @@ export const ConsistencyHeatmap = ({ data, title }) => {
                         style={{
                             aspectRatio: '1/1',
                             borderRadius: '4px',
-                            backgroundColor: getColor(day.value),
-                            // Ensure visibility for empty states
-                            boxShadow: day.value === 0 ? 'inset 0 0 0 1px rgba(0,0,0,0.03)' : 'none'
+                            backgroundColor: getColor(day.value)
                         }}
                         title={`${day.date}: ${day.value}`}
                     />
