@@ -48,7 +48,7 @@ export const SegmentedBarWidget = ({ data, title }) => {
           alignItems: 'center',
           marginTop: '20px' // Additional clearance
       }}>
-        <div style={{ width: '100%' }}>
+        <div style={{ width: '100%', paddingTop: '30px' }}>
             <StackedBar
             data={entries}
             colors={colors}
