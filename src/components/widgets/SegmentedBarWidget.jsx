@@ -42,13 +42,13 @@ export const SegmentedBarWidget = ({ data, title }) => {
       <div style={{
           width: '100%',
           height: '100%',
-          padding: '40px 20px 20px 20px',
+          padding: '50px 20px 20px 20px',
           boxSizing: 'border-box',
           display: 'flex',
           alignItems: 'center',
-          marginTop: '40px' // Additional clearance
+          marginTop: '0'
       }}>
-        <div style={{ width: '100%' }}>
+        <div style={{ width: '100%', borderRadius: '12px', overflow: 'hidden' }}>
             <StackedBar
             data={entries}
             colors={colors}

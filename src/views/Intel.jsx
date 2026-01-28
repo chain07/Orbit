@@ -135,10 +135,8 @@ export const Intel = () => {
                 <div className="flex justify-between items-center">
                     <span className="text-xs font-bold text-secondary uppercase tracking-wide">System Health</span>
                     <div className="flex items-center gap-2">
-                        <span className="text-3xl font-bold">{stats.reliability}%</span>
-                        <div className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${stats.trend.startsWith('-') ? 'bg-red/10 text-red' : 'bg-green/10 text-green'}`}>
-                            {stats.trend}
-                        </div>
+                        {/* Swapped: Trend is now the large number, colored */}
+                        <span className={`text-3xl font-bold ${stats.trend.startsWith('-') ? 'text-orange' : 'text-green'}`}>{stats.trend}</span>
                     </div>
                 </div>
                 {/* Manual Progress Bar */}
@@ -182,8 +180,8 @@ export const Intel = () => {
                 <span className="text-xs font-bold text-secondary uppercase tracking-wide">Activity Volume</span>
                 <span className="text-xs text-secondary">{telemetrySubtitle}</span>
              </div>
-             {/* Wrapper with borders and margin */}
-             <div style={{ marginTop: '40px', borderLeft: '1px solid rgba(0,0,0,0.1)', borderRight: '1px solid rgba(0,0,0,0.1)', width: '100%', height: '220px' }}>
+             {/* Wrapper with margin, borders removed (handled by component) */}
+             <div style={{ marginTop: '40px', width: '100%', height: '220px' }}>
                 <StackedBar data={stats.activityVolume?.entries || []} colors={stats.activityVolume?.colors || {}} height={220} />
              </div>
           </Glass>

@@ -287,39 +287,70 @@ export const AnalyticsEngine = {
 
     // 4. Activity Volume (Stacked Bar Data - TimeLogs Duration)
     const activityVolume = { entries: [], colors: {} };
-    const volumeMap = new Map(); // Date -> { ActivityName: Duration }
+    const volumeMap = new Map();
 
-    // Initialize map with empty entries for the window
-    for (let i = days - 1; i >= 0; i--) {
-        const d = new Date(now);
-        d.setDate(d.getDate() - i);
-        const dateStr = d.toISOString().split('T')[0];
+    if (segment === 'Daily') {
+        // Daily: 4-hour buckets
+        const bucketLabels = ['00-04', '04-08', '08-12', '12-16', '16-20', '20-24'];
+        bucketLabels.forEach((label, index) => {
+            volumeMap.set(index, { label, values: {} });
+        });
 
-        let label = dateStr;
-        if (segment === 'Weekly') label = d.toLocaleDateString('en-US', { weekday: 'short' });
-        if (segment === 'Monthly') label = d.getDate().toString();
-        if (segment === 'Daily') label = 'Today';
+        if (timeLogs) {
+             timeLogs.forEach(t => {
+                 const d = new Date(t.startTime);
+                 // Only process logs from today (or the single day context if we had one)
+                 // Assuming 'Daily' means today.
+                 const startOfDay = new Date(now);
+                 startOfDay.setHours(0,0,0,0);
 
-        volumeMap.set(dateStr, { label, values: {} });
-    }
+                 if (d >= startOfDay) {
+                     const hour = d.getHours();
+                     const bucketIndex = Math.floor(hour / 4);
 
-    if (timeLogs) {
-        timeLogs.forEach(t => {
-            const d = new Date(t.startTime);
-            if (d < windowStart) return;
+                     if (volumeMap.has(bucketIndex)) {
+                         const entry = volumeMap.get(bucketIndex);
+                         const metric = metrics.find(m => m.id === (t.activityId || t.metricId));
+                         const name = metric ? (metric.label || metric.name) : 'Unknown';
+                         if (metric && metric.color) activityVolume.colors[name] = metric.color;
+                         entry.values[name] = (entry.values[name] || 0) + (t.duration || 0);
+                     }
+                 }
+             });
+        }
+    } else {
+        // Weekly & Monthly: Group by Day
+        // Initialize map with empty entries for the window
+        for (let i = days - 1; i >= 0; i--) {
+            const d = new Date(now);
+            d.setDate(d.getDate() - i);
             const dateStr = d.toISOString().split('T')[0];
 
-            if (volumeMap.has(dateStr)) {
-                const entry = volumeMap.get(dateStr);
-                const metric = metrics.find(m => m.id === (t.activityId || t.metricId));
-                const name = metric ? (metric.label || metric.name) : 'Unknown';
+            let label = dateStr;
+            if (segment === 'Weekly') label = d.toLocaleDateString('en-US', { weekday: 'short' });
+            if (segment === 'Monthly') label = d.getDate().toString();
 
-                // Color mapping
-                if (metric && metric.color) activityVolume.colors[name] = metric.color;
+            volumeMap.set(dateStr, { label, values: {} });
+        }
 
-                entry.values[name] = (entry.values[name] || 0) + (t.duration || 0);
-            }
-        });
+        if (timeLogs) {
+            timeLogs.forEach(t => {
+                const d = new Date(t.startTime);
+                if (d < windowStart) return;
+                const dateStr = d.toISOString().split('T')[0];
+
+                if (volumeMap.has(dateStr)) {
+                    const entry = volumeMap.get(dateStr);
+                    const metric = metrics.find(m => m.id === (t.activityId || t.metricId));
+                    const name = metric ? (metric.label || metric.name) : 'Unknown';
+
+                    // Color mapping
+                    if (metric && metric.color) activityVolume.colors[name] = metric.color;
+
+                    entry.values[name] = (entry.values[name] || 0) + (t.duration || 0);
+                }
+            });
+        }
     }
     activityVolume.entries = Array.from(volumeMap.values());
 
