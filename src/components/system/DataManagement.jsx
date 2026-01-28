@@ -295,7 +295,7 @@ export const DataManagement = () => {
           </OrbitButton>
       </div>
 
-      <div className="border-t border-separator/50 my-6" />
+      <div style={{ borderTop: '1px solid var(--separator)', margin: '24px 0', opacity: 0.5 }} />
 
       <div className="flex flex-col gap-3">
            <OrbitButton

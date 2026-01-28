@@ -53,11 +53,9 @@ export const StackedBar = ({ data = [], colors = {}, height = 200 }) => {
       return { ...day, values: dayValues, sum: dSum };
     });
 
-    // Dynamic Scale: Nearest even number greater than or equal to maxDaily
-    // If maxDaily is 5, ceil(5/2) = 3, 3*2 = 6.
-    // If maxDaily is 6, ceil(6/2) = 3, 3*2 = 6.
-    // Minimum 4.
-    const computedMax = Math.max(4, Math.ceil(maxDaily / 2) * 2);
+    // Dynamic Scale: Strictly follow data max, minimum 4.
+    // Ensure we have some headroom
+    const computedMax = Math.max(4, maxDaily);
     const computedAvg = data.length ? calculatedTotal / data.length : 0;
 
     const catArray = Array.from(cats).map((k, i) => {
@@ -92,65 +90,73 @@ export const StackedBar = ({ data = [], colors = {}, height = 200 }) => {
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
       
       {/* Chart Frame - Relative Container */}
-      <div style={{ position: 'relative', width: '100%', height: `${height}px`, marginBottom: '16px' }}>
+      <div
+        className="chart-frame"
+        style={{
+            position: 'relative',
+            width: '100%',
+            height: `${height}px`,
+            marginBottom: '16px',
+            border: '1px solid rgba(128,128,128,0.1)',
+            borderRadius: '12px',
+            padding: '12px'
+        }}>
 
            {/* 1. Horizontal Grid Lines (Bottom Layer) */}
-           {/* Adjusted width to leave room for Y-Axis on Right (30px) */}
+           {/* 0%, 50%, 100% */}
            <div style={{
                position: 'absolute',
-               left: 0,
-               right: '30px',
-               top: 0,
-               bottom: '20px',
-               display: 'flex',
-               flexDirection: 'column-reverse',
-               justifyContent: 'space-between',
+               left: '12px',
+               right: '42px', // Space for axis
+               top: '12px',
+               bottom: '32px', // Space for labels
                zIndex: 0
             }}>
-              {[0, 1, 2, 3, 4].map(i => (
-                  <div key={i} style={{ width: '100%', height: '1px', backgroundColor: 'rgba(128, 128, 128, 0.1)' }} />
-              ))}
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '1px', backgroundColor: 'rgba(128,128,128,0.1)' }} />
+                <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', backgroundColor: 'rgba(128,128,128,0.1)' }} />
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', backgroundColor: 'rgba(128,128,128,0.1)' }} />
            </div>
 
            {/* 2. Y-Axis Labels (Right Side) */}
            <div style={{
                position: 'absolute',
-               right: 0,
-               top: 0,
-               bottom: '20px',
-               width: '24px',
+               right: '8px',
+               top: '12px',
+               bottom: '32px',
+               width: '30px',
                display: 'flex',
-               flexDirection: 'column-reverse',
+               flexDirection: 'column',
                justifyContent: 'space-between',
                fontSize: '10px',
                color: 'var(--text-secondary)',
-               textAlign: 'left', // Align left towards graph
-               paddingLeft: '6px',
+               textAlign: 'right',
                zIndex: 1
             }}>
-               {[0, 1, 2, 3, 4].map(i => {
-                   const val = Math.round((max / 4) * i);
-                   return <div key={i} style={{ lineHeight: '0' }}>{val}</div>;
-               })}
+               <div style={{ lineHeight: '0' }}>{Math.round(max)}</div>
+               <div style={{ lineHeight: '0' }}>{Math.round(max/2)}</div>
+               <div style={{ lineHeight: '0' }}>0</div>
            </div>
 
            {/* 3. Bars Container (Interactive Layer) */}
            <div style={{
                position: 'absolute',
-               left: 0,
-               right: '30px', // Leave room for Y-Axis
-               top: 0,
-               bottom: '20px',
+               left: '12px',
+               right: '42px', // Match grid
+               top: '12px',
+               bottom: '32px',
                display: 'flex',
                alignItems: 'flex-end',
                justifyContent: 'space-between',
-               zIndex: 2
+               zIndex: 2,
+               gap: '4px'
             }}>
                {processedData.map((day, idx) => {
                    // Calculate bar segments
                    const segments = Object.entries(day.values).map(([key, val]) => {
                        return { key, val, h: (val / max) * 100 };
                    });
+
+                   const showLabel = processedData.length <= 10 || idx % 5 === 0;
 
                    return (
                        <div
@@ -171,7 +177,7 @@ export const StackedBar = ({ data = [], colors = {}, height = 200 }) => {
                        >
                            {/* The Stack Column */}
                            <div style={{
-                               width: '60%',
+                               width: '80%', // Slightly wider bars
                                height: '100%',
                                display: 'flex',
                                flexDirection: 'column-reverse', // Stack from bottom up
@@ -189,10 +195,10 @@ export const StackedBar = ({ data = [], colors = {}, height = 200 }) => {
                                                height: `${seg.h}%`,
                                                backgroundColor: colorMap[seg.key] || '#8E8E93',
                                                width: '100%',
-                                               borderTopLeftRadius: isTop ? '4px' : 0,
-                                               borderTopRightRadius: isTop ? '4px' : 0,
-                                               borderBottomLeftRadius: isBottom ? '4px' : 0,
-                                               borderBottomRightRadius: isBottom ? '4px' : 0,
+                                               borderTopLeftRadius: isTop ? '2px' : 0,
+                                               borderTopRightRadius: isTop ? '2px' : 0,
+                                               borderBottomLeftRadius: isBottom ? '2px' : 0,
+                                               borderBottomRightRadius: isBottom ? '2px' : 0,
                                                marginBottom: '1px',
                                                minHeight: '2px'
                                            }}
@@ -205,12 +211,16 @@ export const StackedBar = ({ data = [], colors = {}, height = 200 }) => {
                            <div style={{
                                position: 'absolute',
                                bottom: '-20px',
-                               fontSize: '10px',
+                               fontSize: '9px', // Smaller font
                                fontWeight: '600',
                                color: selectedIdx === idx ? 'var(--text-primary)' : 'var(--text-secondary)',
                                width: '100%',
                                textAlign: 'center',
-                               textTransform: 'uppercase'
+                               textTransform: 'uppercase',
+                               whiteSpace: 'nowrap',
+                               overflow: 'hidden',
+                               textOverflow: 'ellipsis',
+                               opacity: showLabel ? 1 : 0 // Selective rendering
                            }}>
                                {day.label}
                            </div>

@@ -58,7 +58,7 @@ export const TrendSparkline = ({ data, title }) => {
   const pathD = getSplinePath(points);
 
   return (
-    <div style={{ position: 'relative', height: '100%', width: '100%' }}>
+    <div style={{ position: 'relative', height: '100%', width: '100%', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '16px' }}>
        {/* Strict Header */}
        <div style={{
             position: 'absolute',
@@ -93,9 +93,9 @@ export const TrendSparkline = ({ data, title }) => {
 
            {/* Grid Overlay (Manual) */}
            <div style={{ position: 'absolute', inset: 0, padding: '20px', pointerEvents: 'none', zIndex: 0 }}>
-                <div style={{ borderTop: '1px dashed var(--separator)', position: 'absolute', top: '25%', left: 0, right: 0, opacity: 0.3 }} />
+                <div style={{ borderTop: '1px dashed var(--separator)', position: 'absolute', top: '0', left: 0, right: 0, opacity: 0.3 }} />
                 <div style={{ borderTop: '1px dashed var(--separator)', position: 'absolute', top: '50%', left: 0, right: 0, opacity: 0.3 }} />
-                <div style={{ borderTop: '1px dashed var(--separator)', position: 'absolute', top: '75%', left: 0, right: 0, opacity: 0.3 }} />
+                <div style={{ borderTop: '1px dashed var(--separator)', position: 'absolute', bottom: '0', left: 0, right: 0, opacity: 0.3 }} />
            </div>
 
            {/* Axis Labels (Outside Right) */}
